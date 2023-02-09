@@ -1,7 +1,7 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.SongVMs;
+﻿using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.SongVMs;
 
-namespace API_practice.Models.ViewModels.PlaylistVMs
+namespace api.iSMusic.Models.ViewModels.PlaylistVMs
 {
 	public class PlaylistSongMetadataVM
 	{

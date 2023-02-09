@@ -1,8 +1,8 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.AlbumVMs;
-using API_practice.Models.ViewModels.SongVMs;
+﻿using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.AlbumVMs;
+using api.iSMusic.Models.ViewModels.SongVMs;
 
-namespace API_practice.Models.ViewModels.ArtistVMs
+namespace api.iSMusic.Models.ViewModels.ArtistVMs
 {
 	public class ArtistDetailVM
 	{

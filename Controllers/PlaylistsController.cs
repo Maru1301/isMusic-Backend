@@ -1,60 +1,64 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.Infrastructures.Extensions;
+﻿using api.iSMusic.Models;
+using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
+using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using API_practice.Models.ViewModels.PlaylistVMs;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace API_practice.Controllers
+namespace api.iSMusic.Controllers
 {
-    [Route("[controller]")]
+	[Route("[controller]")]
 	[ApiController]
-	public class PlaylistController : ControllerBase
+	public class PlaylistsController : ControllerBase
 	{
 		private readonly AppDbContext _db;
 
-		public PlaylistController(AppDbContext db)
+		public PlaylistsController(AppDbContext db)
 		{
 			_db = db;
 		}
 
-		[HttpGet]
-		[Route("All")]
-		public ActionResult<IEnumerable<PlaylistIndexVM>> GetAllPlaylists([FromQuery]string memberAccount)
-		{
-			var data = _db.Playlists;
+		//[HttpGet]
+		//[Route("All")]
+		////to do edit the method
+		//public ActionResult<IEnumerable<PlaylistIndexVM>> GetAllPlaylists([FromQuery] string memberAccount)
+		//{
+		//	var data = _db.Playlists;
 
-			if(string.IsNullOrEmpty(memberAccount) == false)
-			{
-				data.Where(p=> p.MemberAccount== memberAccount);
-			}
+		//	if (string.IsNullOrEmpty(memberAccount) == false)
+		//	{
+		//		data.Where(p => p.MemberId == memberId);
+		//	}
 
-			return Ok(data.ToList().Select(p => p.ToIndexVM()));
-		}
+		//	return Ok(data.ToList().Select(p => p.ToIndexVM()));
+		//}
 
 		[HttpGet]
 		[Route("Recommended")]
+
 		public ActionResult<PlaylistIndexVM> GetRecommended()
 		{
 			var data = _db.Playlists
-				.Where(p=>p.IsPublic == true)
-				.Include(p=>p.LikedPlaylists)
-				.Select(p=> new
+				.Where(p => p.IsPublic == true)
+				.Include(p => p.LikedPlaylists)
+				.Select(p => new
 				{
 					p.Id,
 					p.ListName,
 					p.PlaylistCoverPath,
-					p.MemberAccount,
+					p.MemberId,
 					p.IsPublic,
 					TotalLiked = p.LikedPlaylists.Count(),
-				}).OrderByDescending(x=>x.TotalLiked).Take(10)
-				.Select(x=> new PlaylistIndexVM
+				}).OrderByDescending(x => x.TotalLiked).Take(10)
+				.Select(x => new PlaylistIndexVM
 				{
 					Id = x.Id,
 					ListName = x.ListName,
 					PlaylistCoverPath = x.PlaylistCoverPath,
-					MemberAccount = x.MemberAccount,
+					MemberId = x.MemberId,
 				});
 
 
@@ -71,7 +75,7 @@ namespace API_practice.Controllers
 			}
 
 			var playlist = _db.Playlists
-				.Include(p => p.PlayListSongMetadata)
+				.Include(p => p.PlaylistSongMetadata)
 				.Single(p => p.Id == playlistId);
 
 			if (playlist == null)
@@ -79,7 +83,7 @@ namespace API_practice.Controllers
 				return NotFound("Playlist not found");
 			}
 
-			var memberId = _db.Members.Single(member => member.MemberAccount == playlist.MemberAccount).Id;
+			var memberId = _db.Members.Single(member => member.Id == playlist.MemberId).Id;
 
 			var likedSongIds = _db.LikedSongs
 				.Where(l => l.MemberId == memberId)
@@ -88,7 +92,7 @@ namespace API_practice.Controllers
 
 			var songs = _db.Songs
 				.Include(s => s.Album)
-				.Where(s => playlist.PlayListSongMetadata.Select(m => m.SongId).Contains(s.Id))
+				.Where(s => playlist.PlaylistSongMetadata.Select(m => m.SongId).Contains(s.Id))
 				.ToList();
 
 			var playlistDetailVM = playlist.ToDetailVM();
@@ -110,7 +114,7 @@ namespace API_practice.Controllers
 		[Route("Search")]
 		public ActionResult<IEnumerable<PlaylistIndexVM>> Search([FromQuery] SearchQuery query)
 		{
-			var data = _db.Playlists.Where(playlist => playlist.ListName.Contains(query.Input) || playlist.MemberAccount == query.MemberAccount);
+			var data = _db.Playlists.Where(playlist => playlist.ListName.Contains(query.Input) || playlist.MemberId == query.MemberId);
 
 			if (query.ShowAll == false)
 			{
@@ -126,37 +130,38 @@ namespace API_practice.Controllers
 
 			public bool ShowAll { get; set; }
 
-			public string MemberAccount { get; set; } = null!;
+			public int MemberId { get; set; }
 		}
 
 		[HttpPost]
 		[Route("{memberAccount}")]
-		public async Task<IActionResult> CreatePlaylist(string memberAccount)
+		//todo edit the method
+		public async Task<IActionResult> CreatePlaylist(int memberId)
 		{
-			// Check if the provided memberAccount is valid
-			if (string.IsNullOrEmpty(memberAccount))
+			//Check if the provided memberAccount is valid
+			if (memberId <= 0)
 			{
 				return BadRequest("Invalid member account");
 			}
 
 			// Find the number of playlists created by the member
-			var numOfPlaylists = await _db.Playlists.CountAsync(p => p.MemberAccount == memberAccount);
+		   var numOfPlaylists = await _db.Playlists.CountAsync(p => p.MemberId == memberId);
 			numOfPlaylists += 1;
 
-			// Create a new playlist
+			//Create a new playlist
 			var newPlaylist = new PlaylistCreateVM
 			{
-				MemberAccount = memberAccount,
+				MemberId = memberId,
 				ListName = "MyPlaylist" + numOfPlaylists
 			};
 
-			// Add the new playlist to the database
+			//Add the new playlist to the database
 			_db.Playlists.Add(newPlaylist.ToEntity());
 			await _db.SaveChangesAsync();
 
-			var playlistId = _db.Playlists.Where(p => p.MemberAccount == memberAccount).OrderByDescending(p => p.Id).First().Id;
+			var playlistId = _db.Playlists.Where(p => p.MemberId == memberId).OrderByDescending(p => p.Id).First().Id;
 
-			// Return a 201 Created status code along with the newly created playlist's information
+			//Return a 201 Created status code along with the newly created playlist's information
 			return CreatedAtAction(nameof(GetPlaylistDetail), new { playlistId }, newPlaylist);
 		}
 
@@ -170,7 +175,7 @@ namespace API_practice.Controllers
 				return BadRequest(ModelState);
 			}
 
-			// Find the playlist in the database
+			//Find the playlist in the database
 			var playlist = await _db.Playlists.FirstOrDefaultAsync(p => p.Id == playlistId);
 
 			if (playlist == null)
@@ -178,7 +183,7 @@ namespace API_practice.Controllers
 				return NotFound("Playlist not found");
 			}
 
-			// Update the playlist with the data from the view model
+			//Update the playlist with the data from the view model
 			playlist.ListName = model.ListName;
 			playlist.Description = model.Description;
 
@@ -195,7 +200,7 @@ namespace API_practice.Controllers
 				playlist.PlaylistCoverPath = Path.Combine("uploads", fileName);
 			}
 
-			// Save the changes to the database
+			//Save the changes to the database
 			await _db.SaveChangesAsync();
 
 			return NoContent();

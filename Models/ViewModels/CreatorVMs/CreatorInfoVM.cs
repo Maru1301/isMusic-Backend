@@ -1,7 +1,7 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.CreatorVMs;
+﻿using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.CreatorVMs;
 
-namespace API_practice.Models.ViewModels.CreatorVMs
+namespace api.iSMusic.Models.ViewModels.CreatorVMs
 {
 	public class CreatorInfoVM
 	{

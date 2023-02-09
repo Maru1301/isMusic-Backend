@@ -1,19 +1,20 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.PlaylistVMs;
-using API_practice.Models.ViewModels.SongVMs;
+﻿using api.iSMusic.Models;
+using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.PlaylistVMs;
+using api.iSMusic.Models.ViewModels.SongVMs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace API_practice.Controllers
+namespace api.iSMusic.Controllers
 {
 	[Route("[controller]")]
 	[ApiController]
-	public class SongController : ControllerBase
+	public class SongsController : ControllerBase
 	{
 		private readonly AppDbContext _db;
 
-		public SongController(AppDbContext db)
+		public SongsController(AppDbContext db)
 		{
 			_db = db;
 		}
@@ -22,7 +23,8 @@ namespace API_practice.Controllers
 		[Route("Popular")]
 		public ActionResult<IEnumerable<SongIndexVM>> GetPopularSongs()
 		{
-			var data = _db.Songs.Where(s => s.AlbumId != null && s.Status != false)
+			var data = _db.Songs
+				.Where(s => s.AlbumId != null && s.Status != false)
 				.Include(s => s.SongPlayedRecords)
 				.Include(s => s.SongArtistMetadata)
 				.Include(s => s.SongCreatorMetadata)
@@ -30,7 +32,7 @@ namespace API_practice.Controllers
 				{
 					s.Id,
 					s.SongName,
-					GenreName = s.Genre.GenreName,
+					s.Genre.GenreName,
 					s.IsExplicit,
 					s.SongCoverPath,
 					s.SongPath,
@@ -49,7 +51,7 @@ namespace API_practice.Controllers
 					AlbumId = x.AlbumId.Value,
 					PlayedTimes = x.PlayedTimes,
 					Artistlist = x.Artists.Select(a => a.ToInfoVM()).ToList(),
-					Creatorlist = x.Creators.Select(c=>c.ToInfoVM()).ToList(),
+					Creatorlist = x.Creators.Select(c => c.ToInfoVM()).ToList(),
 				});
 
 			return Ok(data);
@@ -57,7 +59,7 @@ namespace API_practice.Controllers
 
 		[HttpGet]
 		[Route("Search")]
-		public ActionResult<IEnumerable<SongIndexVM>> Search([FromQuery]string input)
+		public ActionResult<IEnumerable<SongIndexVM>> Search([FromQuery] string input)
 		{
 			var data = _db.Songs.Where(song => song.SongName.Contains(input) && song.Status == true);
 
@@ -66,18 +68,18 @@ namespace API_practice.Controllers
 
 		[HttpGet]
 		[Route("RecentlyPlayed")]
-		public ActionResult<IEnumerable<SongIndexVM>> GetRecentlyPlayedSongs([FromQuery]string memberAccount)
+		public ActionResult<IEnumerable<SongIndexVM>> GetRecentlyPlayedSongs([FromQuery] string memberAccount)
 		{
-			var member = _db.Members.SingleOrDefault(member => member.MemberAccount== memberAccount);
+			var member = _db.Members.SingleOrDefault(member => member.MemberAccount == memberAccount);
 
-			if(member == null)
+			if (member == null)
 			{
 				return NotFound("Member does not existed");
 			}
 
 			var data = _db.SongPlayedRecords.Where(record => record.MemberId == member.Id).Include(record => record.Song).Select(record => record.Song);
 
-			if(data == null)
+			if (data == null)
 			{
 				return NoContent();
 			}

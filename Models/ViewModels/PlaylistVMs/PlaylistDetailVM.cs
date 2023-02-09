@@ -1,4 +1,4 @@
-﻿namespace API_practice.Models.ViewModels.PlaylistVMs
+﻿namespace api.iSMusic.Models.ViewModels.PlaylistVMs
 {
 	public class PlaylistDetailVM
 	{
@@ -8,7 +8,7 @@
 
 		public string? PlaylistCoverPath { get; set; }
 
-		public string MemberAccount { get; set; } = null!;
+		public int MemberId { get; set; }
 
 		public bool IsPublic { get; set; }
 

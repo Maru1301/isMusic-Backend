@@ -1,9 +1,9 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.ArtistVMs;
-using API_practice.Models.ViewModels.CreatorVMs;
-using API_practice.Models.ViewModels.SongVMs;
+﻿using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.ArtistVMs;
+using api.iSMusic.Models.ViewModels.CreatorVMs;
+using api.iSMusic.Models.ViewModels.SongVMs;
 
-namespace API_practice.Models.ViewModels.SongVMs
+namespace api.iSMusic.Models.ViewModels.SongVMs
 {
 	public class SongIndexVM
 	{

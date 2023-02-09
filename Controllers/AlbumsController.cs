@@ -1,18 +1,19 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.AlbumVMs;
+﻿using api.iSMusic.Models;
+using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.AlbumVMs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace API_practice.Controllers
+namespace api.iSMusic.Controllers
 {
 	[Route("[controller]")]
 	[ApiController]
-	public class AlbumController : ControllerBase
+	public class AlbumsController : ControllerBase
 	{
 		private readonly AppDbContext _db;
 
-		public AlbumController(AppDbContext db)
+		public AlbumsController(AppDbContext db)
 		{
 			_db = db;
 		}
@@ -23,7 +24,7 @@ namespace API_practice.Controllers
 		{
 			var data = _db.Albums
 				.Include(album => album.LikedAlbums)
-				.Select(album=> new
+				.Select(album => new
 				{
 					album.Id,
 					album.AlbumName,
@@ -33,16 +34,16 @@ namespace API_practice.Controllers
 					album.Released,
 					album.MainArtistId,
 					TotalLiked = album.LikedAlbums.Count(),
-				}).OrderByDescending(x=>x.TotalLiked).Take(10)
-				.Select(x=> new AlbumIndexVM
+				}).OrderByDescending(x => x.TotalLiked).Take(10)
+				.Select(x => new AlbumIndexVM
 				{
-					Id= x.Id,
-					AlbumName= x.AlbumName,
-					AlbumCoverPath= x.AlbumCoverPath,
-					AlbumTypeId= x.AlbumTypeId,
-					AlbumGenreId= x.AlbumGenreId,
-					Released= x.Released,
-					MainArtistId= x.MainArtistId,
+					Id = x.Id,
+					AlbumName = x.AlbumName,
+					AlbumCoverPath = x.AlbumCoverPath,
+					AlbumTypeId = x.AlbumTypeId,
+					AlbumGenreId = x.AlbumGenreId,
+					Released = x.Released,
+					MainArtistId = x.MainArtistId,
 				});
 
 			return Ok(data);

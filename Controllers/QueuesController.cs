@@ -1,21 +1,22 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.QueueVMs;
+﻿using api.iSMusic.Models;
+using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.QueueVMs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace practice.Controllers
+namespace api.iSMusic.Controllers
 {
 	[ApiController]
 	[Route("[controller]")]
-	public class QueueController : ControllerBase
+	public class QueuesController : ControllerBase
 	{
 		private readonly AppDbContext _db;
-		public QueueController(AppDbContext db)
+		public QueuesController(AppDbContext db)
 		{
 			_db = db;
 		}
 
-		[HttpGet(Name ="GetAll")]
+		[HttpGet(Name = "GetAll")]
 		public ActionResult<IEnumerable<Queue>> GetAll()
 		{
 			var data = _db.Queues.ToList();
@@ -27,18 +28,19 @@ namespace practice.Controllers
 		[Route("{memberAccount}")]
 		public ActionResult<QueueIndexVM> Get(string memberAccount)
 		{
-			var data = _db.Queues.Include(q=>q.CurrentSong).Include(q=>q.QueueSongs).Where(q=>q.MemberAccount == memberAccount).Single();
+			var data = _db.Queues.Include(q => q.CurrentSong).Include(q => q.QueueSongs).Where(q => q.MemberAccount == memberAccount).Single();
 
 			return Ok(data);
 		}
 
 		[HttpPost]
 		[Route("{memberAccount}")]
+		//todo edit the method
 		public void CreateQueue(string memberAccount)
 		{
 			var queue = new Queue()
 			{
-				MemberAccount = memberAccount,
+				MemberId = memberAccount,
 				CurrentSongId = null,
 				CurrentSongTime = null,
 				IsShuffle = false,
@@ -50,7 +52,7 @@ namespace practice.Controllers
 
 		[HttpPost]
 		[Route("Song")]
-		public void Push([FromBody]int queueId, int songId)
+		public void Push([FromBody] int queueId, int songId)
 		{
 			var queue = _db.Queues.Single(q => q.Id == queueId);
 
@@ -97,9 +99,9 @@ namespace practice.Controllers
 
 		[HttpPatch]
 		[Route("Member/{memberAccount}/shuffle")]
-		public void ChangeShuffle(string memberAccount, [FromBody] bool isShuffle)
+		public void ChangeShuffle(int memberId, [FromBody] bool isShuffle)
 		{
-			Queue queue = _db.Queues.Where(queue => queue.MemberAccount == memberAccount).Single();
+			Queue queue = _db.Queues.Where(queue => queue.memberId == memberId).Single();
 
 			queue.IsShuffle = isShuffle;
 
@@ -109,9 +111,9 @@ namespace practice.Controllers
 
 		[HttpPatch]
 		[Route("Member/{memberAccount}/repeat")]
-		public void ChangeRepeat(string memberAccount, [FromBody] bool? isRepeat)
+		public void ChangeRepeat(int memberId, [FromBody] bool? isRepeat)
 		{
-			Queue queue = _db.Queues.Where(queue => queue.MemberAccount == memberAccount).Single();
+			Queue queue = _db.Queues.Where(queue => queue.memberId == memberId).Single();
 
 			queue.IsRepeat = isRepeat;
 

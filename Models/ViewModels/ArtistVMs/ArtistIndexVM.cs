@@ -1,6 +1,6 @@
-﻿using API_practice.Models.EFModels;
+﻿using api.iSMusic.Models.EFModels;
 
-namespace API_practice.Models.ViewModels.ArtistVMs
+namespace api.iSMusic.Models.ViewModels.ArtistVMs
 {
 	public class ArtistIndexVM
 	{

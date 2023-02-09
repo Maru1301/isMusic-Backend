@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace API_practice.Models.ViewModels.PlaylistVMs
+﻿namespace api.iSMusic.Models.ViewModels.PlaylistVMs
 {
 	public class PlaylistIndexVM
 	{
@@ -10,6 +8,6 @@ namespace API_practice.Models.ViewModels.PlaylistVMs
 
 		public string? PlaylistCoverPath { get; set; }
 
-		public string MemberAccount { get; set; } = null!;
+		public int MemberId { get; set; }
 	}
 }

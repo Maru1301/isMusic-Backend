@@ -1,4 +1,4 @@
-﻿namespace API_practice.Models.ViewModels.ArtistVMs
+﻿namespace api.iSMusic.Models.ViewModels.ArtistVMs
 {
 	public class ArtistInfoVM
 	{

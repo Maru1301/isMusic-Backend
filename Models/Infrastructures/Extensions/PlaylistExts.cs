@@ -1,5 +1,5 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.PlaylistVMs;
+﻿using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.PlaylistVMs;
 
 public static class PlaylistExts
 {
@@ -9,9 +9,9 @@ public static class PlaylistExts
 			Id = source.Id,
 			ListName = source.ListName,
 			PlaylistCoverPath = source.PlaylistCoverPath,
-			MemberAccount = source.MemberAccount,
-			IsPublic= source.IsPublic,
-			PlayListSongMetadata = source.PlayListSongMetadata.Select(m=>m.ToVM()).ToList(),
+			MemberId = source.MemberId,
+			IsPublic = source.IsPublic,
+			PlayListSongMetadata = source.PlaylistSongMetadata.Select(m => m.ToVM()).ToList(),
 		};
 
 	public static PlaylistIndexVM ToIndexVM(this Playlist source)
@@ -20,13 +20,12 @@ public static class PlaylistExts
 			Id = source.Id,
 			ListName = source.ListName,
 			PlaylistCoverPath = source.PlaylistCoverPath,
-			MemberAccount = source.MemberAccount,
 		};
 
 	public static Playlist ToEntity(this PlaylistCreateVM source)
 		=> new Playlist
 		{
 			ListName = source.ListName,
-			MemberAccount = source.MemberAccount,
+			MemberId = source.MemberId,
 		};
 }

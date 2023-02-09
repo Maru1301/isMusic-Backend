@@ -1,30 +1,31 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.ArtistVMs;
-using API_practice.Models.ViewModels.SongVMs;
+﻿using api.iSMusic.Models;
+using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.ArtistVMs;
+using api.iSMusic.Models.ViewModels.SongVMs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace API_practice.Controllers
+namespace api.iSMusic.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class ArtistController : ControllerBase
+	public class ArtistsController : ControllerBase
 	{
 		private readonly AppDbContext _db;
 
-		public ArtistController(AppDbContext db)
+		public ArtistsController(AppDbContext db)
 		{
 			_db = db;
 		}
 
 		[HttpGet]
 		[Route("Detail")]
-		public ActionResult<ArtistDetailVM> GetArtistDetail([FromQuery]int artistId)
+		public ActionResult<ArtistDetailVM> GetArtistDetail([FromQuery] int artistId)
 		{
-			var data = _db.Artists.SingleOrDefault(artist =>artist.Id== artistId);
+			var data = _db.Artists.SingleOrDefault(artist => artist.Id == artistId);
 
-			if(data==null) return NotFound();
+			if (data == null) return NotFound();
 
 			var popularSongs = _db.Songs
 				.Include(song => song.SongArtistMetadata)
@@ -34,7 +35,7 @@ namespace API_practice.Controllers
 				{
 					song.Id,
 					song.SongName,
-					
+
 				});
 
 			return Ok(data.ToDetailVM());

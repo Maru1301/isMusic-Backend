@@ -1,6 +1,6 @@
-﻿using API_practice.Models.EFModels;
+﻿using api.iSMusic.Models.EFModels;
 
-namespace API_practice.Models.ViewModels.QueueVMs
+namespace api.iSMusic.Models.ViewModels.QueueVMs
 {
 	public class QueueIndexVM
 	{

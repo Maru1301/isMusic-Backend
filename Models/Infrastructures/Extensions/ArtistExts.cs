@@ -1,5 +1,5 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.ArtistVMs;
+﻿using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.ArtistVMs;
 
 public static class ArtistExts
 {
@@ -21,7 +21,7 @@ public static class ArtistExts
 	public static ArtistDetailVM ToDetailVM(this Artist source)
 		=> new ArtistDetailVM
 		{
-			Id= source.Id,
+			Id = source.Id,
 			ArtistName = source.ArtistName,
 			ArtistPicPath = source.ArtistPicPath,
 		};

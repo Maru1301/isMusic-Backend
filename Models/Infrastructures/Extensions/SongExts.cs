@@ -1,7 +1,7 @@
-﻿using API_practice.Models.EFModels;
-using API_practice.Models.ViewModels.SongVMs;
+﻿using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.SongVMs;
 
-namespace API_practice.Models.Infrastructures.Extensions;
+namespace api.iSMusic.Models.Infrastructures.Extensions;
 
 public static class SongExts
 {
