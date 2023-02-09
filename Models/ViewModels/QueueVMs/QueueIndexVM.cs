@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.QueueVMs;
 
 namespace api.iSMusic.Models.ViewModels.QueueVMs
 {
@@ -6,7 +7,7 @@ namespace api.iSMusic.Models.ViewModels.QueueVMs
 	{
 		public int Id { get; set; }
 
-		public string MemberAccount { get; set; } = null!;
+		public int MemberId { get; set; }
 
 		public int? CurrentSongId { get; set; }
 
@@ -18,6 +19,21 @@ namespace api.iSMusic.Models.ViewModels.QueueVMs
 
 		public virtual Song? CurrentSong { get; set; }
 
-		public virtual ICollection<QueueSong> QueueSongs { get; } = new List<QueueSong>();
+		public IEnumerable<int> SongIds { get; set; } = null!;
 	}
+}
+
+public static class QueueExts
+{
+	public static QueueIndexVM ToIndexVM(this Queue source)
+		=> new QueueIndexVM
+		{
+			Id= source.Id,
+			MemberId= source.MemberId,
+			CurrentSongId= source.CurrentSongId,
+			CurrentSongTime= source.CurrentSongTime,
+			IsShuffle= source.IsShuffle,
+			IsRepeat= source.IsRepeat,
+			SongIds = source.QueueSongs.OrderBy(qs => qs.DisplayOrder).Select(qs => qs.Id),
+		};
 }

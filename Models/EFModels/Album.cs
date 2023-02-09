@@ -60,10 +60,13 @@ public partial class Album
 
     [ForeignKey("MainArtistId")]
     [InverseProperty("Albums")]
-    public virtual Artist? MainArtist { get; set; }
+    public virtual Artist MainArtist { get; set; } = null!;
 
     [InverseProperty("Album")]
     public virtual ICollection<Product> Products { get; } = new List<Product>();
+
+    [InverseProperty("Album")]
+    public virtual ICollection<QueueSong> QueueSongs { get; } = new List<QueueSong>();
 
     [InverseProperty("Album")]
     public virtual ICollection<Song> Songs { get; } = new List<Song>();

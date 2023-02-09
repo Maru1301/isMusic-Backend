@@ -25,33 +25,20 @@ namespace api.iSMusic.Controllers
 		{
 			var data = _db.Songs
 				.Where(s => s.AlbumId != null && s.Status != false)
-				.Include(s => s.SongPlayedRecords)
-				.Include(s => s.SongArtistMetadata)
-				.Include(s => s.SongCreatorMetadata)
-				.Select(s => new
+				.OrderByDescending(s => s.SongPlayedRecords.Count())
+				.Take(10)
+				.Select(s => new SongIndexVM
 				{
-					s.Id,
-					s.SongName,
-					s.Genre.GenreName,
-					s.IsExplicit,
-					s.SongCoverPath,
-					s.SongPath,
-					s.AlbumId,
+					Id = s.Id,
+					SongName = s.SongName,
+					GenreName = s.Genre.GenreName,
+					IsExplicit = s.IsExplicit,
+					SongCoverPath = s.SongCoverPath,
+					SongPath = s.SongPath,
+					AlbumId = s.AlbumId != null? s.AlbumId.Value : 0,
 					PlayedTimes = s.SongPlayedRecords.Count(),
-					Artists = s.SongArtistMetadata.Select(m => m.Artist),
-					Creators = s.SongCreatorMetadata.Select(m => m.Creator),
-				}).OrderByDescending(x => x.PlayedTimes).Take(10).ToList().Select(x => new SongIndexVM
-				{
-					Id = x.Id,
-					SongName = x.SongName,
-					GenreName = x.GenreName,
-					IsExplicit = x.IsExplicit,
-					SongCoverPath = x.SongCoverPath,
-					SongPath = x.SongPath,
-					AlbumId = x.AlbumId.Value,
-					PlayedTimes = x.PlayedTimes,
-					Artistlist = x.Artists.Select(a => a.ToInfoVM()).ToList(),
-					Creatorlist = x.Creators.Select(c => c.ToInfoVM()).ToList(),
+					Artistlist = s.SongArtistMetadata.Select(m => m.Artist.ToInfoVM()).ToList(),
+					Creatorlist = s.SongCreatorMetadata.Select(m => m.Creator.ToInfoVM()).ToList(),
 				});
 
 			return Ok(data);

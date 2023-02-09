@@ -59,7 +59,7 @@ public partial class Song
 
     [ForeignKey("AlbumId")]
     [InverseProperty("Songs")]
-    public virtual Album Album { get; set; } = new Album();
+    public virtual Album? Album { get; set; }
 
     [ForeignKey("GenreId")]
     [InverseProperty("Songs")]

@@ -20,33 +20,31 @@ namespace api.iSMusic.Controllers
 
 		[HttpGet]
 		[Route("Recommended")]
-		public ActionResult<AlbumIndexVM> GetRecommended()
+		public IActionResult GetRecommended()
 		{
-			var data = _db.Albums
+			var recommendedAlbums = _db.Albums
 				.Include(album => album.LikedAlbums)
-				.Select(album => new
+				.Select(album => new AlbumIndexVM
 				{
-					album.Id,
-					album.AlbumName,
-					album.AlbumCoverPath,
-					album.AlbumTypeId,
-					album.AlbumGenreId,
-					album.Released,
-					album.MainArtistId,
-					TotalLiked = album.LikedAlbums.Count(),
-				}).OrderByDescending(x => x.TotalLiked).Take(10)
-				.Select(x => new AlbumIndexVM
-				{
-					Id = x.Id,
-					AlbumName = x.AlbumName,
-					AlbumCoverPath = x.AlbumCoverPath,
-					AlbumTypeId = x.AlbumTypeId,
-					AlbumGenreId = x.AlbumGenreId,
-					Released = x.Released,
-					MainArtistId = x.MainArtistId,
-				});
+					Id = album.Id,
+					AlbumName = album.AlbumName,
+					AlbumCoverPath = album.AlbumCoverPath,
+					AlbumTypeId = album.AlbumTypeId,
+					AlbumGenreId = album.AlbumGenreId,
+					Released = album.Released,
+					MainArtistId = album.MainArtistId,
+					TotalLikes = album.LikedAlbums.Count()
+				})
+				.OrderByDescending(x => x.TotalLikes)
+				.Take(10)
+				.ToList();
 
-			return Ok(data);
+			if (recommendedAlbums.Count() == 0)
+			{
+				return NoContent();
+			}
+
+			return Ok(recommendedAlbums);
 		}
 	}
 }

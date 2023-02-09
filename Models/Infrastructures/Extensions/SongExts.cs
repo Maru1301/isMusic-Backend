@@ -17,6 +17,6 @@ public static class SongExts
             SongPath = source.SongPath,
             Status = source.Status,
             AlbumId = source.AlbumId,
-            AlbumName = source.Album.AlbumName,
+            AlbumName = source.Album != null? source.Album.AlbumName: "",
         };
 }

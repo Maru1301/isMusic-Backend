@@ -21,48 +21,31 @@ namespace api.iSMusic.Controllers
 			_db = db;
 		}
 
-		//[HttpGet]
-		//[Route("All")]
-		////to do edit the method
-		//public ActionResult<IEnumerable<PlaylistIndexVM>> GetAllPlaylists([FromQuery] string memberAccount)
-		//{
-		//	var data = _db.Playlists;
-
-		//	if (string.IsNullOrEmpty(memberAccount) == false)
-		//	{
-		//		data.Where(p => p.MemberId == memberId);
-		//	}
-
-		//	return Ok(data.ToList().Select(p => p.ToIndexVM()));
-		//}
-
 		[HttpGet]
 		[Route("Recommended")]
-
-		public ActionResult<PlaylistIndexVM> GetRecommended()
+		public IActionResult GetRecommended()
 		{
-			var data = _db.Playlists
-				.Where(p => p.IsPublic == true)
+			var recommendedPlaylists = _db.Playlists
+				.Where(p => p.IsPublic)
 				.Include(p => p.LikedPlaylists)
-				.Select(p => new
+				.Select(p => new PlaylistIndexVM
 				{
-					p.Id,
-					p.ListName,
-					p.PlaylistCoverPath,
-					p.MemberId,
-					p.IsPublic,
-					TotalLiked = p.LikedPlaylists.Count(),
-				}).OrderByDescending(x => x.TotalLiked).Take(10)
-				.Select(x => new PlaylistIndexVM
-				{
-					Id = x.Id,
-					ListName = x.ListName,
-					PlaylistCoverPath = x.PlaylistCoverPath,
-					MemberId = x.MemberId,
-				});
+					Id = p.Id,
+					ListName = p.ListName,
+					PlaylistCoverPath = p.PlaylistCoverPath,
+					MemberId = p.MemberId,
+					TotalLikes = p.LikedPlaylists.Count(),
+				})
+				.OrderByDescending(x => x.TotalLikes)
+				.Take(10)
+				.ToList();
+				
+			if(recommendedPlaylists.Count() == 0)
+			{
+				return NoContent();
+			}
 
-
-			return Ok(data);
+			return Ok(recommendedPlaylists);
 		}
 
 		[HttpGet]
@@ -132,39 +115,6 @@ namespace api.iSMusic.Controllers
 
 			public int MemberId { get; set; }
 		}
-
-		[HttpPost]
-		[Route("{memberAccount}")]
-		//todo edit the method
-		public async Task<IActionResult> CreatePlaylist(int memberId)
-		{
-			//Check if the provided memberAccount is valid
-			if (memberId <= 0)
-			{
-				return BadRequest("Invalid member account");
-			}
-
-			// Find the number of playlists created by the member
-		   var numOfPlaylists = await _db.Playlists.CountAsync(p => p.MemberId == memberId);
-			numOfPlaylists += 1;
-
-			//Create a new playlist
-			var newPlaylist = new PlaylistCreateVM
-			{
-				MemberId = memberId,
-				ListName = "MyPlaylist" + numOfPlaylists
-			};
-
-			//Add the new playlist to the database
-			_db.Playlists.Add(newPlaylist.ToEntity());
-			await _db.SaveChangesAsync();
-
-			var playlistId = _db.Playlists.Where(p => p.MemberId == memberId).OrderByDescending(p => p.Id).First().Id;
-
-			//Return a 201 Created status code along with the newly created playlist's information
-			return CreatedAtAction(nameof(GetPlaylistDetail), new { playlistId }, newPlaylist);
-		}
-
 
 		[HttpPut]
 		[Route("{playlistId}")]

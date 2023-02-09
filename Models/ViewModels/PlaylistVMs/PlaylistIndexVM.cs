@@ -9,5 +9,7 @@
 		public string? PlaylistCoverPath { get; set; }
 
 		public int MemberId { get; set; }
+
+		public int TotalLikes { get; set; }
 	}
 }

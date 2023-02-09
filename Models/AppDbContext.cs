@@ -7,6 +7,10 @@ namespace api.iSMusic.Models;
 
 public partial class AppDbContext : DbContext
 {
+    public AppDbContext()
+    {
+    }
+
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
@@ -161,7 +165,9 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Albums_AlbumTypes");
 
-            entity.HasOne(d => d.MainArtist).WithMany(p => p.Albums).HasConstraintName("FK_Albums_Artists");
+            entity.HasOne(d => d.MainArtist).WithMany(p => p.Albums)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Albums_Artists");
         });
 
         modelBuilder.Entity<Artist>(entity =>
@@ -343,6 +349,14 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<QueueSong>(entity =>
         {
+            entity.HasOne(d => d.Album).WithMany(p => p.QueueSongs)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_QueueSongs_Albums");
+
+            entity.HasOne(d => d.Playlist).WithMany(p => p.QueueSongs)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_QueueSongs_Playlists");
+
             entity.HasOne(d => d.Queue).WithMany(p => p.QueueSongs)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_QueueSongs_Queues");
@@ -357,7 +371,9 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_Musics");
 
-            entity.HasOne(d => d.Album).WithMany(p => p.Songs).HasConstraintName("FK_Songs_Albums");
+            entity.HasOne(d => d.Album).WithMany(p => p.Songs)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Songs_Albums");
 
             entity.HasOne(d => d.Genre).WithMany(p => p.Songs)
                 .OnDelete(DeleteBehavior.ClientSetNull)

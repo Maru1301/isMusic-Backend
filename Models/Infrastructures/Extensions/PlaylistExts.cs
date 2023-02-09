@@ -19,6 +19,7 @@ public static class PlaylistExts
 		{
 			Id = source.Id,
 			ListName = source.ListName,
+			MemberId= source.MemberId,
 			PlaylistCoverPath = source.PlaylistCoverPath,
 		};
 
@@ -27,5 +28,15 @@ public static class PlaylistExts
 		{
 			ListName = source.ListName,
 			MemberId = source.MemberId,
+		};
+
+	public static PlaylistSongMetadataVM ToVM(this PlaylistSongMetadatum source)
+		=> new PlaylistSongMetadataVM
+		{
+			Id= source.Id,
+			PlayListId = source.PlayListId,
+			SongId = source.SongId,
+			DisplayOrder= source.DisplayOrder,
+			AddedTime= source.AddedTime,
 		};
 }

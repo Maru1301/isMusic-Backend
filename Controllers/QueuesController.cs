@@ -24,23 +24,14 @@ namespace api.iSMusic.Controllers
 			return Ok(data);
 		}
 
-		[HttpGet()]
-		[Route("{memberAccount}")]
-		public ActionResult<QueueIndexVM> Get(string memberAccount)
-		{
-			var data = _db.Queues.Include(q => q.CurrentSong).Include(q => q.QueueSongs).Where(q => q.MemberAccount == memberAccount).Single();
-
-			return Ok(data);
-		}
-
 		[HttpPost]
-		[Route("{memberAccount}")]
+		[Route("{memberId}")]
 		//todo edit the method
-		public void CreateQueue(string memberAccount)
+		public void CreateQueue(int memberId)
 		{
 			var queue = new Queue()
 			{
-				MemberId = memberAccount,
+				MemberId = memberId,
 				CurrentSongId = null,
 				CurrentSongTime = null,
 				IsShuffle = false,
@@ -52,34 +43,75 @@ namespace api.iSMusic.Controllers
 
 		[HttpPost]
 		[Route("Song")]
-		public void Push([FromBody] int queueId, int songId)
+		public ActionResult AddSongIntoQueue([FromBody] SongQueueInput input)
 		{
-			var queue = _db.Queues.Single(q => q.Id == queueId);
+			var queue = _db.Queues.SingleOrDefault(q => q.Id == input.QueueId);
 
-			QueueSong metadata = new QueueSong();
-			metadata.SongId = songId;
-			metadata.QueueId = queueId;
-			metadata.NextQueueSong = null;
-			metadata.FromAlbumOrPlaylist = false;
+			if (queue == null)
+			{
+				return NotFound(new { message = "Queue not found" });
+			}
+
+			var song = _db.Songs.SingleOrDefault(s => s.Id == input.SongId);
+
+			if (song == null)
+			{
+				return NotFound(new { message = "Song not found" });
+			}
+
+			var album = _db.Albums.SingleOrDefault(a => a.Id == input.AlbumId);
+
+			if (album == null)
+			{
+				return NotFound(new { message = "Album not found" });
+			}
+
+			var playlist = _db.Playlists.SingleOrDefault(p => p.Id == input.PlaylistId);
+
+			if (playlist == null)
+			{
+				return NotFound(new { message = "Playlist not found" });
+			}
+
+			QueueSong metadata = new QueueSong
+			{
+				SongId = input.SongId,
+				QueueId = input.QueueId
+			};
+
+			var lastSong = _db.QueueSongs.Where(qs => qs.QueueId == input.QueueId)
+										  .OrderByDescending(qs => qs.DisplayOrder)
+										  .FirstOrDefault();
+
+			if (lastSong == null)
+			{
+				metadata.DisplayOrder = 1;
+			}
+			else
+			{
+				metadata.DisplayOrder = lastSong.DisplayOrder + 1;
+			}
 
 			_db.QueueSongs.Add(metadata);
 			_db.SaveChanges();
 
-			// if there is no song in the queue
-			if (queue.CurrentSongId != null)
-			{
-				var lastSong = _db.QueueSongs.Single(qs => qs.NextQueueSong == null && qs.QueueId == queueId);
+			return Ok(new { message = "Song added to the queue successfully" });
+		}
 
-				// find added metadata id
-				var addedMetadata = _db.QueueSongs.Single(qs => qs.QueueId == queueId && qs.SongId == songId && qs.Id != lastSong.Id);
+		public class SongQueueInput
+		{
+			public int SongId { get; set; }
 
-				lastSong.NextQueueSong = addedMetadata.Id;
-			}
+			public int QueueId { get; set; }
+
+			public int? AlbumId { get; set; }
+
+			public int? PlaylistId { get; set; }
 		}
 
 		[HttpDelete]
 		[Route("Song")]
-		public ActionResult<Song> Pop(int queueId)
+		public ActionResult<Song> DeleteSongFromQueue(int queueId)
 		{
 			var queue = _db.Queues.SingleOrDefault(q => q.Id == queueId);
 
@@ -98,10 +130,10 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPatch]
-		[Route("Member/{memberAccount}/shuffle")]
+		[Route("Member/{memberId}/shuffle")]
 		public void ChangeShuffle(int memberId, [FromBody] bool isShuffle)
 		{
-			Queue queue = _db.Queues.Where(queue => queue.memberId == memberId).Single();
+			Queue queue = _db.Queues.Where(queue => queue.MemberId == memberId).Single();
 
 			queue.IsShuffle = isShuffle;
 
@@ -110,10 +142,10 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPatch]
-		[Route("Member/{memberAccount}/repeat")]
+		[Route("Member/{memberId}/repeat")]
 		public void ChangeRepeat(int memberId, [FromBody] bool? isRepeat)
 		{
-			Queue queue = _db.Queues.Where(queue => queue.memberId == memberId).Single();
+			Queue queue = _db.Queues.Where(queue => queue.MemberId == memberId).Single();
 
 			queue.IsRepeat = isRepeat;
 
