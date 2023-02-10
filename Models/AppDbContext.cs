@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
 using api.iSMusic.Models.EFModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.iSMusic.Models;
 
