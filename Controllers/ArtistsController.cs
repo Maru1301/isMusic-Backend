@@ -1,5 +1,6 @@
 ﻿using api.iSMusic.Models;
 using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.ViewModels.ArtistVMs;
 using api.iSMusic.Models.ViewModels.SongVMs;
 using Microsoft.AspNetCore.Http;

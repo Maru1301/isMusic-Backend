@@ -1,5 +1,9 @@
 ﻿using api.iSMusic.Models;
 using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
+using api.iSMusic.Models.Infrastructures.Repositories;
+using api.iSMusic.Models.Services;
+using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using api.iSMusic.Models.ViewModels.SongVMs;
 using Microsoft.AspNetCore.Http;
@@ -12,66 +16,62 @@ namespace api.iSMusic.Controllers
 	[ApiController]
 	public class SongsController : ControllerBase
 	{
-		private readonly AppDbContext _db;
+		private readonly ISongRepository _repository;
 
-		public SongsController(AppDbContext db)
+		private readonly SongService _service;
+
+		public SongsController(ISongRepository repository)
 		{
-			_db = db;
+			_repository = repository;
+			_service = new(_repository);
 		}
 
 		[HttpGet]
 		[Route("Popular")]
 		public ActionResult<IEnumerable<SongIndexVM>> GetPopularSongs()
 		{
-			var data = _db.Songs
-				.Where(s => s.AlbumId != null && s.Status != false)
-				.OrderByDescending(s => s.SongPlayedRecords.Count())
-				.Take(10)
-				.Select(s => new SongIndexVM
-				{
-					Id = s.Id,
-					SongName = s.SongName,
-					GenreName = s.Genre.GenreName,
-					IsExplicit = s.IsExplicit,
-					SongCoverPath = s.SongCoverPath,
-					SongPath = s.SongPath,
-					AlbumId = s.AlbumId != null? s.AlbumId.Value : 0,
-					PlayedTimes = s.SongPlayedRecords.Count(),
-					Artistlist = s.SongArtistMetadata.Select(m => m.Artist.ToInfoVM()).ToList(),
-					Creatorlist = s.SongCreatorMetadata.Select(m => m.Creator.ToInfoVM()).ToList(),
-				});
+			var data = _repository.GetPopularSongs();
 
-			return Ok(data);
+			return Ok(data.Select(dto => dto.ToIndexVM()));
 		}
 
 		[HttpGet]
-		[Route("Search")]
-		public ActionResult<IEnumerable<SongIndexVM>> Search([FromQuery] string input)
+		[Route("{songName}")]
+		public ActionResult<IEnumerable<SongIndexVM>> Search([FromRoute]string songName)
 		{
-			var data = _db.Songs.Where(song => song.SongName.Contains(input) && song.Status == true);
+			var dtos = _repository.SearchBySongName(songName);
 
-			return Ok(data);
+			return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
 
 		[HttpGet]
-		[Route("RecentlyPlayed")]
-		public ActionResult<IEnumerable<SongIndexVM>> GetRecentlyPlayedSongs([FromQuery] string memberAccount)
+		[Route("SongGenres")]
+		public IActionResult GetSongGenres()
 		{
-			var member = _db.Members.SingleOrDefault(member => member.MemberAccount == memberAccount);
+			var songGenres = _repository.GetSongGenres();
 
-			if (member == null)
-			{
-				return NotFound("Member does not existed");
-			}
-
-			var data = _db.SongPlayedRecords.Where(record => record.MemberId == member.Id).Include(record => record.Song).Select(record => record.Song);
-
-			if (data == null)
-			{
-				return NoContent();
-			}
-
-			return Ok(data);
+			return Ok(songGenres);
 		}
+
+		//[HttpGet]
+		//[Route("RecentlyPlayed")]
+		//public ActionResult<IEnumerable<SongIndexVM>> GetRecentlyPlayedSongs([FromQuery] string memberAccount)
+		//{
+		//	var member = _db.Members.SingleOrDefault(member => member.MemberAccount == memberAccount);
+
+		//	if (member == null)
+		//	{
+		//		return NotFound("Member does not existed");
+		//	}
+
+		//	var data = _db.SongPlayedRecords.Where(record => record.MemberId == member.Id).Include(record => record.Song).Select(record => record.Song);
+
+		//	if (data == null)
+		//	{
+		//		return NoContent();
+		//	}
+
+		//	return Ok(data);
+		//}
 	}
 }

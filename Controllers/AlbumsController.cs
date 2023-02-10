@@ -1,5 +1,8 @@
 ﻿using api.iSMusic.Models;
 using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
+using api.iSMusic.Models.Services;
+using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.AlbumVMs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,40 +14,37 @@ namespace api.iSMusic.Controllers
 	[ApiController]
 	public class AlbumsController : ControllerBase
 	{
-		private readonly AppDbContext _db;
+		private readonly IAlbumRepository _repository;
 
-		public AlbumsController(AppDbContext db)
+		private readonly AlbumService _service;
+
+		public AlbumsController(IAlbumRepository repo)
 		{
-			_db = db;
+			_repository = repo;
+			_service = new AlbumService(_repository);
 		}
 
 		[HttpGet]
 		[Route("Recommended")]
 		public IActionResult GetRecommended()
 		{
-			var recommendedAlbums = _db.Albums
-				.Include(album => album.LikedAlbums)
-				.Select(album => new AlbumIndexVM
-				{
-					Id = album.Id,
-					AlbumName = album.AlbumName,
-					AlbumCoverPath = album.AlbumCoverPath,
-					AlbumTypeId = album.AlbumTypeId,
-					AlbumGenreId = album.AlbumGenreId,
-					Released = album.Released,
-					MainArtistId = album.MainArtistId,
-					TotalLikes = album.LikedAlbums.Count()
-				})
-				.OrderByDescending(x => x.TotalLikes)
-				.Take(10)
-				.ToList();
+			var recommendedAlbums = _service.GetRecommended();
 
 			if (recommendedAlbums.Count() == 0)
 			{
 				return NoContent();
 			}
 
-			return Ok(recommendedAlbums);
+			return Ok(recommendedAlbums.Select(dto => dto.ToIndexVM()));
+		}
+
+		[HttpGet]
+		[Route("SongGenres/{genreId}")]
+		public IActionResult GetAlbumsByGenreId(int genreId)
+		{
+			var dtos = _service.GetAlbumsByGenreId(genreId);
+
+			return Ok(dtos.Select(dtos => dtos.ToIndexVM()));
 		}
 	}
 }

@@ -1,5 +1,8 @@
 ﻿using api.iSMusic.Models;
 using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
+using api.iSMusic.Models.Services;
+using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using api.iSMusic.Models.ViewModels.QueueVMs;
 using Microsoft.AspNetCore.Http;
@@ -12,40 +15,34 @@ namespace api.iSMusic.Controllers
 	[ApiController]
 	public class MembersController : ControllerBase
 	{
-		private readonly AppDbContext _db;
+		private readonly IMemberRepository _memberRepository;
 
-		public MembersController(AppDbContext db)
+		private readonly ISongRepository _songRepository;
+
+		private readonly IPlaylistRepository _playlistRepository;
+
+		private readonly IQueueRepository _queueRepository;
+
+		private readonly MemberService _memberService;
+
+		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IPlaylistRepository playlistRepository, IQueueRepository queueRepository)
 		{
-			_db = db;
+			_memberRepository = memberRepo;
+			_songRepository = songRepository;
+			_playlistRepository = playlistRepository;
+			_queueRepository = queueRepository;
+			_memberService = new (_memberRepository, _playlistRepository);
 		}
 
 		[HttpGet]
 		[Route("{memberId}/Playlists")]
 		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylist([FromRoute] int memberId, [FromQuery] bool myOwn)
 		{
-			var data = _db.Playlists;
-			List<int> likedPlaylists = new List<int>();
+			var playlists = _memberService.GetMemberPlaylist(memberId, myOwn);
 
-			var member = _db.Members.SingleOrDefault(m => m.Id == memberId);
-
-			if (member == null)
+			if (playlists == null)
 			{
 				return NotFound("Member not found");
-			}
-
-			IQueryable<Playlist> playlists;
-			if (!myOwn)
-			{
-				likedPlaylists = _db.LikedPlaylists
-					.Where(lp => lp.MemberId == memberId)
-					.Select(lp => lp.PlaylistId)
-					.ToList();
-
-				playlists = data.Where(p => p.MemberId == memberId || likedPlaylists.Contains(p.Id));
-			}
-			else
-			{
-				playlists = data.Where(p => p.MemberId == memberId);
 			}
 
 			return Ok(playlists.Select(p => p.ToIndexVM()));
@@ -53,30 +50,33 @@ namespace api.iSMusic.Controllers
 
 		[HttpGet]
 		[Route("{memberId}/Queue")]
-		public ActionResult<QueueIndexVM> GetMemberQueue([FromRoute] int memberId)
+		public async Task<IActionResult> GetMemberQueue([FromRoute] int memberId)
 		{
-			var member = _db.Members.SingleOrDefault(m => m.Id == memberId);
-
-			if (member == null)
+			try
 			{
-				return NotFound(new { message = "Member not found" });
+				var member = await _memberRepository.GetMemberAsync(memberId);
+				if (member == null)
+				{
+					return NotFound(new { message = "Member not found" });
+				}
+
+				var queue = await _queueRepository.GetQueueByMemberIdAsync(memberId);
+				if (queue == null)
+				{
+					return NotFound(new { message = "Queue not found for the given member" });
+				}
+
+				return Ok(queue.ToIndexVM());
 			}
-
-			var queue = _db.Queues.Include(q => q.CurrentSong)
-								.Include(q => q.QueueSongs)
-								.SingleOrDefault(q => q.MemberId == memberId);
-
-			if (queue == null)
+			catch (Exception ex)
 			{
-				return NotFound(new { message = "Queue not found for the given member" });
+				return BadRequest(new { message = ex.Message });
 			}
-
-			return Ok(queue.ToIndexVM());
 		}
 
 		[HttpPost]
 		[Route("{memberId}/Playlist")]
-		public async Task<IActionResult> CreatePlaylist([FromRoute]int memberId)
+		public async Task<IActionResult> CreatePlaylist([FromRoute] int memberId)
 		{
 			//Check if the provided memberAccount is valid
 			if (memberId <= 0)
@@ -84,25 +84,12 @@ namespace api.iSMusic.Controllers
 				return BadRequest("Invalid member account");
 			}
 
-			// Find the number of playlists created by the member
-			var numOfPlaylists = await _db.Playlists.CountAsync(p => p.MemberId == memberId);
-			numOfPlaylists += 1;
+			var _playlistService = new PlaylistService(_playlistRepository, _songRepository);
 
-			//Create a new playlist
-			var newPlaylist = new PlaylistCreateVM
-			{
-				MemberId = memberId,
-				ListName = "MyPlaylist" + numOfPlaylists
-			};
-
-			//Add the new playlist to the database
-			_db.Playlists.Add(newPlaylist.ToEntity());
-			await _db.SaveChangesAsync();
-
-			var playlistId = _db.Playlists.Where(p => p.MemberId == memberId).OrderByDescending(p => p.Id).First().Id;
+			var playlistId = await _playlistService.CreatePlaylistAsync(memberId);
 
 			//Return a 201 Created status code along with the newly created playlist's information
-			return CreatedAtAction("GetPlaylistDetail", "Playlists", new { playlistId }, newPlaylist);
+			return Ok(playlistId);
 		}
 	}
 }

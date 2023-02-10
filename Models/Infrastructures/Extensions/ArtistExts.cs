@@ -1,6 +1,8 @@
 ﻿using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.ArtistVMs;
 
+namespace api.iSMusic.Models.Infrastructures.Extensions;
+
 public static class ArtistExts
 {
 	public static ArtistInfoVM ToInfoVM(this Artist source)

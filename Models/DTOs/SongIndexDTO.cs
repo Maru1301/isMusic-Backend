@@ -1,11 +1,9 @@
-﻿using api.iSMusic.Models.EFModels;
-using api.iSMusic.Models.ViewModels.ArtistVMs;
+﻿using api.iSMusic.Models.ViewModels.ArtistVMs;
 using api.iSMusic.Models.ViewModels.CreatorVMs;
-using api.iSMusic.Models.ViewModels.SongVMs;
 
-namespace api.iSMusic.Models.ViewModels.SongVMs
+namespace api.iSMusic.Models.DTOs
 {
-	public class SongIndexVM
+	public class SongIndexDTO
 	{
 		public int Id { get; set; }
 
@@ -26,6 +24,5 @@ namespace api.iSMusic.Models.ViewModels.SongVMs
 		public IEnumerable<ArtistInfoVM> Artistlist { get; set; } = new List<ArtistInfoVM>();
 
 		public IEnumerable<CreatorInfoVM> Creatorlist { get; set; } = new List<CreatorInfoVM>();
-
 	}
 }
