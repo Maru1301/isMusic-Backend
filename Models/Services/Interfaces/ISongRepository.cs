@@ -1,19 +1,25 @@
-﻿using api.iSMusic.Models.DTOs;
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.SongVMs;
 
 namespace api.iSMusic.Models.Services.Interfaces
 {
-	public interface ISongRepository
+    public interface ISongRepository
 	{
-		IEnumerable<SongIndexDTO> GetPopularSongs();
+		IEnumerable<SongIndexDTO> GetPopularSongs(int artistId = 0);
 
-		List<int> GetLikedSongIdsByMemberId(int memberId);
+		IEnumerable<int> GetLikedSongIdsByMemberId(int memberId);
 
-		List<SongInfoDTO> GetSongsByPlaylistId(int playlistId);
+		IEnumerable<SongIndexDTO> GetRecentlyPlayed(int memberId);
+
+		IEnumerable<SongInfoDTO> GetSongsByAlbumId(int albumId);
+
+		IEnumerable<SongInfoDTO> GetSongsByPlaylistId(int playlistId);
 
 		IEnumerable<SongGenreInfo> GetSongGenres();
 
-		IEnumerable<SongIndexDTO> SearchBySongName(string songName);
+		SongIndexDTO? GetSongById(int id);
+
+		IEnumerable<SongIndexDTO> GetSongsByName(string name, int skipRows, int takeRows);
 	}
 }

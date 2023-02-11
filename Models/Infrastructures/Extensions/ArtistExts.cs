@@ -1,4 +1,5 @@
-﻿using api.iSMusic.Models.EFModels;
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.ArtistVMs;
 
 namespace api.iSMusic.Models.Infrastructures.Extensions;
@@ -12,7 +13,7 @@ public static class ArtistExts
 			ArtistName = source.ArtistName
 		};
 
-	public static ArtistIndexVM ToIndexVM(this Artist source)
+	public static ArtistIndexVM ToIndexVM(this ArtistIndexDTO source)
 		=> new ArtistIndexVM
 		{
 			Id = source.Id,

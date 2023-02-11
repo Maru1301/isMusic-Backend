@@ -1,4 +1,4 @@
-﻿using api.iSMusic.Models.DTOs;
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
@@ -6,7 +6,7 @@ using api.iSMusic.Models.ViewModels.PlaylistVMs;
 
 namespace api.iSMusic.Models.Services
 {
-	public class PlaylistService
+    public class PlaylistService
 	{
 		private readonly IPlaylistRepository _repository;
 
@@ -64,6 +64,19 @@ namespace api.iSMusic.Models.Services
 				metadata.Song = song;
 			}
 			return (true, string.Empty, playlistDetailVM);
+		}
+
+		public IEnumerable<PlaylistIndexDTO> GetPlaylistsByName(string name, int rowNumber)
+		{
+			int skip = (rowNumber - 1) * 5;
+			int take = 5;
+			if(rowNumber == 2)
+			{
+				skip = 0;
+				take = 10;
+			}
+
+			return _repository.GetPlaylistsByName(name, skip, take);
 		}
 	}
 }

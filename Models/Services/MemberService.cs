@@ -1,11 +1,11 @@
-﻿using api.iSMusic.Models.DTOs;
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
 
 namespace api.iSMusic.Models.Services
 {
-	public class MemberService
+    public class MemberService
 	{
 		private readonly IMemberRepository _memberRepository;
 

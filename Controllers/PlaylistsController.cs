@@ -56,28 +56,20 @@ namespace api.iSMusic.Controllers
 			return result.playlist;
 		}
 
-		//[HttpGet]
-		//[Route("Search")]
-		//public ActionResult<IEnumerable<PlaylistIndexVM>> Search([FromQuery] SearchQuery query)
-		//{
-		//	var data = _db.Playlists.Where(playlist => playlist.ListName.Contains(query.Input) || playlist.MemberId == query.MemberId);
+		/// <summary>
+		/// Use input name to search the playlists
+		/// </summary>
+		/// <param name="playlistName">input name</param>
+		/// <param name="rowNumber">the default number is 1</param>
+		/// <returns>a list of playlists</returns>
+		[HttpGet]
+		[Route("{playlistName}/{rowNumber}")]
+		public ActionResult<IEnumerable<PlaylistIndexVM>> GetPlaylistsByName([FromRoute] string playlistName, [FromRoute]int rowNumber = 1)
+		{
+			var data = _service.GetPlaylistsByName(playlistName, rowNumber);
 
-		//	if (query.ShowAll == false)
-		//	{
-		//		data = data.Where(playlist => playlist.ListName.Contains(query.Input));
-		//	}
-
-		//	return Ok(data.Select(p => p.ToIndexVM()));
-		//}
-
-		//public class SearchQuery
-		//{
-		//	public string Input { get; set; } = null!;
-
-		//	public bool ShowAll { get; set; }
-
-		//	public int MemberId { get; set; }
-		//}
+			return Ok(data.Select(p => p.ToIndexVM()));
+		}
 
 		//[HttpPut]
 		//[Route("{playlistId}")]

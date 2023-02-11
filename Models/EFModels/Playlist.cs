@@ -41,5 +41,5 @@ public partial class Playlist
     public virtual ICollection<PlaylistSongMetadatum> PlaylistSongMetadata { get; } = new List<PlaylistSongMetadatum>();
 
     [InverseProperty("Playlist")]
-    public virtual ICollection<QueueSong> QueueSongs { get; } = new List<QueueSong>();
+    public virtual ICollection<Queue> Queues { get; } = new List<Queue>();
 }

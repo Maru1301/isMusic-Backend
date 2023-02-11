@@ -1,4 +1,5 @@
-﻿using api.iSMusic.Models.DTOs;
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.iSMusic.Models.Infrastructures.Repositories
 {
-	public class PlaylistRepository: IRepository, IPlaylistRepository
+    public class PlaylistRepository: IRepository, IPlaylistRepository
 	{
 		private readonly AppDbContext _db;
 
@@ -71,6 +72,24 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					PlayListSongMetadata = playlist.PlaylistSongMetadata.Select(m => m.ToVM()).ToList()
 				})
 				.Single(p => p.Id == playlistId);
+		}
+
+		public IEnumerable<PlaylistIndexDTO> GetPlaylistsByName(string name, int skipRows, int takeRows)
+		{
+			return _db.Playlists
+				.Where(playlist => playlist.ListName.Contains(name) && playlist.IsPublic)
+				.Select(playlist => new PlaylistIndexDTO 
+				{ 
+					Id = playlist.Id,
+					ListName= playlist.ListName,
+					PlaylistCoverPath= playlist.PlaylistCoverPath,
+					MemberId= playlist.MemberId,
+					TotalLikes = playlist.LikedPlaylists.Count,
+				})
+				.OrderBy(dto => dto.TotalLikes)
+				.Skip(skipRows)
+				.Take(takeRows)
+				.ToList();
 		}
 
 		public async Task<int> GetPlaylistIdByMemberIdAsync(int memberId)

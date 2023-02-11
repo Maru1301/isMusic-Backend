@@ -1,4 +1,5 @@
-﻿using api.iSMusic.Models.EFModels;
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.QueueVMs;
 
 namespace api.iSMusic.Models.ViewModels.QueueVMs
@@ -17,23 +18,12 @@ namespace api.iSMusic.Models.ViewModels.QueueVMs
 
 		public bool? IsRepeat { get; set; }
 
-		public virtual Song? CurrentSong { get; set; }
+		public int? AlbumId { get; set; }
 
-		public IEnumerable<int> SongIds { get; set; } = null!;
+		public int? ArtistId { get; set; }
+
+		public int? PlaylistId { get; set; }
+
+		public IEnumerable<SongInfoDTO> SongInfos { get; set; } = null!;
 	}
-}
-
-public static class QueueExts
-{
-	public static QueueIndexVM ToIndexVM(this Queue source)
-		=> new QueueIndexVM
-		{
-			Id= source.Id,
-			MemberId= source.MemberId,
-			CurrentSongId= source.CurrentSongId,
-			CurrentSongTime= source.CurrentSongTime,
-			IsShuffle= source.IsShuffle,
-			IsRepeat= source.IsRepeat,
-			SongIds = source.QueueSongs.OrderBy(qs => qs.DisplayOrder).Select(qs => qs.Id),
-		};
 }

@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using api.iSMusic.Models.EFModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace api.iSMusic.Models;
+namespace api.iSMusic.Models.EFModels;
 
 public partial class AppDbContext : DbContext
 {
-    public AppDbContext()
-    {
-    }
-
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
@@ -340,27 +335,35 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Queue>(entity =>
         {
+            entity.HasOne(d => d.Album).WithMany(p => p.Queues)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Queues_Albums");
+
             entity.HasOne(d => d.CurrentSong).WithMany(p => p.Queues).HasConstraintName("FK_Queues_Songs");
 
             entity.HasOne(d => d.Member).WithMany(p => p.Queues)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Queues_Members");
-        });
+
+            entity.HasOne(d => d.Playlist).WithMany(p => p.Queues)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Queues_Playlists");
+
+			entity.HasOne(d => d.Artist).WithMany(p => p.Queues)
+				.OnDelete(DeleteBehavior.SetNull)
+				.HasConstraintName("FK_Queues_Artists");
+		});
 
         modelBuilder.Entity<QueueSong>(entity =>
         {
-            entity.HasOne(d => d.Album).WithMany(p => p.QueueSongs)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_QueueSongs_Albums");
-
-            entity.HasOne(d => d.Playlist).WithMany(p => p.QueueSongs)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_QueueSongs_Playlists");
-
             entity.HasOne(d => d.Queue).WithMany(p => p.QueueSongs)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_QueueSongs_Queues");
-        });
+
+			entity.HasOne(d => d.Song).WithMany(p => p.QueueSongs)
+				.OnDelete(DeleteBehavior.ClientSetNull)
+				.HasConstraintName("FK_QueueSongs_Songs");
+		});
 
         modelBuilder.Entity<Role>(entity =>
         {

@@ -74,6 +74,28 @@ namespace api.iSMusic.Controllers
 			}
 		}
 
+		[HttpGet]
+		[Route("{memberId}/RecentlyPlayed")]
+		public IActionResult GetRecentlyPlayed(int memberId)
+		{
+			//Check if the provided memberAccount is valid
+			if (memberId <= 0)
+			{
+				return BadRequest("Invalid member account");
+			}
+
+			var _songService = new SongService(_songRepository, _memberRepository);
+
+			var result = _songService.GetRecentlyPlayed(memberId);
+
+			if (!result.Success)
+			{
+				return NotFound(result.ErrorMessage);
+			}
+
+			return Ok(result.RecentlyPlayedSongs.Select(dto => dto.ToIndexVM()));
+		}
+
 		[HttpPost]
 		[Route("{memberId}/Playlist")]
 		public async Task<IActionResult> CreatePlaylist([FromRoute] int memberId)

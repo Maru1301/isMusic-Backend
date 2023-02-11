@@ -1,4 +1,4 @@
-﻿using api.iSMusic.Models.DTOs;
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.SongVMs;
 
@@ -21,7 +21,22 @@ public static class SongExts
             AlbumName = source.AlbumName,
         };
 
-    public static SongIndexVM ToIndexVM(this SongIndexDTO source)
+	public static SongInfoDTO ToInfoDTO(this Song source)
+		=> new SongInfoDTO
+		{
+			Id = source.Id,
+			SongName = source.SongName,
+			Duration = source.Duration,
+			IsExplicit = source.IsExplicit,
+			Released = source.Released,
+			SongCoverPath = source.SongCoverPath,
+			SongPath = source.SongPath,
+			Status = source.Status,
+			AlbumId = source.AlbumId,
+            AlbumName = source.Album != null ? source.Album.AlbumName: string.Empty,
+		};
+
+	public static SongIndexVM ToIndexVM(this SongIndexDTO source)
         => new()
 		{
             Id = source.Id,

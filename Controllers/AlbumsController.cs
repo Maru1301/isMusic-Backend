@@ -39,12 +39,21 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("SongGenres/{genreId}")]
-		public IActionResult GetAlbumsByGenreId(int genreId)
+		[Route("SongGenres/{genreId}/{rowNumber}")]
+		public IActionResult GetAlbumsByGenreId(int genreId, int rowNumber)
 		{
-			var dtos = _service.GetAlbumsByGenreId(genreId);
+			var dtos = _service.GetAlbumsByGenreId(genreId, rowNumber);
 
 			return Ok(dtos.Select(dtos => dtos.ToIndexVM()));
+		}
+
+		[HttpGet]
+		[Route("{albumName}/{rowNumber}")]
+		public IActionResult GetAlbumByName(string albumName, int rowNumber)
+		{
+			var dtos = _service.GetAlbumsByName(albumName, rowNumber);
+
+			return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
 	}
 }

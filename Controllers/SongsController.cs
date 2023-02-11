@@ -20,10 +20,10 @@ namespace api.iSMusic.Controllers
 
 		private readonly SongService _service;
 
-		public SongsController(ISongRepository repository)
+		public SongsController(ISongRepository repository, IMemberRepository memberRepository)
 		{
 			_repository = repository;
-			_service = new(_repository);
+			_service = new(_repository, memberRepository);
 		}
 
 		[HttpGet]
@@ -36,10 +36,10 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{songName}")]
-		public ActionResult<IEnumerable<SongIndexVM>> Search([FromRoute]string songName)
+		[Route("{songName}/{rowNumber}")]
+		public ActionResult<IEnumerable<SongIndexVM>> GetSongsByName(string songName, int rowNumber)
 		{
-			var dtos = _repository.SearchBySongName(songName);
+			var dtos = _service.GetSongsByName(songName, rowNumber);
 
 			return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}

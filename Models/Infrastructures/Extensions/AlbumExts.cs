@@ -1,4 +1,4 @@
-﻿using api.iSMusic.Models.DTOs;
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.ViewModels.AlbumVMs;
 
 namespace api.iSMusic.Models.Infrastructures.Extensions;

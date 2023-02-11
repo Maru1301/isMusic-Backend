@@ -1,10 +1,10 @@
-﻿using api.iSMusic.Models.DTOs;
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
 
 namespace api.iSMusic.Models.Services.Interfaces
 {
-	public interface IPlaylistRepository
+    public interface IPlaylistRepository
 	{
 		IEnumerable<PlaylistIndexDTO> GetRecommended();
 
@@ -16,8 +16,11 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		Task CreatePlaylistAsync(PlaylistCreateVM newPlaylist);
 
+		//check
 		Task<int> GetPlaylistIdByMemberIdAsync(int memberId);
 
 		PlaylistDetailDTO GetPlaylistById(int playlistId);
+
+		IEnumerable<PlaylistIndexDTO> GetPlaylistsByName(string name, int skipRows, int takeRows);
 	}
 }

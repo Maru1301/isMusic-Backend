@@ -1,4 +1,5 @@
 using api.iSMusic.Models;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;

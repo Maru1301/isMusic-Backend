@@ -1,5 +1,8 @@
 ﻿using api.iSMusic.Models;
 using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
+using api.iSMusic.Models.Services;
+using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.QueueVMs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,147 +13,107 @@ namespace api.iSMusic.Controllers
 	[Route("[controller]")]
 	public class QueuesController : ControllerBase
 	{
-		private readonly AppDbContext _db;
-		public QueuesController(AppDbContext db)
+		private readonly IQueueRepository _repository;
+
+		private readonly QueueService _service;
+
+		public QueuesController(IQueueRepository repository, ISongRepository songRepository, IArtistRepository artistRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
-			_db = db;
+			_repository = repository;
+			_service = new(_repository, songRepository, artistRepository, albumRepository, playlistRepository);
 		}
 
-		[HttpGet(Name = "GetAll")]
-		public ActionResult<IEnumerable<Queue>> GetAll()
-		{
-			var data = _db.Queues.ToList();
+		//[HttpPost]
+		//[Route("{memberId}")]
+		////todo edit the method
+		//public void CreateQueue(int memberId)
+		//{
+		//	var queue = new Queue()
+		//	{
+		//		MemberId = memberId,
+		//		CurrentSongId = null,
+		//		CurrentSongTime = null,
+		//		IsShuffle = false,
+		//		IsRepeat = null,
+		//	};
+		//	_db.Queues.Add(queue);
+		//	_db.SaveChanges();
+		//}
 
-			return Ok(data);
-		}
-
-		[HttpPost]
-		[Route("{memberId}")]
-		//todo edit the method
-		public void CreateQueue(int memberId)
+		[HttpPut]
+		[Route("{queueId}/{contentId}")]
+		public IActionResult ChangeQueueContent(int queueId, int contentId, [FromBody] Condition condition)
 		{
-			var queue = new Queue()
+			var result = _service.ChangeQueueContent(queueId, contentId, condition);
+
+			if (!result.Success)
 			{
-				MemberId = memberId,
-				CurrentSongId = null,
-				CurrentSongTime = null,
-				IsShuffle = false,
-				IsRepeat = null,
-			};
-			_db.Queues.Add(queue);
-			_db.SaveChanges();
-		}
-
-		[HttpPost]
-		[Route("Song")]
-		public ActionResult AddSongIntoQueue([FromBody] SongQueueInput input)
-		{
-			var queue = _db.Queues.SingleOrDefault(q => q.Id == input.QueueId);
-
-			if (queue == null)
-			{
-				return NotFound(new { message = "Queue not found" });
+				return NotFound(new { message = result.Message });
 			}
 
-			var song = _db.Songs.SingleOrDefault(s => s.Id == input.SongId);
+			var updatedQueue = _repository.GetQueueById(queueId);
 
-			if (song == null)
+			if (updatedQueue == null)
 			{
-				return NotFound(new { message = "Song not found" });
+				return NoContent();
 			}
 
-			var album = _db.Albums.SingleOrDefault(a => a.Id == input.AlbumId);
-
-			if (album == null)
-			{
-				return NotFound(new { message = "Album not found" });
-			}
-
-			var playlist = _db.Playlists.SingleOrDefault(p => p.Id == input.PlaylistId);
-
-			if (playlist == null)
-			{
-				return NotFound(new { message = "Playlist not found" });
-			}
-
-			QueueSong metadata = new QueueSong
-			{
-				SongId = input.SongId,
-				QueueId = input.QueueId
-			};
-
-			var lastSong = _db.QueueSongs.Where(qs => qs.QueueId == input.QueueId)
-										  .OrderByDescending(qs => qs.DisplayOrder)
-										  .FirstOrDefault();
-
-			if (lastSong == null)
-			{
-				metadata.DisplayOrder = 1;
-			}
-			else
-			{
-				metadata.DisplayOrder = lastSong.DisplayOrder + 1;
-			}
-
-			_db.QueueSongs.Add(metadata);
-			_db.SaveChanges();
-
-			return Ok(new { message = "Song added to the queue successfully" });
+			return Ok(updatedQueue.ToIndexVM());
 		}
 
-		public class SongQueueInput
+		public class Condition
 		{
-			public int SongId { get; set; }
+			public bool SingleSong { get; set; }
 
-			public int QueueId { get; set; }
+			public bool Artist { get; set; }
 
-			public int? AlbumId { get; set; }
+			public bool Album { get; set; }
 
-			public int? PlaylistId { get; set; }
+			public bool Playlist { get; set; }
 		}
 
-		[HttpDelete]
-		[Route("Song")]
-		public ActionResult<Song> DeleteSongFromQueue(int queueId)
-		{
-			var queue = _db.Queues.SingleOrDefault(q => q.Id == queueId);
+		//[HttpDelete]
+		//[Route("Song")]
+		//public ActionResult<Song> DeleteSongFromQueue(int queueId)
+		//{
+		//	var queue = _db.Queues.SingleOrDefault(q => q.Id == queueId);
 
-			if (queue == null)
-			{
-				return NotFound();
-			}
+		//	if (queue == null)
+		//	{
+		//		return NotFound();
+		//	}
 
-			var song = _db.Songs.Where(song => song.Id == queue.CurrentSongId).Single();
+		//	var song = _db.Songs.Where(song => song.Id == queue.CurrentSongId).Single();
 
-			var metadata = _db.QueueSongs.Where(q => q.SongId == queue.CurrentSongId && q.QueueId == queue.Id).Single();
-			_db.Entry(metadata).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
-			_db.SaveChanges();
+		//	var metadata = _db.QueueSongs.Where(q => q.SongId == queue.CurrentSongId && q.QueueId == queue.Id).Single();
+		//	_db.Entry(metadata).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
+		//	_db.SaveChanges();
 
-			return song;
-		}
+		//	return song;
+		//}
 
-		[HttpPatch]
-		[Route("Member/{memberId}/shuffle")]
-		public void ChangeShuffle(int memberId, [FromBody] bool isShuffle)
-		{
-			Queue queue = _db.Queues.Where(queue => queue.MemberId == memberId).Single();
+		//[HttpPatch]
+		//[Route("Member/{memberId}/shuffle")]
+		//public void ChangeShuffle(int memberId, [FromBody] bool isShuffle)
+		//{
+		//	Queue queue = _db.Queues.Where(queue => queue.MemberId == memberId).Single();
 
-			queue.IsShuffle = isShuffle;
+		//	queue.IsShuffle = isShuffle;
 
-			_db.Entry(queue).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-			_db.SaveChanges();
-		}
+		//	_db.Entry(queue).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+		//	_db.SaveChanges();
+		//}
 
-		[HttpPatch]
-		[Route("Member/{memberId}/repeat")]
-		public void ChangeRepeat(int memberId, [FromBody] bool? isRepeat)
-		{
-			Queue queue = _db.Queues.Where(queue => queue.MemberId == memberId).Single();
+		//[HttpPatch]
+		//[Route("Member/{memberId}/repeat")]
+		//public void ChangeRepeat(int memberId, [FromBody] bool? isRepeat)
+		//{
+		//	Queue queue = _db.Queues.Where(queue => queue.MemberId == memberId).Single();
 
-			queue.IsRepeat = isRepeat;
+		//	queue.IsRepeat = isRepeat;
 
-			_db.Entry(queue).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-			_db.SaveChanges();
-		}
+		//	_db.Entry(queue).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+		//	_db.SaveChanges();
+		//}
 	}
 }

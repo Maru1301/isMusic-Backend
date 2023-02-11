@@ -66,7 +66,7 @@ public partial class Album
     public virtual ICollection<Product> Products { get; } = new List<Product>();
 
     [InverseProperty("Album")]
-    public virtual ICollection<QueueSong> QueueSongs { get; } = new List<QueueSong>();
+    public virtual ICollection<Queue> Queues { get; } = new List<Queue>();
 
     [InverseProperty("Album")]
     public virtual ICollection<Song> Songs { get; } = new List<Song>();
