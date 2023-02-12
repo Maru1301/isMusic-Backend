@@ -72,6 +72,27 @@ namespace api.iSMusic.Controllers
 			public bool Playlist { get; set; }
 		}
 
+		[HttpPut]
+		[Route("{queueId}/Songs/{songId}")]
+		public IActionResult UpdateByQueueSong(int queueId, int songId)
+		{
+			var result = _service.UpdateByQueueSong(queueId, songId);
+
+			if(!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			var updatedQueue = _repository.GetQueueById(queueId);
+
+			if (updatedQueue == null)
+			{
+				return NoContent();
+			}
+
+			return Ok(updatedQueue.ToIndexVM());
+		}
+
 		//[HttpDelete]
 		//[Route("Song")]
 		//public ActionResult<Song> DeleteSongFromQueue(int queueId)

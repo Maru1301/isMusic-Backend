@@ -1,4 +1,5 @@
-﻿using api.iSMusic.Models.Infrastructures.Repositories;
+﻿using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
 using static api.iSMusic.Controllers.QueuesController;
 
@@ -91,6 +92,34 @@ namespace api.iSMusic.Models.Services
 			{
 				return (false, ex.Message);
 			}
+
+			return (true, string.Empty);
+		}
+
+		public (bool Success, string Message) UpdateByQueueSong(int queueId, int songId)
+		{
+			try
+			{
+				//check the existance of queue
+				var queue = _queuerepository.GetQueueById(queueId);
+
+				if (queue == null) throw new Exception("佇列不存在");
+
+				//check the existance of song 
+				var song = _songRepository.GetSongById(songId);
+
+				if (song == null) throw new Exception("歌曲不存在");
+
+				//check if the song is in the queue
+				if (queue.SongInfos.Select(song => song.Id).Contains(songId) == false) throw new Exception("歌曲不存在佇列中");
+
+				_queuerepository.UpdateByQueueSong(queueId, songId);
+			}
+			catch(Exception ex)
+			{
+				return (false, ex.Message);
+			}
+			
 
 			return (true, string.Empty);
 		}

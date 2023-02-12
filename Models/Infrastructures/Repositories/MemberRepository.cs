@@ -14,7 +14,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db = db;
 		}
 
-		public Member? GetMember(int memberId)
+		public Member? GetMemberById(int memberId)
 		{
 			return _db.Members.SingleOrDefault(m => m.Id == memberId);
 		}
@@ -22,6 +22,18 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		public async Task<Member?> GetMemberAsync(int memberId)
 		{
 			return await _db.Members.SingleOrDefaultAsync(m => m.Id == memberId);
+		}
+
+		public void AddLikedSong(int memberId, int songId)
+		{
+			var data = new LikedSong
+			{
+				MemberId = memberId,
+				SongId= songId
+			};
+
+			_db.LikedSongs.Add(data);
+			_db.SaveChanges();
 		}
 	}
 }

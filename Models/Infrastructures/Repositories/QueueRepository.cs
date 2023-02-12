@@ -146,5 +146,28 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		{
 			_db.QueueSongs.RemoveRange(_db.QueueSongs.Where(metadata => metadata.QueueId == queueId));
 		}
+
+		public void UpdateByQueueSong(int queueId, int songId)
+		{
+			var queueSongs = _db.QueueSongs
+				.Where(qs => qs.QueueId== queueId)
+				.OrderBy(qs => qs.DisplayOrder)
+				.ToList();
+
+			int newDisplayOrder = 1;
+			int currentSongIndex = queueSongs.FindIndex(qs => qs.SongId == songId);
+
+			for (int i = currentSongIndex - 1; i < queueSongs.Count; ++i)
+			{
+				queueSongs[i].DisplayOrder = newDisplayOrder++;
+			}
+
+			for(int i = 0; i < currentSongIndex; ++i)
+			{
+				queueSongs[i].DisplayOrder = newDisplayOrder++;
+			}
+
+			_db.SaveChanges();
+		}
 	}
 }

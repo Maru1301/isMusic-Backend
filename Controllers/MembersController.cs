@@ -31,7 +31,7 @@ namespace api.iSMusic.Controllers
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_memberService = new (_memberRepository, _playlistRepository);
+			_memberService = new (_memberRepository, _playlistRepository, _songRepository);
 		}
 
 		[HttpGet]
@@ -112,6 +112,20 @@ namespace api.iSMusic.Controllers
 
 			//Return a 201 Created status code along with the newly created playlist's information
 			return Ok(playlistId);
+		}
+
+		[HttpPost]
+		[Route("{memberId}/LikedSongs/{songId}")]
+		public IActionResult AddLikedSong(int memberId, int songId)
+		{
+			var result = _memberService.AddLikedSong(memberId, songId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
 		}
 	}
 }

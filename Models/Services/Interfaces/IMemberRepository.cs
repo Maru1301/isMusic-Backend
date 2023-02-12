@@ -5,8 +5,10 @@ namespace api.iSMusic.Models.Services.Interfaces
 {
 	public interface IMemberRepository
 	{
-		Member? GetMember(int memberId);
+		Member? GetMemberById(int memberId);
 
 		Task<Member?> GetMemberAsync(int memberId);
+
+		void AddLikedSong(int memberId, int songId);
 	}
 }

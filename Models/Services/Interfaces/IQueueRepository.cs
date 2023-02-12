@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 
 namespace api.iSMusic.Models.Services.Interfaces
 {
@@ -11,5 +12,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 		void UpdateQueueBySong(int queueId, int Id);
 
 		void UpdateQueueBySongs(int queueId, List<int> SongIds, string fromWhere, int contentId);
+
+		void UpdateByQueueSong(int queueId, int songId);
 	}
 }
