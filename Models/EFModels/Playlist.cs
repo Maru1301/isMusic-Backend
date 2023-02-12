@@ -30,6 +30,9 @@ public partial class Playlist
     [Column("isPublic")]
     public bool IsPublic { get; set; }
 
+    [Column("created", TypeName = "datetime")]
+    public DateTime Created { get; set; }
+
     [InverseProperty("Playlist")]
     public virtual ICollection<LikedPlaylist> LikedPlaylists { get; } = new List<LikedPlaylist>();
 

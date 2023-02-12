@@ -53,25 +53,22 @@ namespace api.iSMusic.Controllers
 			return Ok(songGenres);
 		}
 
-		//[HttpGet]
-		//[Route("RecentlyPlayed")]
-		//public ActionResult<IEnumerable<SongIndexVM>> GetRecentlyPlayedSongs([FromQuery] string memberAccount)
-		//{
-		//	var member = _db.Members.SingleOrDefault(member => member.MemberAccount == memberAccount);
+		[HttpGet]
+		[Route("{songId}/Credits")]
+		public IActionResult GetSongCredits(int songId)
+		{
+			var dto = _repository.GetSongById(songId);
 
-		//	if (member == null)
-		//	{
-		//		return NotFound("Member does not existed");
-		//	}
+			if (dto == null) return NotFound("歌曲不存在");
 
-		//	var data = _db.SongPlayedRecords.Where(record => record.MemberId == member.Id).Include(record => record.Song).Select(record => record.Song);
+			var Credits = new SongCreditsVM
+			{
+				SongName = dto.SongName,
+				Artists = dto.Artistlist.Select(list => list.ArtistName).ToList(),
+				SongWriter = dto.SongWriter,
+			};
 
-		//	if (data == null)
-		//	{
-		//		return NoContent();
-		//	}
-
-		//	return Ok(data);
-		//}
+			return Ok(Credits);
+		}
 	}
 }

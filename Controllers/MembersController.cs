@@ -36,16 +36,25 @@ namespace api.iSMusic.Controllers
 
 		[HttpGet]
 		[Route("{memberId}/Playlists")]
-		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylist([FromRoute] int memberId, [FromQuery] bool myOwn)
+		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromQuery] bool includedLiked, int rowNumber)
 		{
-			var playlists = _memberService.GetMemberPlaylist(memberId, myOwn);
+			var dtos = _memberService.GetMemberPlaylists(memberId, includedLiked, rowNumber);
 
-			if (playlists == null)
+			if (dtos == null)
 			{
 				return NotFound("Member not found");
 			}
 
-			return Ok(playlists.Select(p => p.ToIndexVM()));
+			return Ok(dtos.Select(dto => dto.ToIndexVM()));
+		}
+
+		[HttpGet]
+		[Route("{memberId}/Playlists/{playlistName}")]
+		public IActionResult GetMemberPlaylistsByName(int memberId, string name, [FromBody]int rowNumber)
+		{
+			var dto = _memberService.GetMemberPlaylistsByName(memberId, name, rowNumber);
+
+			return Ok(dto);
 		}
 
 		[HttpGet]
@@ -64,6 +73,17 @@ namespace api.iSMusic.Controllers
 				if (queue == null)
 				{
 					return NotFound(new { message = "Queue not found for the given member" });
+				}
+
+				var queueSongIds = queue.SongInfos.Select(info => info.Id);
+
+				var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
+
+				foreach(int songId in queueSongIds)
+				{
+					if (likedSongIds.Contains(songId)){
+						queue.SongInfos.Single(info => info.Id == songId).IsLiked = true;
+					}
 				}
 
 				return Ok(queue.ToIndexVM());
@@ -119,6 +139,20 @@ namespace api.iSMusic.Controllers
 		public IActionResult AddLikedSong(int memberId, int songId)
 		{
 			var result = _memberService.AddLikedSong(memberId, songId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+		[HttpDelete]
+		[Route("{memberId}/LikedSongs/{songId}")]
+		public IActionResult DeleteLikedSong(int memberId, int songId)
+		{
+			var result = _memberService.DeleteLikedSong(memberId, songId);
 
 			if (!result.Success)
 			{

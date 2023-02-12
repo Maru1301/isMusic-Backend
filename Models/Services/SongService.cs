@@ -32,7 +32,7 @@ namespace api.iSMusic.Models.Services
 
 		public (bool Success, string ErrorMessage, IEnumerable<SongIndexDTO> RecentlyPlayedSongs) GetRecentlyPlayed(int memberId)
 		{
-			var member = _memberRepository.GetMember(memberId);
+			var member = _memberRepository.GetMemberById(memberId);
 			if (member == null)
 			{
 				return (false, "會員不存在", Enumerable.Empty<SongIndexDTO>());

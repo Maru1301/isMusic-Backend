@@ -26,27 +26,31 @@ namespace api.iSMusic.Models.Services
 			_playlistRepository = playlistRepository;
 		}
 
+		public (bool Success, string Message) AddSongIntoQueue(int queueId, int songId)
+		{
+			if (!CheckQueueExistence(queueId)) return (false, "佇列不存在");
+
+			if (!CheckSongExistence(songId)) return (false, "歌曲不存在");
+
+			_queuerepository.AddSongIntoQueue(queueId, songId);
+			return (true, "新增成功");
+		}
+
 		public (bool Success, string Message) ChangeQueueContent(int queueId, int contentId, Condition condition)
 		{
 			try
 			{
-				var queue = _queuerepository.GetQueueById(queueId);
-
-				if (queue == null) throw new Exception("佇列不存在");
+				if (CheckQueueExistence(queueId) == false) throw new Exception("佇列不存在");
 
 				if (condition.SingleSong)
 				{
-					var song = _songRepository.GetSongById(contentId);
-
-					if (song == null) throw new Exception("歌曲不存在");
+					if (CheckSongExistence(contentId) == false) throw new Exception("歌曲不存在");
 
 					_queuerepository.UpdateQueueBySong(queueId, contentId);
 				}
 				else if (condition.Artist)
 				{
-					var artist = _artistRepository.GetArtistById(contentId);
-
-					if (artist == null) throw new Exception("音樂家不存在");
+					if(CheckArtistExistence(contentId) == false) throw new Exception("音樂家不存在");
 
 					var popularSongIds = _songRepository
 						.GetPopularSongs(contentId)
@@ -59,9 +63,7 @@ namespace api.iSMusic.Models.Services
 				}
 				else if (condition.Album)
 				{
-					var album = _albumRepository.GetAlbumById(contentId);
-
-					if (album == null) throw new Exception("專輯不存在");
+					if (CheckAlbumExistence(contentId) == false) throw new Exception("專輯不存在");
 
 					var albumSongIds = _songRepository
 						.GetSongsByAlbumId(contentId)
@@ -74,9 +76,7 @@ namespace api.iSMusic.Models.Services
 				}
 				else
 				{
-					var playlist = _playlistRepository.GetPlaylistById(contentId);
-
-					if (playlist == null) throw new Exception("播放清單不存在");
+					if (CheckPlaylistExistence(contentId) == false) throw new Exception("播放清單不存在");
 
 					var playlistSongIds = _songRepository
 						.GetSongsByPlaylistId(contentId)
@@ -96,32 +96,59 @@ namespace api.iSMusic.Models.Services
 			return (true, string.Empty);
 		}
 
-		public (bool Success, string Message) UpdateByQueueSong(int queueId, int songId)
+		public (bool Success, string Message) UpdateByDisplayOredr(int queueId, int displayOrder)
 		{
-			try
-			{
-				//check the existance of queue
-				var queue = _queuerepository.GetQueueById(queueId);
+			if (CheckQueueExistence(queueId) == false) return (false, "佇列不存在");
 
-				if (queue == null) throw new Exception("佇列不存在");
-
-				//check the existance of song 
-				var song = _songRepository.GetSongById(songId);
-
-				if (song == null) throw new Exception("歌曲不存在");
-
-				//check if the song is in the queue
-				if (queue.SongInfos.Select(song => song.Id).Contains(songId) == false) throw new Exception("歌曲不存在佇列中");
-
-				_queuerepository.UpdateByQueueSong(queueId, songId);
-			}
-			catch(Exception ex)
-			{
-				return (false, ex.Message);
-			}
-			
+			_queuerepository.UpdateByDisplayOredr(queueId, displayOrder);
 
 			return (true, string.Empty);
 		}
+
+		public (bool Success, string Message) ChangeShuffle(int queueId)
+		{
+			if (CheckQueueExistence(queueId) == false) return (false, "佇列不存在");
+
+			_queuerepository.ChangeShuffle(queueId);
+			
+			return (true, "更新成功");
+		}
+
+
+		private bool CheckQueueExistence(int queueId)
+		{
+			var queue = _queuerepository.GetQueueByIdForCheck(queueId);
+
+			return queue != null;
+		}
+
+		private bool CheckSongExistence(int songId)
+		{
+			var song = _songRepository.GetSongByIdForCheck(songId);
+
+			return song != null;
+		}
+
+		private bool CheckArtistExistence(int contentId)
+		{
+			var artist = _artistRepository.GetArtistByIdForCheck(contentId);
+
+			return artist != null;
+		}
+
+		private bool CheckAlbumExistence(int contentId)
+		{
+			var album = _albumRepository.GetAlbumByIdForCheck(contentId);
+
+			return album != null;
+		}
+
+		private bool CheckPlaylistExistence(int contentId)
+		{
+			var playlist = _playlistRepository.GetPlaylistByIdForCheck(contentId);
+
+			return playlist != null;
+		}
+
 	}
 }

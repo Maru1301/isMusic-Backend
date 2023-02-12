@@ -8,7 +8,9 @@ namespace api.iSMusic.Models.Services.Interfaces
 	{
 		IEnumerable<PlaylistIndexDTO> GetRecommended();
 
-		IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId);
+		IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, int rowNumber);
+
+		IEnumerable<PlaylistIndexDTO> GetMemberPlaylistsByName(int memberId, string name, int rowNumber);
 
 		IEnumerable<PlaylistIndexDTO> GetLikedPlaylists(int memberId);
 
@@ -21,6 +23,10 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		PlaylistDetailDTO GetPlaylistById(int playlistId);
 
+		Playlist? GetPlaylistByIdForCheck(int playlistId);
+
 		IEnumerable<PlaylistIndexDTO> GetPlaylistsByName(string name, int skipRows, int takeRows);
+
+		void AddSongToPlaylist(int playlistId, int songId, int lastOrder);
 	}
 }

@@ -13,6 +13,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db = db;
 		}
 
+		public Artist? GetArtistByIdForCheck(int artistId)
+		{
+			return _db.Artists.Find(artistId);
+		}
+
 		public ArtistIndexDTO? GetArtistById(int artistId)
 		{
 			return _db.Artists

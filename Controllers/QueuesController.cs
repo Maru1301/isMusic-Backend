@@ -1,6 +1,8 @@
 ﻿using api.iSMusic.Models;
+using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Extensions;
+using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.QueueVMs;
@@ -15,11 +17,14 @@ namespace api.iSMusic.Controllers
 	{
 		private readonly IQueueRepository _repository;
 
+		private readonly ISongRepository _songRepository;
+
 		private readonly QueueService _service;
 
 		public QueuesController(IQueueRepository repository, ISongRepository songRepository, IArtistRepository artistRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
 			_repository = repository;
+			_songRepository = songRepository;
 			_service = new(_repository, songRepository, artistRepository, albumRepository, playlistRepository);
 		}
 
@@ -40,6 +45,47 @@ namespace api.iSMusic.Controllers
 		//	_db.SaveChanges();
 		//}
 
+		[HttpPost]
+		[Route("{queueId}/Songs/{songId}")]
+		public IActionResult AddSongIntoQueue(int queueId, int songId)
+		{
+			var result = _service.AddSongIntoQueue(queueId, songId);
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			var updatedQueue = _repository.GetQueueById(queueId);
+
+			if (updatedQueue == null)
+			{
+				return NoContent();
+			}
+
+			updatedQueue = ProcessLikedSongs(updatedQueue);
+
+			return Ok(updatedQueue.ToIndexVM());
+		}
+
+		private QueueIndexDTO ProcessLikedSongs(QueueIndexDTO updatedQueue)
+		{
+			var queueSongIds = updatedQueue.SongInfos.Select(info => info.Id);
+
+			var memberId = updatedQueue.MemberId;
+
+			var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
+
+			foreach (int queueSongId in queueSongIds)
+			{
+				if (likedSongIds.Contains(queueSongId))
+				{
+					updatedQueue.SongInfos.Single(info => info.Id == queueSongId).IsLiked = true;
+				}
+			}
+
+			return updatedQueue;
+		}
+
 		[HttpPut]
 		[Route("{queueId}/{contentId}")]
 		public IActionResult ChangeQueueContent(int queueId, int contentId, [FromBody] Condition condition)
@@ -58,6 +104,8 @@ namespace api.iSMusic.Controllers
 				return NoContent();
 			}
 
+			updatedQueue = ProcessLikedSongs(updatedQueue);
+
 			return Ok(updatedQueue.ToIndexVM());
 		}
 
@@ -73,10 +121,10 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPut]
-		[Route("{queueId}/Songs/{songId}")]
-		public IActionResult UpdateByQueueSong(int queueId, int songId)
+		[Route("{queueId}/DisplayOredr/{displayOrder}")]
+		public IActionResult UpdateByDisplayOredr(int queueId, int displayOrder)
 		{
-			var result = _service.UpdateByQueueSong(queueId, songId);
+			var result = _service.UpdateByDisplayOredr(queueId, displayOrder);
 
 			if(!result.Success)
 			{
@@ -89,6 +137,8 @@ namespace api.iSMusic.Controllers
 			{
 				return NoContent();
 			}
+
+			updatedQueue = ProcessLikedSongs(updatedQueue);
 
 			return Ok(updatedQueue.ToIndexVM());
 		}
@@ -113,17 +163,14 @@ namespace api.iSMusic.Controllers
 		//	return song;
 		//}
 
-		//[HttpPatch]
-		//[Route("Member/{memberId}/shuffle")]
-		//public void ChangeShuffle(int memberId, [FromBody] bool isShuffle)
-		//{
-		//	Queue queue = _db.Queues.Where(queue => queue.MemberId == memberId).Single();
+		[HttpPatch]
+		[Route("{queueId}/shuffle")]
+		public IActionResult ChangeShuffle(int queueId)
+		{
+			var result = _service.ChangeShuffle(queueId);
 
-		//	queue.IsShuffle = isShuffle;
-
-		//	_db.Entry(queue).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-		//	_db.SaveChanges();
-		//}
+			return Ok(result.Message);
+		}
 
 		//[HttpPatch]
 		//[Route("Member/{memberId}/repeat")]

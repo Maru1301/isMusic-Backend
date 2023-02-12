@@ -23,5 +23,7 @@
         public string AlbumName { get; set; } = null!;
 
         public bool IsLiked { get; set; }
+
+        public bool FromList { get; set; }
     }
 }

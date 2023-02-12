@@ -10,5 +10,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 		Task<Member?> GetMemberAsync(int memberId);
 
 		void AddLikedSong(int memberId, int songId);
+
+		void DeleteLikedSong(int memberId, int songId);
 	}
 }

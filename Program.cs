@@ -46,8 +46,11 @@ namespace api.isMusic
 
 			app.UseHttpsRedirection();
 
-			app.UseAuthorization();
+			//app.UseCookiePolicy();
+			
+			//app.UseAuthentication();
 
+			app.UseAuthorization();
 
 			app.MapControllers();
 

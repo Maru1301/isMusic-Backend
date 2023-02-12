@@ -24,7 +24,8 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
         
         public int? PlaylistId { get; set; }
 
-        public IEnumerable<SongInfoDTO> SongInfos { get; set; } = null!;
+        public List<SongInfoDTO> SongInfos { get; set; } = null!;
 
+        public List<QueueSong> QueueSongs { get; set; } = null!;
     }
 }

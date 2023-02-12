@@ -79,6 +79,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			return recommendedAlbums;
 		}
 
+		public Album? GetAlbumByIdForCheck(int albumId)
+		{
+			return _db.Albums.Find(albumId);
+		}
+
 		public AlbumIndexDTO? GetAlbumById(int albumId)
 		{
 			return _db.Albums

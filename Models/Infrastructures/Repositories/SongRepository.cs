@@ -108,6 +108,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
+		public Song? GetSongByIdForCheck(int songId)
+		{
+			return _db.Songs.Find(songId);
+		}
+
 		public SongIndexDTO? GetSongById(int id)
 		{
 			return _db.Songs
@@ -122,7 +127,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					AlbumId = song.AlbumId ?? 0,
 					PlayedTimes= song.SongPlayedRecords.Count(),
 					Artistlist = song.SongArtistMetadata.Select(metadata => metadata.Artist).Select(artist => artist.ToInfoVM()),
-					Creatorlist = song.SongCreatorMetadata.Select(metadata => metadata.Creator).Select(creator => creator.ToInfoVM())
+					Creatorlist = song.SongCreatorMetadata.Select(metadata => metadata.Creator).Select(creator => creator.ToInfoVM()),
+					SongWriter = song.SongWriter,
 				})
 				.SingleOrDefault(song => song.Id == id);
 		}

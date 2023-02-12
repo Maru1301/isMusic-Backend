@@ -20,7 +20,7 @@ namespace api.iSMusic.Models.Services
 			_songRepository = songRepository;
 		}
 
-		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylist(int memberId, bool includeLiked)
+		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, bool includeLiked, int rowNumber)
 		{
 			var member = _memberRepository.GetMemberById(memberId);
 			if (member == null)
@@ -28,12 +28,25 @@ namespace api.iSMusic.Models.Services
 				return Enumerable.Empty<PlaylistIndexDTO>();
 			}
 
-			var playlists = _playlistRepository.GetMemberPlaylists(memberId);
+			var playlists = _playlistRepository.GetMemberPlaylists(memberId, rowNumber);
 			if (includeLiked)
 			{
 				var likedPlaylists = _playlistRepository.GetLikedPlaylists(memberId);
 				playlists = playlists.Concat(likedPlaylists);
 			}
+
+			return playlists;
+		}
+
+		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylistsByName(int memberId, string name, int rowNumber)
+		{
+			var member = _memberRepository.GetMemberById(memberId);
+			if (member == null)
+			{
+				return Enumerable.Empty<PlaylistIndexDTO>();
+			}
+
+			var playlists = _playlistRepository.GetMemberPlaylistsByName(memberId, name, rowNumber);
 
 			return playlists;
 		}
@@ -63,7 +76,39 @@ namespace api.iSMusic.Models.Services
 				return (false, ex.Message);
 			}
 
-			return (true, "Successfully Added");
+			return (true, "成功新增");
+		}
+
+		public (bool Success, string Message) DeleteLikedSong(int memberId, int songId)
+		{
+			try
+			{
+				if (CheckMemberExistence(memberId) == false) throw new Exception("會員不存在");
+
+				if (CheckSongExistence(songId) == false) throw new Exception("歌曲不存在");
+
+				_memberRepository.DeleteLikedSong(memberId, songId);
+			}
+			catch (Exception ex)
+			{
+				return (false, ex.Message);
+			}
+
+			return (true, "成功刪除");
+		}
+
+		private bool CheckSongExistence(int songId)
+		{
+			var song = _songRepository.GetSongById(songId);
+
+			return song != null;
+		}
+
+		private bool CheckMemberExistence(int memberId)
+		{
+			var member = _memberRepository.GetMemberById(memberId);
+
+			return member != null;
 		}
 	}
 }

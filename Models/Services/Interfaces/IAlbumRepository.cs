@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 
 namespace api.iSMusic.Models.Services.Interfaces
 {
@@ -9,6 +10,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 		IEnumerable<AlbumIndexDTO> GetAlbumsByGenreId(int genreId, int skipRows, int takeRows);
 
 		AlbumIndexDTO? GetAlbumById(int albumId);
+
+		Album? GetAlbumByIdForCheck(int albumId);
 
 		IEnumerable<AlbumIndexDTO> GetAlbumsByName(string name, int skipRows, int takeRows);
 	}

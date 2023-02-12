@@ -111,41 +111,19 @@ namespace api.iSMusic.Controllers
 		//	return NoContent();
 		//}
 
-		//[HttpPost]
-		//[Route("Song")]
-		//public IActionResult AddSongintoPlaylist([FromBody] AddSongRequest request)
-		//{
-		//	var playlist = _db.Playlists.Find(request.PlaylistId);
-		//	if (playlist == null)
-		//	{
-		//		return NotFound("Playlist not found");
-		//	}
+		[HttpPost]
+		[Route("{playlistId}/Songs/{songId}")]
+		public IActionResult AddSongToPlaylist(int playlistId, int songId, [FromBody]bool Force)
+		{
+			var result = _service.AddSongToPlaylist(playlistId, songId, Force);
 
-		//	var lastMetadata = _db.PlaylistSongMetadata
-		//		.Where(m => m.PlayListId == request.PlaylistId)
-		//		.OrderByDescending(m => m.DisplayOrder)
-		//		.FirstOrDefault();
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
 
-		//	var lastOrder = (lastMetadata != null) ? lastMetadata.DisplayOrder : 0;
-
-		//	var metadata = new PlaylistSongMetadatum
-		//	{
-		//		SongId = request.SongId,
-		//		PlayListId = request.PlaylistId,
-		//		DisplayOrder = lastOrder + 1
-		//	};
-
-		//	_db.PlaylistSongMetadata.Add(metadata);
-		//	_db.SaveChanges();
-
-		//	return CreatedAtAction(nameof(GetPlaylistDetail), new { request.PlaylistId }, playlist.ToIndexVM());
-		//}
-
-		//public class AddSongRequest
-		//{
-		//	public int SongId { get; set; }
-		//	public int PlaylistId { get; set; }
-		//}
+			return Ok(result.Message);
+		}
 
 		//[HttpDelete]
 		//[Route("Song")]

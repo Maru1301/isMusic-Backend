@@ -12,6 +12,10 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 	{
 		private readonly AppDbContext _db;
 
+		private readonly int skipNumber = 5;
+
+		private readonly int takeNumber = 5;
+
 		public PlaylistRepository(AppDbContext db)
 		{
 			_db = db;
@@ -37,7 +41,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
-		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId)
+		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, int rowNumber)
 		{
 			var memberPlaylists = _db.Playlists
 				.Where(playlist => playlist.MemberId == memberId)
@@ -53,9 +57,32 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			return memberPlaylists;
 		}
 
+		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylistsByName(int memberId, string name, int rowNumber)
+		{
+			var memberPlaylists = _db.Playlists
+				.Where(playlist => playlist.MemberId == memberId && playlist.ListName.Contains(name))
+				.Select(playlist => new PlaylistIndexDTO
+				{
+					Id = playlist.Id,
+					ListName = playlist.ListName,
+					PlaylistCoverPath = playlist.PlaylistCoverPath,
+					MemberId = playlist.MemberId,
+				})
+				.Skip((rowNumber-1)*skipNumber)
+				.Take(takeNumber)
+				.ToList();
+
+			return memberPlaylists;
+		}
+
 		public async Task<int> GetNumOfPlaylistsByMemberIdAsync(int memberId)
 		{
 			return await _db.Playlists.CountAsync(p => p.MemberId == memberId);
+		}
+
+		public Playlist? GetPlaylistByIdForCheck(int playlistId)
+		{
+			return _db.Playlists.Find(playlistId);
 		}
 
 		public PlaylistDetailDTO GetPlaylistById(int playlistId)
@@ -69,7 +96,10 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					IsPublic = playlist.IsPublic,
 					MemberId = playlist.MemberId,
 					PlaylistCoverPath = playlist.PlaylistCoverPath,
-					PlayListSongMetadata = playlist.PlaylistSongMetadata.Select(m => m.ToVM()).ToList()
+					PlayListSongMetadata = playlist.PlaylistSongMetadata
+						.OrderBy(metadata => metadata.DisplayOrder)
+						.Select(m => m.ToVM())
+						.ToList()
 				})
 				.Single(p => p.Id == playlistId);
 		}
@@ -118,6 +148,19 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 
 			return recommendedPlaylists;
+		}
+
+		public void AddSongToPlaylist(int playlistId, int songId, int lastOrder)
+		{
+			var newMetadata = new PlaylistSongMetadatum
+			{
+				SongId = songId,
+				PlayListId = playlistId,
+				DisplayOrder = lastOrder + 1
+			};
+
+			_db.PlaylistSongMetadata.Add(newMetadata);
+			_db.SaveChanges();
 		}
 	}
 }

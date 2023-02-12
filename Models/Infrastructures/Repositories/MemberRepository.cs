@@ -35,5 +35,15 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.LikedSongs.Add(data);
 			_db.SaveChanges();
 		}
+
+		public void DeleteLikedSong(int memberId, int songId)
+		{
+			var data = _db.LikedSongs.SingleOrDefault(ls => ls.MemberId== memberId && ls.SongId == songId);
+
+			if (data == null) throw new Exception("此歌曲不在喜歡列表內");
+
+			_db.LikedSongs.Remove(data);
+			_db.SaveChanges();
+		}
 	}
 }

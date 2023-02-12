@@ -24,11 +24,14 @@ public partial class QueueSong
     [Column("fromPlaylist")]
     public bool FromPlaylist { get; set; }
 
+    [Column("shuffleOrder")]
+    public int ShuffleOrder { get; set; }
+
     [ForeignKey("QueueId")]
     [InverseProperty("QueueSongs")]
     public virtual Queue Queue { get; set; } = null!;
 
-	[ForeignKey("SongId")]
-	[InverseProperty("QueueSongs")]
-	public virtual Song Song { get; set; } = null!;
+    [ForeignKey("SongId")]
+    [InverseProperty("QueueSongs")]
+    public virtual Song Song { get; set; } = null!;
 }

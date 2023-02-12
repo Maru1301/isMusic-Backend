@@ -18,7 +18,9 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		IEnumerable<SongGenreInfo> GetSongGenres();
 
-		SongIndexDTO? GetSongById(int id);
+		SongIndexDTO? GetSongById(int songId);
+		
+		Song? GetSongByIdForCheck(int songId);
 
 		IEnumerable<SongIndexDTO> GetSongsByName(string name, int skipRows, int takeRows);
 	}
