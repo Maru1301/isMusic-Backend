@@ -25,20 +25,20 @@ namespace api.iSMusic.Controllers
 
 		private readonly MemberService _memberService;
 
-		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IPlaylistRepository playlistRepository, IQueueRepository queueRepository)
+		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, IPlaylistRepository playlistRepository, IQueueRepository queueRepository)
 		{
 			_memberRepository = memberRepo;
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_memberService = new (_memberRepository, _playlistRepository, _songRepository);
+			_memberService = new (_memberRepository, _playlistRepository, _songRepository, artistRepository);
 		}
 
 		[HttpGet]
 		[Route("{memberId}/Playlists")]
-		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromQuery] bool includedLiked, int rowNumber)
+		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromBody] InputQuery query)
 		{
-			var dtos = _memberService.GetMemberPlaylists(memberId, includedLiked, rowNumber);
+			var dtos = _memberService.GetMemberPlaylists(memberId, query);
 
 			if (dtos == null)
 			{
@@ -46,6 +46,15 @@ namespace api.iSMusic.Controllers
 			}
 
 			return Ok(dtos.Select(dto => dto.ToIndexVM()));
+		}
+
+		public class InputQuery
+		{
+			public int RowNumber { get; set; }
+
+			public bool IncludedLiked { get; set; }
+
+			public string Condition { get; set; } = "RecentlyAdded";
 		}
 
 		[HttpGet]
@@ -114,6 +123,20 @@ namespace api.iSMusic.Controllers
 			}
 
 			return Ok(result.RecentlyPlayedSongs.Select(dto => dto.ToIndexVM()));
+		}
+
+		[HttpGet]
+		[Route("{memberId}/LikedArtists")]
+		public IActionResult GetLikedArtists(int memberId, [FromBody] string condition)
+		{
+			var result = _memberService.GetLikedArtists(memberId, condition);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.ArtistDtos.Select(dto=> dto.ToIndexVM()));
 		}
 
 		[HttpPost]

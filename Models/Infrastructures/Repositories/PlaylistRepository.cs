@@ -5,6 +5,7 @@ using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static api.iSMusic.Controllers.MembersController;
 
 namespace api.iSMusic.Models.Infrastructures.Repositories
 {
@@ -41,20 +42,34 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
-		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, int rowNumber)
+		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, InputQuery query)
 		{
-			var memberPlaylists = _db.Playlists
-				.Where(playlist => playlist.MemberId == memberId)
-				.Select(playlist => new PlaylistIndexDTO
-				{
-					Id = playlist.Id,
-					ListName = playlist.ListName,
-					PlaylistCoverPath = playlist.PlaylistCoverPath,
-					MemberId = playlist.MemberId,
-				})
-				.ToList();
+			bool includedLiked = query.IncludedLiked;
 
-			return memberPlaylists;
+			var memberPlaylists = _db.Playlists
+				.Where(playlist => includedLiked ?
+				(playlist.MemberId == memberId || playlist.LikedPlaylists.Select(liked => liked.MemberId).Contains(memberId)) : (playlist.MemberId == memberId));
+				
+
+			switch (query.Condition)
+			{
+				case "Alphatically":
+					memberPlaylists = memberPlaylists.OrderBy(playlist => playlist.ListName);
+					break;
+				case "RecentlyAdded":
+					memberPlaylists = memberPlaylists.OrderBy(playlist => playlist.Created);
+					break;
+			}
+
+			var dtos = memberPlaylists.Select(playlist => new PlaylistIndexDTO
+			{
+				Id= playlist.Id,
+				PlaylistCoverPath = playlist.PlaylistCoverPath,
+				ListName= playlist.ListName,
+				MemberId= memberId,
+			});
+
+			return dtos;
 		}
 
 		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylistsByName(int memberId, string name, int rowNumber)

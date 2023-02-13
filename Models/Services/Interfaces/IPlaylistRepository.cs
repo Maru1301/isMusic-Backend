@@ -1,6 +1,7 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
+using static api.iSMusic.Controllers.MembersController;
 
 namespace api.iSMusic.Models.Services.Interfaces
 {
@@ -8,7 +9,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 	{
 		IEnumerable<PlaylistIndexDTO> GetRecommended();
 
-		IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, int rowNumber);
+		IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, InputQuery query);
 
 		IEnumerable<PlaylistIndexDTO> GetMemberPlaylistsByName(int memberId, string name, int rowNumber);
 

@@ -2,6 +2,8 @@
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
+using static api.iSMusic.Controllers.MembersController;
+using static api.iSMusic.Controllers.QueuesController;
 
 namespace api.iSMusic.Models.Services
 {
@@ -13,14 +15,17 @@ namespace api.iSMusic.Models.Services
 
 		private readonly ISongRepository _songRepository;
 
-		public MemberService(IMemberRepository repo, IPlaylistRepository playlistRepository, ISongRepository songRepository)
+		private readonly IArtistRepository _artistRepository;
+
+		public MemberService(IMemberRepository repo, IPlaylistRepository playlistRepository, ISongRepository songRepository, IArtistRepository artistRepository)
 		{
 			_memberRepository = repo;
 			_playlistRepository = playlistRepository;
 			_songRepository = songRepository;
+			_artistRepository = artistRepository;
 		}
 
-		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, bool includeLiked, int rowNumber)
+		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, InputQuery query)
 		{
 			var member = _memberRepository.GetMemberById(memberId);
 			if (member == null)
@@ -28,14 +33,17 @@ namespace api.iSMusic.Models.Services
 				return Enumerable.Empty<PlaylistIndexDTO>();
 			}
 
-			var playlists = _playlistRepository.GetMemberPlaylists(memberId, rowNumber);
-			if (includeLiked)
-			{
-				var likedPlaylists = _playlistRepository.GetLikedPlaylists(memberId);
-				playlists = playlists.Concat(likedPlaylists);
-			}
-
+			var playlists = _playlistRepository.GetMemberPlaylists(memberId, query);
 			return playlists;
+		}
+
+		public (bool Success, string Message, IEnumerable<ArtistIndexDTO> ArtistDtos)GetLikedArtists(int memberId, string condition)
+		{
+			if(CheckMemberExistence(memberId) == false) return (false, "會員不存在", new List<ArtistIndexDTO>());
+
+			var dtos = _artistRepository.GetLikedArtists(memberId, condition);
+
+			return (true, "", dtos);
 		}
 
 		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylistsByName(int memberId, string name, int rowNumber)
