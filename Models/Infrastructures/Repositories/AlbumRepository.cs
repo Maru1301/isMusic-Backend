@@ -1,6 +1,7 @@
 ﻿using api.iSMusic.Controllers;
 using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.AlbumVMs;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db = db;
 		}
 
-		public IEnumerable<AlbumIndexDTO> GetAlbumsByName(string albumName, int skipRows, int takeRows)
+		public IEnumerable<AlbumIndexDTO> GetAlbumsByName(string albumName, int rowNumber)
 		{
 			return _db.Albums
 				.Where(album => album.AlbumName.Contains(albumName) && album.Released <= DateTime.Now)
@@ -36,12 +37,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					TotalLikes = album.LikedAlbums.Count,
 				})
 				.OrderBy(dto => dto.TotalLikes)
-				.Skip(skipRows)
-				.Take(takeRows)
+				.Skip(rowNumber != 2 ? (rowNumber - 1) * skipNumber : 0)
+				.Take(rowNumber != 2 ? takeNumber : takeNumber * 2)
 				.ToList();
 		}
 
-		public IEnumerable<AlbumIndexDTO> GetAlbumsByGenreId(int genreId, int skipRows, int takeRows)
+		public IEnumerable<AlbumIndexDTO> GetAlbumsByGenreId(int genreId, int rowNumber)
 		{
 			return _db.Albums
 				.Where(album => album.AlbumGenreId== genreId)
@@ -57,8 +58,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					TotalLikes= album.LikedAlbums.Count,
 				})
 				.OrderBy(dto => dto.TotalLikes)
-				.Skip(skipRows)
-				.Take (takeRows)
+				.Skip(rowNumber != 2 ? (rowNumber - 1) * skipNumber : 0)
+				.Take(rowNumber != 2 ? takeNumber : takeNumber * 2)
 				.ToList();
 		}
 
@@ -78,7 +79,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					TotalLikes = album.LikedAlbums.Count()
 				})
 				.OrderByDescending(x => x.TotalLikes)
-				.Take(10)
+				.Take(takeNumber * 2)
 				.ToList();
 
 			return recommendedAlbums;
@@ -89,27 +90,36 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			return _db.Albums.Find(albumId);
 		}
 
-		public AlbumIndexDTO? GetAlbumById(int albumId)
+		public AlbumDetailDTO? GetAlbumById(int albumId)
 		{
 			return _db.Albums
-				.Select(album => new AlbumIndexDTO
+				.Select(album => new AlbumDetailDTO
 				{
 					Id = album.Id,
 					AlbumName = album.AlbumName,
 					AlbumCoverPath = album.AlbumCoverPath,
 					AlbumTypeId = album.AlbumTypeId,
+					AlbumTypeName = album.AlbumType.TypeName,
 					AlbumGenreId = album.AlbumGenreId,
+					AlbumGenreName = album.AlbumGenre.GenreName,
 					Released = album.Released,
 					MainArtistId = album.MainArtistId,
+					MainArtistName = album.MainArtist.ArtistName,
+					MainCreatorId= album.MainCreatorId,
+					MainCreatorName = album.MainCreator != null? album.MainCreator.CreatorName: string.Empty,
+					Description = album.Description,
+					AlbumProducer = album.AlbumProducer,
+					AlbumCompany= album.AlbumCompany,
+					Songs = album.Songs.Select(song => song.ToInfoDTO()).ToList(),
 				})
 				.SingleOrDefault(dto => dto.Id == albumId);
 		}
 
-		public IEnumerable<AlbumIndexDTO> GetLikedAlbums(int memberId, MembersController.LikedQueryBody body)
+		public IEnumerable<AlbumIndexDTO> GetLikedAlbums(int memberId, MembersController.LikedQuery query)
 		{
 			var likeds = _db.LikedAlbums.Where(liked => liked.MemberId == memberId);
 
-			IEnumerable<Album> albums = body.Condition switch
+			IEnumerable<Album> albums = query.Condition switch
 			{
 				"RecentlyAdded" => likeds
 										.OrderByDescending(liked => liked.Created)
@@ -120,9 +130,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				_ => new List<Album>(),
 			};
 
-			albums = body.RowNumber == 2 ?
+			albums = query.RowNumber == 2 ?
 				albums.Take(takeNumber * 2) :
-				albums.Skip((body.RowNumber - 1) * skipNumber)
+				albums.Skip((query.RowNumber - 1) * skipNumber)
 				.Take(takeNumber);
 
 			return albums.Select(album => new AlbumIndexDTO

@@ -15,15 +15,7 @@ namespace api.iSMusic.Models.Services
 
 		public IEnumerable<CreatorIndexDTO> GetCreatorsByName(string creatorName, int rowNumber)
 		{
-			int skip = (rowNumber - 1) * 5;
-			int take = 5;
-			if(rowNumber == 2)
-			{
-				skip = 0;
-				take = 10;
-			}
-
-			return _repository.GetCreatorsByName(creatorName, skip, take);
+			return _repository.GetCreatorsByName(creatorName, rowNumber);
 		}
 	}
 }

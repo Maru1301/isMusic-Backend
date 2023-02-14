@@ -53,10 +53,10 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
-		public IEnumerable<ArtistIndexDTO> GetLikedArtists(int memberId, LikedQueryBody body)
+		public IEnumerable<ArtistIndexDTO> GetLikedArtists(int memberId, LikedQuery query)
 		{
 			var follows = _db.ArtistFollows.Where(follow => follow.MemberId == memberId);
-			IEnumerable<Artist> artists = body.Condition switch
+			IEnumerable<Artist> artists = query.Condition switch
 			{
 				"RecentlyAdded" => follows
 										.OrderByDescending(follow => follow.Created)
@@ -67,9 +67,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				_ => new List<Artist>(),
 			};
 
-			artists = body.RowNumber == 2 ?
+			artists = query.RowNumber == 2 ?
 				artists.Take(takeNumber * 2) :
-				artists.Skip((body.RowNumber - 1) * skipNumber)
+				artists.Skip((query.RowNumber - 1) * skipNumber)
 				.Take(takeNumber);
 
 			return artists.Select(artist => new ArtistIndexDTO 

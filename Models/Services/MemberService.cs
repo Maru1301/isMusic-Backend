@@ -43,29 +43,29 @@ namespace api.iSMusic.Models.Services
 			return playlists;
 		}
 
-		public (bool Success, string Message, IEnumerable<ArtistIndexDTO> ArtistDtos) GetLikedArtists(int memberId, LikedQueryBody body)
+		public (bool Success, string Message, IEnumerable<ArtistIndexDTO> ArtistDtos) GetLikedArtists(int memberId, LikedQuery query)
 		{
 			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在", new List<ArtistIndexDTO>());
 
-			var dtos = _artistRepository.GetLikedArtists(memberId, body);
+			var dtos = _artistRepository.GetLikedArtists(memberId, query);
 
 			return (true, "", dtos);
 		}
 
-		public (bool Success, string Message, IEnumerable<CreatorIndexDTO> CreatorsDtos) GetLikedCreators(int memberId, LikedQueryBody body)
+		public (bool Success, string Message, IEnumerable<CreatorIndexDTO> CreatorsDtos) GetLikedCreators(int memberId, LikedQuery query)
 		{
 			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在", new List<CreatorIndexDTO>());
 
-			var dtos = _creatorRepository.GetLikedCreators(memberId, body);
+			var dtos = _creatorRepository.GetLikedCreators(memberId, query);
 
 			return (true, "", dtos);
 		}
 
-		public (bool Success, string Message, IEnumerable<AlbumIndexDTO> AlbumsDtos) GetLikedAlbums(int memberId, LikedQueryBody body)
+		public (bool Success, string Message, IEnumerable<AlbumIndexDTO> AlbumsDtos) GetLikedAlbums(int memberId, LikedQuery query)
 		{
 			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在", new List<AlbumIndexDTO>());
 
-			var dtos = _albumRepository.GetLikedAlbums(memberId, body);
+			var dtos = _albumRepository.GetLikedAlbums(memberId, query);
 
 			return (true, "", dtos);
 		}

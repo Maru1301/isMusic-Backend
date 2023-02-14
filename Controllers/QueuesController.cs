@@ -67,6 +67,28 @@ namespace api.iSMusic.Controllers
 			return Ok(updatedQueue.ToIndexVM());
 		}
 
+		[HttpPost]
+		[Route("{queueId}/Playlists/{playlistId}")]
+		public IActionResult AddPlaylistIntoQueue(int queueId, int playlistId)
+		{
+			var result = _service.AddPlaylistIntoQueue(queueId, playlistId);
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			var updatedQueue = _repository.GetQueueById(queueId);
+
+			if (updatedQueue == null)
+			{
+				return NoContent();
+			}
+
+			updatedQueue = ProcessLikedSongs(updatedQueue);
+
+			return Ok(updatedQueue.ToIndexVM());
+		}
+
 		private QueueIndexDTO ProcessLikedSongs(QueueIndexDTO updatedQueue)
 		{
 			var queueSongIds = updatedQueue.SongInfos.Select(info => info.Id);

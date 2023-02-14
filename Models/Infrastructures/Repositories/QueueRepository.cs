@@ -248,19 +248,48 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		public void AddSongIntoQueue(int queueId, int songId)
 		{
-			var lastDisplayOrder = _db.QueueSongs
-				.Where(qs => qs.QueueId == queueId)
-				.Max(qs => qs.DisplayOrder);
+			var qss = _db.QueueSongs
+				.Where(qs => qs.QueueId == queueId);
+
+			var lastDisplayOrder = (qss != null) ?
+				qss.Max(qs => qs.DisplayOrder) :
+				0;
 
 			var newQueueSongData = new QueueSong
 			{
 				QueueId = queueId,
 				SongId = songId,
 				FromPlaylist = false,
-				DisplayOrder = lastDisplayOrder == 0 ? 1 : lastDisplayOrder + 1
+				DisplayOrder = lastDisplayOrder + 1
 			};
 
 			_db.QueueSongs.Add(newQueueSongData);
+			_db.SaveChanges();
+		}
+
+		public void AddPlaylistIntoQueue(int queueId, int playlistId)
+		{
+			var qss = _db.QueueSongs
+				.Where(qs => qs.QueueId == queueId);
+
+			var displayOrder = (qss!=null) ? 
+				qss.Max(qs => qs.DisplayOrder) : 
+				0;
+
+			var songIds = _db.PlaylistSongMetadata
+				.Where(metadata => metadata.PlayListId == playlistId)
+				.Select(metadata => metadata.SongId)
+				.ToList();
+
+			var newQueueSongData = songIds.Select((songId, index) => new QueueSong
+			{
+				QueueId = queueId,
+				SongId = songId,
+				FromPlaylist = false,
+				DisplayOrder = displayOrder + index + 1,
+			});
+
+			_db.QueueSongs.AddRange(newQueueSongData);
 			_db.SaveChanges();
 		}
 

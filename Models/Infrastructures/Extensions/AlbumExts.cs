@@ -17,5 +17,26 @@ public static class AlbumExts
 			MainArtistId= source.MainArtistId,
 			TotalLikes= source.TotalLikes,
 		};
+
+	public static AlbumDetailVM ToDetailVM(this AlbumDetailDTO source)
+		=> new()
+		{
+			Id = source.Id,
+			AlbumName = source.AlbumName,
+			AlbumCoverPath= source.AlbumCoverPath,
+			Released = source.Released,
+			MainArtistId= source.MainArtistId,
+			AlbumTypeId= source.AlbumTypeId,
+			AlbumTypeName= source.AlbumTypeName,
+			AlbumGenreId= source.AlbumGenreId,
+			AlbumGenreName= source.AlbumGenreName,
+			AlbumCompany = source.AlbumCompany,
+			AlbumProducer = source.AlbumProducer,
+			MainArtistName= source.MainArtistName,
+			MainCreatorId= source.MainCreatorId,
+			MainCreatorName= source.MainCreatorName,
+			Description= source.Description,
+			Songs = source.Songs,
+		};
 }
 

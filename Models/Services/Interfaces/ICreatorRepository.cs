@@ -6,8 +6,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 {
     public interface ICreatorRepository
 	{
-		IEnumerable<CreatorIndexDTO> GetLikedCreators(int memberId, LikedQueryBody body);
+		IEnumerable<CreatorIndexDTO> GetLikedCreators(int memberId, LikedQuery body);
 
-		IEnumerable<CreatorIndexDTO> GetCreatorsByName(string name, int skipRows, int takeRows);
+		IEnumerable<CreatorIndexDTO> GetCreatorsByName(string name, int rowNumber);
 	}
 }

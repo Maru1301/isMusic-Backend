@@ -55,5 +55,16 @@ namespace api.iSMusic.Controllers
 
 			return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
+
+		[HttpGet]
+		[Route("{albumId}")]
+		public IActionResult GetAlbumById(int albumId)
+		{
+			var dto = _service.GetAlbumById(albumId);
+
+			if(dto == null) return NotFound("專輯不存在");
+
+			return Ok(dto.ToDetailVM());
+		}
 	}
 }

@@ -36,6 +36,16 @@ namespace api.iSMusic.Models.Services
 			return (true, "新增成功");
 		}
 
+		public (bool Success, string Message) AddPlaylistIntoQueue(int queueId, int playlistId)
+		{
+			if (!CheckQueueExistence(queueId)) return (false, "佇列不存在");
+
+			if (!CheckPlaylistExistence(playlistId)) return (false, "清單不存在");
+
+			_queuerepository.AddPlaylistIntoQueue(queueId, playlistId);
+			return (true, "新增成功");
+		}
+
 		public (bool Success, string Message) ChangeQueueContent(int queueId, int contentId, Condition condition)
 		{
 			try

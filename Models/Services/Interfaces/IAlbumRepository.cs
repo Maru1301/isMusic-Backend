@@ -8,14 +8,14 @@ namespace api.iSMusic.Models.Services.Interfaces
 	{
 		IEnumerable<AlbumIndexDTO> GetRecommended();
 
-		IEnumerable<AlbumIndexDTO> GetAlbumsByGenreId(int genreId, int skipRows, int takeRows);
+		IEnumerable<AlbumIndexDTO> GetAlbumsByGenreId(int genreId, int rowNumber);
 
-		AlbumIndexDTO? GetAlbumById(int albumId);
+		AlbumDetailDTO? GetAlbumById(int albumId);
 
 		Album? GetAlbumByIdForCheck(int albumId);
 
-		IEnumerable<AlbumIndexDTO> GetAlbumsByName(string name, int skipRows, int takeRows);
+		IEnumerable<AlbumIndexDTO> GetAlbumsByName(string name, int rowNumber);
 
-		IEnumerable<AlbumIndexDTO> GetLikedAlbums(int memberId, LikedQueryBody body);
+		IEnumerable<AlbumIndexDTO> GetLikedAlbums(int memberId, LikedQuery query);
 	}
 }

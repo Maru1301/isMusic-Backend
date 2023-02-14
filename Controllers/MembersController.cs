@@ -133,9 +133,9 @@ namespace api.iSMusic.Controllers
 
 		[HttpGet]
 		[Route("{memberId}/LikedArtists")]
-		public IActionResult GetLikedArtists(int memberId, [FromQuery] LikedQueryBody body)
+		public IActionResult GetLikedArtists(int memberId, [FromQuery] LikedQuery query)
 		{
-			var result = _memberService.GetLikedArtists(memberId, body);
+			var result = _memberService.GetLikedArtists(memberId, query);
 
 			if (!result.Success)
 			{
@@ -147,9 +147,9 @@ namespace api.iSMusic.Controllers
 
 		[HttpGet]
 		[Route("{memberId}/LikedCreators")]
-		public IActionResult GetLikedCreators(int memberId, [FromQuery] LikedQueryBody body)
+		public IActionResult GetLikedCreators(int memberId, [FromQuery] LikedQuery query)
 		{
-			var result = _memberService.GetLikedCreators(memberId, body);
+			var result = _memberService.GetLikedCreators(memberId, query);
 
 			if (!result.Success)
 			{
@@ -161,9 +161,9 @@ namespace api.iSMusic.Controllers
 
 		[HttpGet]
 		[Route("{memberId}/LikedAlbums")]
-		public IActionResult GetLikedAlbums(int memberId, [FromQuery] LikedQueryBody body)
+		public IActionResult GetLikedAlbums(int memberId, [FromQuery] LikedQuery query)
 		{
-			var result = _memberService.GetLikedAlbums(memberId, body);
+			var result = _memberService.GetLikedAlbums(memberId, query);
 
 			if (!result.Success)
 			{
@@ -173,9 +173,9 @@ namespace api.iSMusic.Controllers
 			return Ok(result.AlbumsDtos.Select(dto => dto.ToIndexVM()));
 		}
 
-		public class LikedQueryBody
+		public class LikedQuery
 		{
-			public LikedQueryBody()
+			public LikedQuery()
 			{
 				RowNumber = 2;
 				Condition = "RecentlyAdded";

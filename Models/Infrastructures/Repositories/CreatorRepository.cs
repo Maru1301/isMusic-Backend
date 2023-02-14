@@ -19,7 +19,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db = db;
 		}
 
-		public IEnumerable<CreatorIndexDTO> GetCreatorsByName(string name, int skipRows, int takeRows)
+		public IEnumerable<CreatorIndexDTO> GetCreatorsByName(string name, int rowNumber)
 		{
 			return _db.Creators
 				.Where(creator => creator.CreatorName.Contains(name))
@@ -31,12 +31,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					TotalFollows = creator.CreatorFollows.Count,
 				})
 				.OrderBy(dto => dto.TotalFollows)
-				.Skip(skipRows)
-				.Take(takeRows)
+				.Skip(rowNumber != 2 ? (rowNumber - 1) * skipNumber : 0)
+				.Take(rowNumber != 2 ? takeNumber : takeNumber * 2)
 				.ToList();
 		}
 
-		public IEnumerable<CreatorIndexDTO> GetLikedCreators(int memberId, MembersController.LikedQueryBody body)
+		public IEnumerable<CreatorIndexDTO> GetLikedCreators(int memberId, MembersController.LikedQuery body)
 		{
 			var follows = _db.CreatorFollows.Where(follow => follow.MemberId == memberId);
 			IEnumerable<Creator> creators = body.Condition switch

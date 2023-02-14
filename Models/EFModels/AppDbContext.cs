@@ -163,6 +163,8 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.MainArtist).WithMany(p => p.Albums)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Albums_Artists");
+
+            entity.HasOne(d => d.MainCreator).WithMany(p => p.Albums).HasConstraintName("FK_Albums_Creators");
         });
 
         modelBuilder.Entity<Artist>(entity =>

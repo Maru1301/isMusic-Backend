@@ -71,46 +71,6 @@ namespace api.iSMusic.Controllers
 			return Ok(data.Select(p => p.ToIndexVM()));
 		}
 
-		//[HttpPut]
-		//[Route("{playlistId}")]
-		//public async Task<IActionResult> EditPlaylistDetail(int playlistId, [FromForm] PlaylistEditVM model)
-		//{
-		//	if (!ModelState.IsValid)
-		//	{
-		//		return BadRequest(ModelState);
-		//	}
-
-		//	//Find the playlist in the database
-		//	var playlist = await _db.Playlists.FirstOrDefaultAsync(p => p.Id == playlistId);
-
-		//	if (playlist == null)
-		//	{
-		//		return NotFound("Playlist not found");
-		//	}
-
-		//	//Update the playlist with the data from the view model
-		//	playlist.ListName = model.ListName;
-		//	playlist.Description = model.Description;
-
-		//	if (model.PlaylistCover != null)
-		//	{
-		//		var fileName = Path.GetFileName(model.PlaylistCover.FileName);
-		//		var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", fileName);
-
-		//		using (var stream = new FileStream(filePath, FileMode.Create))
-		//		{
-		//			await model.PlaylistCover.CopyToAsync(stream);
-		//		}
-
-		//		playlist.PlaylistCoverPath = Path.Combine("uploads", fileName);
-		//	}
-
-		//	//Save the changes to the database
-		//	await _db.SaveChangesAsync();
-
-		//	return NoContent();
-		//}
-
 		[HttpPost]
 		[Route("{playlistId}/Songs/{songId}")]
 		public IActionResult AddSongToPlaylist(int playlistId, int songId, [FromBody]bool Force)
@@ -123,6 +83,46 @@ namespace api.iSMusic.Controllers
 			}
 
 			return Ok(result.Message);
+		}
+
+		[HttpPut]
+		[Route("{playlistId}/Detail")]
+		public async Task<IActionResult> UpdatePlaylistDetail(int playlistId, [FromForm] PlaylistEditVM model)
+		{
+			if (!ModelState.IsValid)
+			{
+				return BadRequest(ModelState);
+			}
+
+			//Find the playlist in the database
+			var playlist = await _db.Playlists.FirstOrDefaultAsync(p => p.Id == playlistId);
+
+			if (playlist == null)
+			{
+				return NotFound("Playlist not found");
+			}
+
+			//Update the playlist with the data from the view model
+			playlist.ListName = model.ListName;
+			playlist.Description = model.Description;
+
+			if (model.PlaylistCover != null)
+			{
+				var fileName = Path.GetFileName(model.PlaylistCover.FileName);
+				var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", fileName);
+
+				using (var stream = new FileStream(filePath, FileMode.Create))
+				{
+					await model.PlaylistCover.CopyToAsync(stream);
+				}
+
+				playlist.PlaylistCoverPath = Path.Combine("uploads", fileName);
+			}
+
+			//Save the changes to the database
+			await _db.SaveChangesAsync();
+
+			return Ok();
 		}
 
 		//[HttpDelete]

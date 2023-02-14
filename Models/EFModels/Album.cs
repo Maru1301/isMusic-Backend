@@ -62,6 +62,10 @@ public partial class Album
     [InverseProperty("Albums")]
     public virtual Artist MainArtist { get; set; } = null!;
 
+    [ForeignKey("MainCreatorId")]
+    [InverseProperty("Albums")]
+    public virtual Creator? MainCreator { get; set; }
+
     [InverseProperty("Album")]
     public virtual ICollection<Product> Products { get; } = new List<Product>();
 

@@ -13,6 +13,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void AddSongIntoQueue(int queueId, int songId);
 
+		void AddPlaylistIntoQueue(int queueId, int playlistId);
+
 		void UpdateQueueBySong(int queueId, int Id);
 
 		void UpdateQueueBySongs(int queueId, List<int> SongIds, string fromWhere, int contentId);
