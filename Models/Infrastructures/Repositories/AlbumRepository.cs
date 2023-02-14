@@ -1,4 +1,5 @@
-﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+﻿using api.iSMusic.Controllers;
+using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.AlbumVMs;
@@ -9,6 +10,10 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
     public class AlbumRepository: IRepository, IAlbumRepository
 	{
 		private readonly AppDbContext _db;
+
+		private readonly int skipNumber = 5;
+
+		private readonly int takeNumber = 5;
 
 		public AlbumRepository(AppDbContext db)
 		{
@@ -98,6 +103,38 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					MainArtistId = album.MainArtistId,
 				})
 				.SingleOrDefault(dto => dto.Id == albumId);
+		}
+
+		public IEnumerable<AlbumIndexDTO> GetLikedAlbums(int memberId, MembersController.LikedQueryBody body)
+		{
+			var likeds = _db.LikedAlbums.Where(liked => liked.MemberId == memberId);
+
+			IEnumerable<Album> albums = body.Condition switch
+			{
+				"RecentlyAdded" => likeds
+										.OrderByDescending(liked => liked.Created)
+										.Select(liked => liked.Album),
+				"Alphatically" => likeds
+										.Select(liked => liked.Album)
+										.OrderBy(album => album.AlbumName),
+				_ => new List<Album>(),
+			};
+
+			albums = body.RowNumber == 2 ?
+				albums.Take(takeNumber * 2) :
+				albums.Skip((body.RowNumber - 1) * skipNumber)
+				.Take(takeNumber);
+
+			return albums.Select(album => new AlbumIndexDTO
+			{
+				Id = album.Id,
+				AlbumName = album.AlbumName,
+				AlbumCoverPath = album.AlbumCoverPath,
+				AlbumGenreId= album.AlbumGenreId,
+				AlbumTypeId= album.AlbumTypeId,
+				MainArtistId= album.MainArtistId,
+				Released = album.Released,
+			});
 		}
 	}
 }

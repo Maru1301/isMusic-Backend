@@ -19,15 +19,7 @@ namespace api.iSMusic.Models.Services
 
 		public IEnumerable<SongIndexDTO> GetSongsByName(string songName, int rowNumber)
 		{
-			int skip = (rowNumber- 1) * 5;
-			int take = 5;
-			if(rowNumber == 2)
-			{
-				skip = 0;
-				take = 10;
-			}
-
-			return _songRepository.GetSongsByName(songName, skip, take);
+			return _songRepository.GetSongsByName(songName, rowNumber);
 		}
 
 		public (bool Success, string ErrorMessage, IEnumerable<SongIndexDTO> RecentlyPlayedSongs) GetRecentlyPlayed(int memberId)

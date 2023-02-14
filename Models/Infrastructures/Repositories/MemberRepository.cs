@@ -29,7 +29,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			var data = new LikedSong
 			{
 				MemberId = memberId,
-				SongId= songId
+				SongId= songId,
+				Created= DateTime.Now,
 			};
 
 			_db.LikedSongs.Add(data);
@@ -43,6 +44,29 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			if (data == null) throw new Exception("此歌曲不在喜歡列表內");
 
 			_db.LikedSongs.Remove(data);
+			_db.SaveChanges();
+		}
+
+		public void AddLikedPlaylist(int memberId, int playlistId)
+		{
+			var data = new LikedPlaylist
+			{
+				MemberId = memberId,
+				PlaylistId = playlistId,
+				Created = DateTime.Now,
+			};
+
+			_db.LikedPlaylists.Add(data);
+			_db.SaveChanges();
+		}
+
+		public void DeleteLikedPlaylist(int memberId, int playlistId)
+		{
+			var data = _db.LikedPlaylists.SingleOrDefault(lp => lp.MemberId == memberId && lp.PlaylistId == playlistId);
+
+			if (data == null) throw new Exception("此歌曲不在喜歡列表內");
+
+			_db.LikedPlaylists.Remove(data);
 			_db.SaveChanges();
 		}
 	}

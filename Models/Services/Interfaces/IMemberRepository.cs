@@ -11,6 +11,10 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void AddLikedSong(int memberId, int songId);
 
+		void AddLikedPlaylist(int memberId, int playlistId);
+
 		void DeleteLikedSong(int memberId, int songId);
+
+		void DeleteLikedPlaylist(int memberId, int playlistId);
 	}
 }

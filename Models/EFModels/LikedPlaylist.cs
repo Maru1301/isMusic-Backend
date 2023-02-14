@@ -18,6 +18,9 @@ public partial class LikedPlaylist
     [Column("memberId")]
     public int MemberId { get; set; }
 
+    [Column("created", TypeName = "datetime")]
+    public DateTime Created { get; set; }
+
     [ForeignKey("MemberId")]
     [InverseProperty("LikedPlaylists")]
     public virtual Member Member { get; set; } = null!;

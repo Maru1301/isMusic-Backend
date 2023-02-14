@@ -36,8 +36,8 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{songName}/{rowNumber}")]
-		public ActionResult<IEnumerable<SongIndexVM>> GetSongsByName(string songName, int rowNumber)
+		[Route("{songName}")]
+		public ActionResult<IEnumerable<SongIndexVM>> GetSongsByName(string songName, [FromQuery]int rowNumber = 2)
 		{
 			var dtos = _service.GetSongsByName(songName, rowNumber);
 

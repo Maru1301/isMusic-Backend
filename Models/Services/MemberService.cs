@@ -7,7 +7,7 @@ using static api.iSMusic.Controllers.QueuesController;
 
 namespace api.iSMusic.Models.Services
 {
-    public class MemberService
+	public class MemberService
 	{
 		private readonly IMemberRepository _memberRepository;
 
@@ -17,12 +17,18 @@ namespace api.iSMusic.Models.Services
 
 		private readonly IArtistRepository _artistRepository;
 
-		public MemberService(IMemberRepository repo, IPlaylistRepository playlistRepository, ISongRepository songRepository, IArtistRepository artistRepository)
+		private readonly ICreatorRepository _creatorRepository;
+
+		private readonly IAlbumRepository _albumRepository;
+
+		public MemberService(IMemberRepository repo, IPlaylistRepository playlistRepository, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IAlbumRepository albumRepository)
 		{
 			_memberRepository = repo;
 			_playlistRepository = playlistRepository;
 			_songRepository = songRepository;
 			_artistRepository = artistRepository;
+			_creatorRepository = creatorRepository;
+			_albumRepository = albumRepository;
 		}
 
 		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, InputQuery query)
@@ -37,11 +43,29 @@ namespace api.iSMusic.Models.Services
 			return playlists;
 		}
 
-		public (bool Success, string Message, IEnumerable<ArtistIndexDTO> ArtistDtos)GetLikedArtists(int memberId, string condition)
+		public (bool Success, string Message, IEnumerable<ArtistIndexDTO> ArtistDtos) GetLikedArtists(int memberId, LikedQueryBody body)
 		{
-			if(CheckMemberExistence(memberId) == false) return (false, "會員不存在", new List<ArtistIndexDTO>());
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在", new List<ArtistIndexDTO>());
 
-			var dtos = _artistRepository.GetLikedArtists(memberId, condition);
+			var dtos = _artistRepository.GetLikedArtists(memberId, body);
+
+			return (true, "", dtos);
+		}
+
+		public (bool Success, string Message, IEnumerable<CreatorIndexDTO> CreatorsDtos) GetLikedCreators(int memberId, LikedQueryBody body)
+		{
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在", new List<CreatorIndexDTO>());
+
+			var dtos = _creatorRepository.GetLikedCreators(memberId, body);
+
+			return (true, "", dtos);
+		}
+
+		public (bool Success, string Message, IEnumerable<AlbumIndexDTO> AlbumsDtos) GetLikedAlbums(int memberId, LikedQueryBody body)
+		{
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在", new List<AlbumIndexDTO>());
+
+			var dtos = _albumRepository.GetLikedAlbums(memberId, body);
 
 			return (true, "", dtos);
 		}
@@ -61,47 +85,41 @@ namespace api.iSMusic.Models.Services
 
 		public (bool Success, string Message) AddLikedSong(int memberId, int songId)
 		{
-			try
-			{
-				var member = _memberRepository.GetMemberById(memberId);
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
 
-				if (member == null)
-				{
-					throw new Exception("會員不存在");
-				}
+			if (CheckSongExistence(songId) == false) return (false, "歌曲不存在");
 
-				var song = _songRepository.GetSongById(songId);
+			_memberRepository.AddLikedSong(memberId, songId);
+			return (true, "成功新增");
+		}
 
-				if (song == null)
-				{
-					throw new Exception("歌曲不存在");
-				}
+		public (bool Success, string Message) AddLikedPlaylists(int memberId, int playlistId)
+		{
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
 
-				_memberRepository.AddLikedSong(memberId, songId);
-			}
-			catch(Exception ex)
-			{
-				return (false, ex.Message);
-			}
+			if (CheckPlaylistExistence(playlistId) == false) return (false, "播放清單不存在");
 
+			_memberRepository.AddLikedPlaylist(memberId, playlistId);
 			return (true, "成功新增");
 		}
 
 		public (bool Success, string Message) DeleteLikedSong(int memberId, int songId)
 		{
-			try
-			{
-				if (CheckMemberExistence(memberId) == false) throw new Exception("會員不存在");
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
 
-				if (CheckSongExistence(songId) == false) throw new Exception("歌曲不存在");
+			if (CheckSongExistence(songId) == false) return (false, "歌曲不存在");
 
-				_memberRepository.DeleteLikedSong(memberId, songId);
-			}
-			catch (Exception ex)
-			{
-				return (false, ex.Message);
-			}
+			_memberRepository.DeleteLikedSong(memberId, songId);
+			return (true, "成功刪除");
+		}
 
+		public (bool Success, string Message) DeleteLikedPlaylist(int memberId, int playlistId)
+		{
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
+
+			if (CheckPlaylistExistence(playlistId) == false) return (false, "播放清單不存在");
+
+			_memberRepository.DeleteLikedPlaylist(memberId, playlistId);
 			return (true, "成功刪除");
 		}
 
@@ -117,6 +135,13 @@ namespace api.iSMusic.Models.Services
 			var member = _memberRepository.GetMemberById(memberId);
 
 			return member != null;
+		}
+
+		private bool CheckPlaylistExistence(int playlistId)
+		{
+			var playlist = _playlistRepository.GetPlaylistById(playlistId);
+
+			return playlist != null;
 		}
 	}
 }

@@ -23,8 +23,8 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{creatorName}/{rowNumber}")]
-		public ActionResult<IEnumerable<CreatorIndexVM>> GetCreatorsByName(string creatorName, int rowNumber)
+		[Route("{creatorName}")]
+		public ActionResult<IEnumerable<CreatorIndexVM>> GetCreatorsByName(string creatorName, [FromQuery]int rowNumber = 2)
 		{
 			var dtos = _service.GetCreatorsByName(creatorName, rowNumber);
 

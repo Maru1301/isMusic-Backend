@@ -49,8 +49,8 @@ namespace api.iSMusic.Controllers
 		//}
 
 		[HttpGet]
-		[Route("{artistName}/{rowNumber}")]
-		public ActionResult<IEnumerable<ArtistIndexVM>> GetArtistsByArtistName(string artistName, int rowNumber)
+		[Route("{artistName}")]
+		public ActionResult<IEnumerable<ArtistIndexVM>> GetArtistsByArtistName(string artistName, [FromQuery]int rowNumber = 2)
 		{
 			var dtos = _service.GetArtistsByName(artistName, rowNumber);
 

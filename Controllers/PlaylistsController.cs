@@ -53,7 +53,7 @@ namespace api.iSMusic.Controllers
 			{
 				return BadRequest(result.Message);
 			}
-			return result.playlist;
+			return result.PlaylistDetail;
 		}
 
 		/// <summary>
@@ -63,8 +63,8 @@ namespace api.iSMusic.Controllers
 		/// <param name="rowNumber">the default number is 1</param>
 		/// <returns>a list of playlists</returns>
 		[HttpGet]
-		[Route("{playlistName}/{rowNumber}")]
-		public ActionResult<IEnumerable<PlaylistIndexVM>> GetPlaylistsByName([FromRoute] string playlistName, [FromRoute]int rowNumber = 1)
+		[Route("{playlistName}")]
+		public ActionResult<IEnumerable<PlaylistIndexVM>> GetPlaylistsByName([FromRoute] string playlistName, [FromQuery]int rowNumber = 2)
 		{
 			var data = _service.GetPlaylistsByName(playlistName, rowNumber);
 

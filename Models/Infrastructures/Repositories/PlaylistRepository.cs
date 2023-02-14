@@ -57,7 +57,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					memberPlaylists = memberPlaylists.OrderBy(playlist => playlist.ListName);
 					break;
 				case "RecentlyAdded":
-					memberPlaylists = memberPlaylists.OrderBy(playlist => playlist.Created);
+					memberPlaylists = memberPlaylists.OrderByDescending(playlist => playlist.Created);
 					break;
 			}
 

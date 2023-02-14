@@ -41,7 +41,7 @@ namespace api.iSMusic.Models.Services
 			return await _repository.GetPlaylistIdByMemberIdAsync(memberId);
 		}
 
-		public (bool Success, string Message, PlaylistDetailVM playlist) GetPlaylistDetail(int playlistId)
+		public (bool Success, string Message, PlaylistDetailVM PlaylistDetail) GetPlaylistDetail(int playlistId)
 		{
 			if (playlistId <= 0) return (false, "非法的清單編號", new PlaylistDetailVM());
 

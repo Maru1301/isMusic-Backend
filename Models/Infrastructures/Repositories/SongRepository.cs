@@ -11,6 +11,10 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 	{
 		private readonly AppDbContext _db;
 
+		private readonly int skipNumber = 5;
+
+		private readonly int takeNumber = 5;
+
 		public SongRepository(AppDbContext db)
 		{
 			_db = db;
@@ -85,7 +89,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
-		public IEnumerable<SongIndexDTO> GetSongsByName(string songName, int skipRows, int takeRows)
+		public IEnumerable<SongIndexDTO> GetSongsByName(string songName, int rowNumber)
 		{
 			return _db.Songs
 				.Where(song => song.SongName.Contains(songName) && song.Status == true && song.AlbumId != null)
@@ -103,8 +107,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					PlayedTimes = song.SongPlayedRecords.Count(),
 				})
 				.OrderBy(dto => dto.PlayedTimes)
-				.Skip(skipRows)
-				.Take(takeRows)
+				.Skip(rowNumber != 2 ? (rowNumber - 1) * skipNumber : 0)
+				.Take(rowNumber != 2 ? takeNumber : takeNumber * 2)
 				.ToList();
 		}
 

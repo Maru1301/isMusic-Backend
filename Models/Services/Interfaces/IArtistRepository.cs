@@ -1,5 +1,6 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
+using static api.iSMusic.Controllers.MembersController;
 using static api.iSMusic.Controllers.QueuesController;
 
 namespace api.iSMusic.Models.Services.Interfaces
@@ -12,6 +13,6 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		IEnumerable<ArtistIndexDTO> GetArtistsByName(string artistName, int skipRows, int takeRows);
 
-		IEnumerable<ArtistIndexDTO> GetLikedArtists(int memberId, string condition);
+		IEnumerable<ArtistIndexDTO> GetLikedArtists(int memberId, LikedQueryBody body);
 	}
 }

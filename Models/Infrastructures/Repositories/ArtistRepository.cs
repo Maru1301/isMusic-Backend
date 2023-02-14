@@ -2,12 +2,17 @@
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Services.Interfaces;
 using Microsoft.EntityFrameworkCore.Diagnostics.Internal;
+using static api.iSMusic.Controllers.MembersController;
 
 namespace api.iSMusic.Models.Infrastructures.Repositories
 {
     public class ArtistRepository : IRepository, IArtistRepository
 	{
 		private readonly AppDbContext _db;
+
+		private readonly int skipNumber = 5;
+
+		private readonly int takeNumber = 5;
 
 		public ArtistRepository(AppDbContext db)
 		{
@@ -48,22 +53,31 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
-		public IEnumerable<ArtistIndexDTO> GetLikedArtists(int memberId, string condition)
+		public IEnumerable<ArtistIndexDTO> GetLikedArtists(int memberId, LikedQueryBody body)
 		{
 			var follows = _db.ArtistFollows.Where(follow => follow.MemberId == memberId);
-
-			var artists = new List<Artist>();
-			switch(condition)
+			IEnumerable<Artist> artists = body.Condition switch
 			{
-				case "RecentlyAdded":
-					artists = follows.OrderBy(follow => follow.created).Select(follow => follow.Artist).ToList();
-					break;
-				case "Alphatically":
-					artists = follows.Select(follows => follows.Artist).OrderBy(artist => artist.ArtistName).ToList();
-					break;
-			}
+				"RecentlyAdded" => follows
+										.OrderByDescending(follow => follow.Created)
+										.Select(follow => follow.Artist),
+				"Alphatically" => follows
+										.Select(follows => follows.Artist)
+										.OrderBy(artist => artist.ArtistName),
+				_ => new List<Artist>(),
+			};
 
-			return artists.Select(artist => new ArtistIndexDTO { Id = artist.Id, ArtistName = artist.ArtistName, });
+			artists = body.RowNumber == 2 ?
+				artists.Take(takeNumber * 2) :
+				artists.Skip((body.RowNumber - 1) * skipNumber)
+				.Take(takeNumber);
+
+			return artists.Select(artist => new ArtistIndexDTO 
+			{ 
+				Id = artist.Id, 
+				ArtistName = artist.ArtistName, 
+				ArtistPicPath= artist.ArtistPicPath,
+			});
 		}
 	}
 }

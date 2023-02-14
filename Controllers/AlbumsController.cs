@@ -30,7 +30,7 @@ namespace api.iSMusic.Controllers
 		{
 			var recommendedAlbums = _service.GetRecommended();
 
-			if (recommendedAlbums.Count() == 0)
+			if (!recommendedAlbums.Any())
 			{
 				return NoContent();
 			}
@@ -39,8 +39,8 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("SongGenres/{genreId}/{rowNumber}")]
-		public IActionResult GetAlbumsByGenreId(int genreId, int rowNumber)
+		[Route("SongGenres/{genreId}")]
+		public IActionResult GetAlbumsByGenreId(int genreId, [FromQuery]int rowNumber = 2)
 		{
 			var dtos = _service.GetAlbumsByGenreId(genreId, rowNumber);
 
@@ -48,8 +48,8 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{albumName}/{rowNumber}")]
-		public IActionResult GetAlbumByName(string albumName, int rowNumber)
+		[Route("{albumName}")]
+		public IActionResult GetAlbumByName(string albumName, [FromQuery]int rowNumber = 2)
 		{
 			var dtos = _service.GetAlbumsByName(albumName, rowNumber);
 

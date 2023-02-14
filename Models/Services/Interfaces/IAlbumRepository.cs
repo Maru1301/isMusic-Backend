@@ -1,5 +1,6 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
+using static api.iSMusic.Controllers.MembersController;
 
 namespace api.iSMusic.Models.Services.Interfaces
 {
@@ -14,5 +15,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 		Album? GetAlbumByIdForCheck(int albumId);
 
 		IEnumerable<AlbumIndexDTO> GetAlbumsByName(string name, int skipRows, int takeRows);
+
+		IEnumerable<AlbumIndexDTO> GetLikedAlbums(int memberId, LikedQueryBody body);
 	}
 }

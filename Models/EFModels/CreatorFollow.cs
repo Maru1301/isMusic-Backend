@@ -18,6 +18,9 @@ public partial class CreatorFollow
     [Column("memberId")]
     public int MemberId { get; set; }
 
+    [Column("created", TypeName = "datetime")]
+    public DateTime Created { get; set; }
+
     [ForeignKey("CreatorId")]
     [InverseProperty("CreatorFollows")]
     public virtual Creator Creator { get; set; } = null!;

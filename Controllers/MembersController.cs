@@ -25,18 +25,18 @@ namespace api.iSMusic.Controllers
 
 		private readonly MemberService _memberService;
 
-		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, IPlaylistRepository playlistRepository, IQueueRepository queueRepository)
+		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository , IQueueRepository queueRepository)
 		{
 			_memberRepository = memberRepo;
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_memberService = new (_memberRepository, _playlistRepository, _songRepository, artistRepository);
+			_memberService = new (_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository);
 		}
 
 		[HttpGet]
 		[Route("{memberId}/Playlists")]
-		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromBody] InputQuery query)
+		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromQuery]InputQuery query)
 		{
 			var dtos = _memberService.GetMemberPlaylists(memberId, query);
 
@@ -50,16 +50,22 @@ namespace api.iSMusic.Controllers
 
 		public class InputQuery
 		{
+			public InputQuery()
+			{
+				RowNumber = 2;
+				IncludedLiked = true;
+				Condition = "RecentlyAdded";
+			}
 			public int RowNumber { get; set; }
 
 			public bool IncludedLiked { get; set; }
 
-			public string Condition { get; set; } = "RecentlyAdded";
+			public string Condition { get; set; }
 		}
 
 		[HttpGet]
 		[Route("{memberId}/Playlists/{playlistName}")]
-		public IActionResult GetMemberPlaylistsByName(int memberId, string name, [FromBody]int rowNumber)
+		public IActionResult GetMemberPlaylistsByName(int memberId, string name, [FromQuery] int rowNumber = 2)
 		{
 			var dto = _memberService.GetMemberPlaylistsByName(memberId, name, rowNumber);
 
@@ -127,9 +133,9 @@ namespace api.iSMusic.Controllers
 
 		[HttpGet]
 		[Route("{memberId}/LikedArtists")]
-		public IActionResult GetLikedArtists(int memberId, [FromBody] string condition)
+		public IActionResult GetLikedArtists(int memberId, [FromQuery] LikedQueryBody body)
 		{
-			var result = _memberService.GetLikedArtists(memberId, condition);
+			var result = _memberService.GetLikedArtists(memberId, body);
 
 			if (!result.Success)
 			{
@@ -137,6 +143,46 @@ namespace api.iSMusic.Controllers
 			}
 
 			return Ok(result.ArtistDtos.Select(dto=> dto.ToIndexVM()));
+		}
+
+		[HttpGet]
+		[Route("{memberId}/LikedCreators")]
+		public IActionResult GetLikedCreators(int memberId, [FromQuery] LikedQueryBody body)
+		{
+			var result = _memberService.GetLikedCreators(memberId, body);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.CreatorsDtos.Select(dto => dto.ToIndexVM()));
+		}
+
+		[HttpGet]
+		[Route("{memberId}/LikedAlbums")]
+		public IActionResult GetLikedAlbums(int memberId, [FromQuery] LikedQueryBody body)
+		{
+			var result = _memberService.GetLikedAlbums(memberId, body);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.AlbumsDtos.Select(dto => dto.ToIndexVM()));
+		}
+
+		public class LikedQueryBody
+		{
+			public LikedQueryBody()
+			{
+				RowNumber = 2;
+				Condition = "RecentlyAdded";
+			}
+			public int RowNumber { get; set; }
+
+			public string Condition { get; set; }
 		}
 
 		[HttpPost]
@@ -171,11 +217,39 @@ namespace api.iSMusic.Controllers
 			return Ok(result.Message);
 		}
 
+		[HttpPost]
+		[Route("{memberId}/LikedPlaylists/{playlistId}")]
+		public IActionResult AddLikedPlaylist(int memberId, int playlistId)
+		{
+			var result = _memberService.AddLikedPlaylists(memberId, playlistId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
 		[HttpDelete]
 		[Route("{memberId}/LikedSongs/{songId}")]
 		public IActionResult DeleteLikedSong(int memberId, int songId)
 		{
 			var result = _memberService.DeleteLikedSong(memberId, songId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+		[HttpDelete]
+		[Route("{memberId}/LikedPlaylists/{playlistId}")]
+		public IActionResult DeleteLikedPlaylist(int memberId, int playlistId)
+		{
+			var result = _memberService.DeleteLikedPlaylist(memberId, playlistId);
 
 			if (!result.Success)
 			{
