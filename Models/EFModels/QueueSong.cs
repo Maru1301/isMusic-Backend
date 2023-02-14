@@ -21,21 +21,17 @@ public partial class QueueSong
     [Column("displayOrder")]
     public int DisplayOrder { get; set; }
 
-    [Column("albumId")]
-    public int AlbumId { get; set; }
+    [Column("fromPlaylist")]
+    public bool FromPlaylist { get; set; }
 
-    [Column("playlistId")]
-    public int PlaylistId { get; set; }
-
-    [ForeignKey("AlbumId")]
-    [InverseProperty("QueueSongs")]
-    public virtual Album Album { get; set; } = null!;
-
-    [ForeignKey("PlaylistId")]
-    [InverseProperty("QueueSongs")]
-    public virtual Playlist Playlist { get; set; } = null!;
+    [Column("shuffleOrder")]
+    public int ShuffleOrder { get; set; }
 
     [ForeignKey("QueueId")]
     [InverseProperty("QueueSongs")]
     public virtual Queue Queue { get; set; } = null!;
+
+    [ForeignKey("SongId")]
+    [InverseProperty("QueueSongs")]
+    public virtual Song Song { get; set; } = null!;
 }

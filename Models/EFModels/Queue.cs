@@ -27,6 +27,23 @@ public partial class Queue
     [Column("isRepeat")]
     public bool? IsRepeat { get; set; }
 
+    [Column("albumId")]
+    public int? AlbumId { get; set; }
+
+    [Column("playlistId")]
+    public int? PlaylistId { get; set; }
+
+    [Column("artistId")]
+    public int? ArtistId { get; set; }
+
+    [ForeignKey("AlbumId")]
+    [InverseProperty("Queues")]
+    public virtual Album? Album { get; set; }
+
+    [ForeignKey("ArtistId")]
+    [InverseProperty("Queues")]
+    public virtual Artist? Artist { get; set; }
+
     [ForeignKey("CurrentSongId")]
     [InverseProperty("Queues")]
     public virtual Song? CurrentSong { get; set; }
@@ -34,6 +51,10 @@ public partial class Queue
     [ForeignKey("MemberId")]
     [InverseProperty("Queues")]
     public virtual Member Member { get; set; } = null!;
+
+    [ForeignKey("PlaylistId")]
+    [InverseProperty("Queues")]
+    public virtual Playlist? Playlist { get; set; }
 
     [InverseProperty("Queue")]
     public virtual ICollection<QueueSong> QueueSongs { get; } = new List<QueueSong>();

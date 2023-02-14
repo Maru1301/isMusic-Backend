@@ -18,6 +18,9 @@ public partial class ArtistFollow
     [Column("memberId")]
     public int MemberId { get; set; }
 
+    [Column("created", TypeName = "datetime")]
+    public DateTime Created { get; set; }
+
     [ForeignKey("ArtistId")]
     [InverseProperty("ArtistFollows")]
     public virtual Artist Artist { get; set; } = null!;

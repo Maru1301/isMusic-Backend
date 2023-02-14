@@ -37,5 +37,8 @@ public partial class Artist
     public virtual ICollection<ArtistFollow> ArtistFollows { get; } = new List<ArtistFollow>();
 
     [InverseProperty("Artist")]
+    public virtual ICollection<Queue> Queues { get; } = new List<Queue>();
+
+    [InverseProperty("Artist")]
     public virtual ICollection<SongArtistMetadatum> SongArtistMetadata { get; } = new List<SongArtistMetadatum>();
 }
