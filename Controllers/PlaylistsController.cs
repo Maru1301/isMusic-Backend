@@ -104,6 +104,19 @@ namespace api.iSMusic.Controllers
 			return Ok(result.Messgae);
 		}
 
+		[HttpPatch]
+		[Route("{playlistId}/PrivacySetting")]
+		public IActionResult ChangePrivacySetting(int playlistId)
+		{
+			var result = _service.ChangePrivacySetting(playlistId);
+			if (!result.Success)
+			{
+				return NotFound(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
 		[HttpDelete]
 		[Route("{playlistId}")]
 		public IActionResult DeletePlaylist(int playlistId)
@@ -111,10 +124,10 @@ namespace api.iSMusic.Controllers
 			var result = _service.DeletePlaylist(playlistId);
 			if (!result.Success)
 			{
-				return NotFound(result.Messgae);
+				return NotFound(result.Message);
 			}
 
-			return Ok(result.Messgae);
+			return Ok(result.Message);
 		}
 
 		[HttpDelete]
@@ -124,10 +137,10 @@ namespace api.iSMusic.Controllers
 			var result = _service.DeleteSongfromPlaylist(playlistId, displayOrder);
 			if (!result.Success)
 			{
-				return NotFound(result.Messgae);
+				return NotFound(result.Message);
 			}
 
-			return Ok(result.Messgae);
+			return Ok(result.Message);
 		}
 	}
 }

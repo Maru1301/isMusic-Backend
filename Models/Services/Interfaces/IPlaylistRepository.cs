@@ -32,6 +32,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void UpdatePlaylistDetail(int playlistId, PlaylistEditDTO dto);
 
+		void ChangePrivacySetting(int playlistId);
+
 		void DeletePlaylist(int playlistId);
 
 		void DeleteSongfromPlaylist(int playlistId, int displayOrder);

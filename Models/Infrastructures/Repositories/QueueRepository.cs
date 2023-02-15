@@ -105,14 +105,13 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		private QueueIndexDTO? CheckisRepeat(QueueIndexDTO? queue)
 		{
-			if (queue == null)
+			if (queue?.IsRepeat == true && queue.SongInfos.Count < this.takeLimit)
 			{
-				return null;
-			}
-
-			if (queue.IsRepeat.HasValue && queue.IsRepeat.Value == true && queue.SongInfos.Count < this.takeLimit)
-			{
-				queue.SongInfos.Add(queue.SongInfos.First());
+				var firstSong = queue.SongInfos.FirstOrDefault();
+				if (firstSong != null)
+				{
+					queue.SongInfos.Add(firstSong);
+				}
 			}
 
 			return queue;
@@ -293,6 +292,32 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SaveChanges();
 		}
 
+		public void AddAlbumIntoQueue(int queueId, int albumId)
+		{
+			var qss = _db.QueueSongs
+				.Where(qs => qs.QueueId == queueId);
+
+			var displayOrder = (qss != null) ?
+				qss.Max(qs => qs.DisplayOrder) :
+				0;
+
+			var songIds = _db.Songs
+				.Where(song => song.AlbumId == albumId)
+				.Select(song => song.Id)
+				.ToList();
+
+			var newQueueSongData = songIds.Select((songId, index) => new QueueSong
+			{
+				QueueId = queueId,
+				SongId = songId,
+				FromPlaylist = false,
+				DisplayOrder = displayOrder + index + 1,
+			});
+
+			_db.QueueSongs.AddRange(newQueueSongData);
+			_db.SaveChanges();
+		}
+
 		public void ChangeShuffle(int queueId)
 		{
 			var queue = _db.Queues.Single(queue => queue.Id == queueId);
@@ -317,6 +342,20 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					queueSong.ShuffleOrder = order;
 				}
 			}
+
+			_db.SaveChanges();
+		}
+
+		public void ChangeRepeat(int queueId, string mode)
+		{
+			var queue = _db.Queues.Single(queue => queue.Id == queueId);
+
+			queue.IsRepeat = mode switch
+			{
+				"Loop" => true,
+				"SingleLoop" => false,
+				_ => null,
+			};
 
 			_db.SaveChanges();
 		}

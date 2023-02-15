@@ -221,7 +221,21 @@ namespace api.iSMusic.Controllers
 		[Route("{memberId}/LikedPlaylists/{playlistId}")]
 		public IActionResult AddLikedPlaylist(int memberId, int playlistId)
 		{
-			var result = _memberService.AddLikedPlaylists(memberId, playlistId);
+			var result = _memberService.AddLikedPlaylist(memberId, playlistId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+		[HttpPost]
+		[Route("{memberId}/LikedAlbums/{albumId}")]
+		public IActionResult AddLikedAlbum(int memberId, int albumId)
+		{
+			var result = _memberService.AddLikedAlbum(memberId, albumId);
 
 			if (!result.Success)
 			{
@@ -250,6 +264,20 @@ namespace api.iSMusic.Controllers
 		public IActionResult DeleteLikedPlaylist(int memberId, int playlistId)
 		{
 			var result = _memberService.DeleteLikedPlaylist(memberId, playlistId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+		[HttpDelete]
+		[Route("{memberId}/LikedAlbums/{albumId}")]
+		public IActionResult DeleteLikedAlbum(int memberId, int albumId)
+		{
+			var result = _memberService.DeleteLikedAlbum(memberId, albumId);
 
 			if (!result.Success)
 			{

@@ -15,6 +15,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void AddPlaylistIntoQueue(int queueId, int playlistId);
 
+		void AddAlbumIntoQueue(int queueId, int albumId);
+
 		void UpdateQueueBySong(int queueId, int Id);
 
 		void UpdateQueueBySongs(int queueId, List<int> SongIds, string fromWhere, int contentId);
@@ -22,5 +24,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 		void UpdateByDisplayOredr(int queueId, int displayOrder);
 
 		void ChangeShuffle(int queueId);
+
+		void ChangeRepeat(int queueId, string mode);
 	}
 }

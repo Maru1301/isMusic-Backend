@@ -119,7 +119,15 @@ namespace api.iSMusic.Models.Services
 			return (true, "更新成功");
 		}
 
-		public (bool Success, string Messgae) DeletePlaylist(int playlistId)
+		public (bool Success, string Message) ChangePrivacySetting(int playlistId)
+		{
+			if(CheckPlaylistExistence(playlistId)==false) return (false, "清單不存在");
+
+			_repository.ChangePrivacySetting(playlistId);
+			return (true, "更新成功");
+		}
+
+		public (bool Success, string Message) DeletePlaylist(int playlistId)
 		{
 			if(CheckPlaylistExistence(playlistId) == false) return(false, "清單不存在");
 
@@ -127,7 +135,7 @@ namespace api.iSMusic.Models.Services
 			return (true, "刪除成功");
 		}
 
-		public (bool Success, string Messgae) DeleteSongfromPlaylist(int playlistId, int displayOrder)
+		public (bool Success, string Message) DeleteSongfromPlaylist(int playlistId, int displayOrder)
 		{
 			if (CheckPlaylistExistence(playlistId) == false) return (false, "清單不存在");
 

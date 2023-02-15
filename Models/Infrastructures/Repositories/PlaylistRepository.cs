@@ -213,5 +213,14 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				_db.SaveChanges();
 			}
 		}
+
+		public void ChangePrivacySetting(int playlistId)
+		{
+			var playlist = _db.Playlists.First(playlist => playlist.Id == playlistId);
+
+			playlist.IsPublic = !playlist.IsPublic;
+
+			_db.SaveChanges();
+		}
 	}
 }

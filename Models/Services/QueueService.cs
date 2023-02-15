@@ -46,6 +46,16 @@ namespace api.iSMusic.Models.Services
 			return (true, "新增成功");
 		}
 
+		public (bool Success, string Message) AddAlbumIntoQueue(int queueId, int albumId)
+		{
+			if (!CheckQueueExistence(queueId)) return (false, "佇列不存在");
+
+			if (!CheckAlbumExistence(albumId)) return (false, "專輯不存在");
+
+			_queuerepository.AddAlbumIntoQueue(queueId, albumId);
+			return (true, "新增成功");
+		}
+
 		public (bool Success, string Message) ChangeQueueContent(int queueId, int contentId, Condition condition)
 		{
 			try
@@ -121,6 +131,15 @@ namespace api.iSMusic.Models.Services
 
 			_queuerepository.ChangeShuffle(queueId);
 			
+			return (true, "更新成功");
+		}
+
+		public (bool Success, string Message)  ChangeRepeat(int queueId, string mode)
+		{
+			if (CheckQueueExistence(queueId) == false) return (false, "佇列不存在");
+
+			_queuerepository.ChangeRepeat(queueId, mode);
+
 			return (true, "更新成功");
 		}
 
