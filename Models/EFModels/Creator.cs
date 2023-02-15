@@ -35,6 +35,9 @@ public partial class Creator
     [StringLength(100)]
     public string? CreatorCoverPath { get; set; }
 
+    [InverseProperty("MainCreator")]
+    public virtual ICollection<Album> Albums { get; } = new List<Album>();
+
     [InverseProperty("Creator")]
     public virtual ICollection<CreatorFollow> CreatorFollows { get; } = new List<CreatorFollow>();
 

@@ -16,12 +16,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\EFModels\" />
-    <Folder Include="Models\DTOs\" />
-    <Folder Include="Models\Infrastructures\" />
-    <Folder Include="Models\ViewModels\" />
-    <Folder Include="Models\Services\" />
-  </ItemGroup>
-
 </Project>
