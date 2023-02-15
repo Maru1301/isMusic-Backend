@@ -14,10 +14,13 @@ namespace api.iSMusic.Models.Services
 
 		private readonly ISongRepository _songRepository;
 
-		public PlaylistService(IPlaylistRepository repository, ISongRepository songRepository)
+		private readonly IAlbumRepository _albumRepository;
+
+		public PlaylistService(IPlaylistRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository)
 		{
 			_repository = repository;
 			_songRepository = songRepository;
+			_albumRepository = albumRepository;
 		}
 
 		public IEnumerable<PlaylistIndexDTO> GetRecommended()
@@ -79,7 +82,7 @@ namespace api.iSMusic.Models.Services
 			return _repository.GetPlaylistsByName(name, skip, take);
 		}
 
-		public (bool Success, string Message)AddSongToPlaylist(int playlistId, int songId, bool Force)
+		public (bool Success, string Message) AddSongToPlaylist(int playlistId, int songId, bool Force)
 		{
 			var playlist = _repository.GetPlaylistById(playlistId);
 			if(playlist == null) return (false, "清單不存在");
@@ -88,13 +91,50 @@ namespace api.iSMusic.Models.Services
 
 			if(!Force && metadata.Select(metadatum => metadatum.SongId).Contains(songId))
 			{
-				return (false, "清單內已有歌曲");
+				return (false, string.Empty);
 			}
 
 			var lastOrder = metadata != null ? metadata.Max(metadatum => metadatum.DisplayOrder) : 0;
 
 			_repository.AddSongToPlaylist(playlistId, songId, lastOrder);
 
+			return (true, "新增成功");
+		}
+
+		public (bool Success, string Message) AddAlbumToPlaylist(int playlistId, int albumId, string mode)
+		{
+			var playlist = _repository.GetPlaylistById(playlistId);
+			if (playlist == null) return (false, "播放清單不存在");
+
+			var album = _albumRepository.GetAlbumById(albumId);
+			if (album == null) return (false, "專輯不存在");
+
+			var songIdsInPlaylist = playlist.PlayListSongMetadata.Select(metadata => metadata.SongId).ToHashSet();
+
+			var selectedSongs = album.Songs.Select(song => song.Id).ToList();
+
+			if (mode == "Normal")
+			{
+				bool contained = songIdsInPlaylist.IsSupersetOf(selectedSongs);
+				if (contained)
+				{
+					return (false, "整張專輯已經在播放清單中");
+				}
+				else if (songIdsInPlaylist.Overlaps(selectedSongs))
+				{
+					return (false, "此播放清單已包部分歌曲");
+				}
+			}
+			else if(mode == "Partial")
+			{
+				selectedSongs = selectedSongs.Where(songId => songIdsInPlaylist.Contains(songId) == false).ToList();
+			}
+
+			var metadata = playlist.PlayListSongMetadata;
+
+			var newOrder = metadata != null ? metadata.Max(metadatum => metadatum.DisplayOrder)+1 : 0;
+
+			_repository.AddSongsToPlaylist(playlistId, selectedSongs, newOrder);
 			return (true, "新增成功");
 		}
 

@@ -7,6 +7,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 {
     public interface IArtistRepository
 	{
+		ArtistDetailDTO? GetArtistDetail(int artistId);
+
 		ArtistIndexDTO? GetArtistById(int artistId);
 
 		Artist? GetArtistByIdForCheck(int artistId);

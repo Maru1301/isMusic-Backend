@@ -171,10 +171,25 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			{
 				SongId = songId,
 				PlayListId = playlistId,
-				DisplayOrder = lastOrder + 1
+				DisplayOrder = lastOrder + 1,
+				AddedTime= DateTime.Now,
 			};
 
 			_db.PlaylistSongMetadata.Add(newMetadata);
+			_db.SaveChanges();
+		}
+
+		public void AddSongsToPlaylist(int playlistId, List<int> selectedSongs, int order)
+		{
+			var newMetadata = selectedSongs.Select((songId, index) => new PlaylistSongMetadatum
+			{
+				SongId = songId,
+				PlayListId = playlistId,
+				DisplayOrder = order + index,
+				AddedTime= DateTime.Now,
+			}).ToList();
+
+			_db.PlaylistSongMetadata.AddRange(newMetadata);
 			_db.SaveChanges();
 		}
 
@@ -222,5 +237,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 			_db.SaveChanges();
 		}
+
+		
 	}
 }

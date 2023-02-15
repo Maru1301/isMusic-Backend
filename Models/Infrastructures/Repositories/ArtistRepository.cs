@@ -1,6 +1,8 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics.Internal;
 using static api.iSMusic.Controllers.MembersController;
 
@@ -17,6 +19,27 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		public ArtistRepository(AppDbContext db)
 		{
 			_db = db;
+		}
+
+		public ArtistDetailDTO? GetArtistDetail(int artistId)
+		{
+			return _db.Artists
+				.Include(artist => artist.SongArtistMetadata)
+				.Include(artist => artist.Albums)
+				.Select(artist => new ArtistDetailDTO
+				{
+					Id = artistId,
+					ArtistName = artist.ArtistName,
+					ArtistPicPath = artist.ArtistPicPath,
+					PopularSongs = artist.SongArtistMetadata
+						.Where(metadata => metadata.ArtistId == artistId)
+						.Select(metadata => metadata.Song.ToInfoDTO())
+						.ToList(),
+					PopularAlbums = artist.Albums
+						.Where(album => album.MainArtistId == artistId)
+						.Select(album => album.ToIndexDTO())
+				})
+				.SingleOrDefault(dto => dto.Id == artistId);
 		}
 
 		public Artist? GetArtistByIdForCheck(int artistId)
@@ -79,5 +102,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				ArtistPicPath= artist.ArtistPicPath,
 			});
 		}
+
+		
 	}
 }

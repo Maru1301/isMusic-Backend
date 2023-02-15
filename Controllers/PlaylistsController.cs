@@ -23,11 +23,11 @@ namespace api.iSMusic.Controllers
 
 		private readonly PlaylistService _service;
 
-		public PlaylistsController(IPlaylistRepository repo, ISongRepository songRepository)
+		public PlaylistsController(IPlaylistRepository repo, ISongRepository songRepository,IAlbumRepository albumRepository)
 		{
 			_repository = repo;
 			_songRepository = songRepository;
-			_service = new(_repository, _songRepository);
+			_service = new(_repository, _songRepository, albumRepository);
 		}
 
 		[HttpGet]
@@ -76,6 +76,23 @@ namespace api.iSMusic.Controllers
 		public IActionResult AddSongToPlaylist(int playlistId, int songId, [FromBody]bool Force)
 		{
 			var result = _service.AddSongToPlaylist(playlistId, songId, Force);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}else if(result.Success == true && string.IsNullOrEmpty(result.Message))
+			{
+				return Accepted("歌曲已在清單中");
+			}
+
+			return Ok(result.Message);
+		}
+
+		[HttpPost]
+		[Route("{playlistId}/Albums/{albumId}")]
+		public IActionResult AddAlbumToPlaylist(int playlistId, int albumId, [FromBody]string mode = "Normal")
+		{
+			var result = _service.AddAlbumToPlaylist(playlistId, albumId, mode);
 
 			if (!result.Success)
 			{

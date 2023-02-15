@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.AlbumVMs;
 
 namespace api.iSMusic.Models.Infrastructures.Extensions;
@@ -16,6 +17,18 @@ public static class AlbumExts
 			Released = source.Released,
 			MainArtistId= source.MainArtistId,
 			TotalLikes= source.TotalLikes,
+		};
+
+	public static AlbumIndexDTO ToIndexDTO(this Album source)
+		=> new()
+		{
+			Id = source.Id,
+			AlbumName = source.AlbumName,
+			AlbumGenreId = source.AlbumGenreId,
+			AlbumTypeId = source.AlbumTypeId,
+			AlbumCoverPath = source.AlbumCoverPath,
+			Released = source.Released,
+			MainArtistId = source.MainArtistId,
 		};
 
 	public static AlbumDetailVM ToDetailVM(this AlbumDetailDTO source)

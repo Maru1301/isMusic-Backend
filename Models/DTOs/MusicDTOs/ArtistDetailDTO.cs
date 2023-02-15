@@ -1,11 +1,9 @@
-﻿using api.iSMusic.Models.DTOs.MusicDTOs;
-using api.iSMusic.Models.EFModels;
-using api.iSMusic.Models.ViewModels.AlbumVMs;
+﻿using api.iSMusic.Models.ViewModels.AlbumVMs;
 using api.iSMusic.Models.ViewModels.SongVMs;
 
-namespace api.iSMusic.Models.ViewModels.ArtistVMs
+namespace api.iSMusic.Models.DTOs.MusicDTOs
 {
-	public class ArtistDetailVM
+	public class ArtistDetailDTO
 	{
 		public int Id { get; set; }
 

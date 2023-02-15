@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Services.Interfaces;
 
 namespace api.iSMusic.Models.Services
@@ -12,6 +13,21 @@ namespace api.iSMusic.Models.Services
 			_artistRepository= artistRepository;
 		}
 
+		public (bool Success, string Message, ArtistDetailDTO dto) GetArtistDetail(int artistId)
+		{
+			ArtistDetailDTO dto;
+			try
+			{
+				dto = _artistRepository.GetArtistDetail(artistId);
+			}
+			catch(Exception ex)
+			{
+				return (false, ex.Message, new ArtistDetailDTO());
+			}
+
+			return (true, string.Empty, dto);
+		}
+
 		public IEnumerable<ArtistIndexDTO> GetArtistsByName(string name, int rowNumber)
 		{
 			int skip = (rowNumber - 1) * 5;
@@ -23,6 +39,13 @@ namespace api.iSMusic.Models.Services
 			}
 
 			return _artistRepository.GetArtistsByName(name, skip, take);
+		}
+
+		private bool CheckArtistExistence(int artistId)
+		{
+			var artist = _artistRepository.GetArtistById(artistId);
+
+			return artist != null;
 		}
 	}
 }

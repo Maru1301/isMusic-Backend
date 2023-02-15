@@ -30,6 +30,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void AddSongToPlaylist(int playlistId, int songId, int lastOrder);
 
+		void AddSongsToPlaylist(int playlistId, List<int> selectedSongs, int order);
+
 		void UpdatePlaylistDetail(int playlistId, PlaylistEditDTO dto);
 
 		void ChangePrivacySetting(int playlistId);
