@@ -87,60 +87,47 @@ namespace api.iSMusic.Controllers
 
 		[HttpPut]
 		[Route("{playlistId}/Detail")]
-		public async Task<IActionResult> UpdatePlaylistDetail(int playlistId, [FromForm] PlaylistEditVM model)
+		public IActionResult UpdatePlaylistDetail(int playlistId, [FromForm] PlaylistEditVM model)
 		{
 			if (!ModelState.IsValid)
 			{
 				return BadRequest(ModelState);
 			}
 
-			//Find the playlist in the database
-			var playlist = await _db.Playlists.FirstOrDefaultAsync(p => p.Id == playlistId);
+			var result = _service.UpdatePlaylistDetail(playlistId, model.ToEditDTO());
 
-			if (playlist == null)
+			if (!result.Success)
 			{
-				return NotFound("Playlist not found");
+				return NotFound(result.Messgae);
 			}
 
-			//Update the playlist with the data from the view model
-			playlist.ListName = model.ListName;
-			playlist.Description = model.Description;
-
-			if (model.PlaylistCover != null)
-			{
-				var fileName = Path.GetFileName(model.PlaylistCover.FileName);
-				var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", fileName);
-
-				using (var stream = new FileStream(filePath, FileMode.Create))
-				{
-					await model.PlaylistCover.CopyToAsync(stream);
-				}
-
-				playlist.PlaylistCoverPath = Path.Combine("uploads", fileName);
-			}
-
-			//Save the changes to the database
-			await _db.SaveChangesAsync();
-
-			return Ok();
+			return Ok(result.Messgae);
 		}
 
-		//[HttpDelete]
-		//[Route("Song")]
-		//public IActionResult DeleteSongfromPlaylist(int playlistId, int songId)
-		//{
-		//	var metadata = _db.PlaylistSongMetadata
-		//		.FirstOrDefault(m => m.PlayListId == playlistId && m.SongId == songId);
+		[HttpDelete]
+		[Route("{playlistId}")]
+		public IActionResult DeletePlaylist(int playlistId)
+		{
+			var result = _service.DeletePlaylist(playlistId);
+			if (!result.Success)
+			{
+				return NotFound(result.Messgae);
+			}
 
-		//	if (metadata == null)
-		//	{
-		//		return NotFound("Playlist-song metadata not found");
-		//	}
+			return Ok(result.Messgae);
+		}
 
-		//	_db.PlaylistSongMetadata.Remove(metadata);
-		//	_db.SaveChanges();
+		[HttpDelete]
+		[Route("{playlistId}/Songs/{displayOrder}")]
+		public IActionResult DeleteSongfromPlaylist(int playlistId, int displayOrder)
+		{
+			var result = _service.DeleteSongfromPlaylist(playlistId, displayOrder);
+			if (!result.Success)
+			{
+				return NotFound(result.Messgae);
+			}
 
-		//	return NoContent();
-		//}
+			return Ok(result.Messgae);
+		}
 	}
 }

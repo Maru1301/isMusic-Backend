@@ -66,5 +66,7 @@ namespace api.iSMusic.Controllers
 
 			return Ok(dto.ToDetailVM());
 		}
+
+		
 	}
 }

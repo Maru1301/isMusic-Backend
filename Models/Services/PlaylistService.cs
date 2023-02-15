@@ -98,6 +98,50 @@ namespace api.iSMusic.Models.Services
 			return (true, "新增成功");
 		}
 
+		public (bool Success, string Messgae) UpdatePlaylistDetail(int playlistId, PlaylistEditDTO dto)
+		{
+			if (CheckPlaylistExistence(playlistId)) return (false, "清單不存在");
+
+			if (dto.PlaylistCover != null)
+			{
+				var fileName = Path.GetFileName(dto.PlaylistCover.FileName);
+				var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", fileName);
+
+				using (var stream = new FileStream(filePath, FileMode.Create))
+				{
+					dto.PlaylistCover.CopyTo(stream);
+				}
+
+				dto.PlaylistCoverPath = Path.Combine("uploads", fileName);
+			}
+
+			_repository.UpdatePlaylistDetail(playlistId, dto);
+			return (true, "更新成功");
+		}
+
+		public (bool Success, string Messgae) DeletePlaylist(int playlistId)
+		{
+			if(CheckPlaylistExistence(playlistId) == false) return(false, "清單不存在");
+
+			_repository.DeletePlaylist(playlistId);
+			return (true, "刪除成功");
+		}
+
+		public (bool Success, string Messgae) DeleteSongfromPlaylist(int playlistId, int displayOrder)
+		{
+			if (CheckPlaylistExistence(playlistId) == false) return (false, "清單不存在");
+
+			_repository.DeleteSongfromPlaylist(playlistId, displayOrder);
+			return (true, "刪除成功");
+		}
+
+		private bool CheckSongExistence(int songId)
+		{
+			var song = _songRepository.GetSongByIdForCheck(songId);
+
+			return song != null;
+		}
+
 		private bool CheckPlaylistExistence(int playlistId)
 		{
 			var playlist = _repository.GetPlaylistByIdForCheck(playlistId);

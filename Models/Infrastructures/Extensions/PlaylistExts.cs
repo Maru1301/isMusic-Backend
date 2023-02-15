@@ -1,6 +1,7 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
+using API_practice.Models.ViewModels.PlaylistVMs;
 
 namespace api.iSMusic.Models.Infrastructures.Extensions;
 
@@ -51,5 +52,14 @@ public static class PlaylistExts
 			SongId = source.SongId,
 			DisplayOrder= source.DisplayOrder,
 			AddedTime= source.AddedTime,
+		};
+
+	public static PlaylistEditDTO ToEditDTO(this PlaylistEditVM source)
+		=> new PlaylistEditDTO
+		{
+			ListName= source.ListName,
+			PlaylistCover = source.PlaylistCover,
+			PlaylistCoverPath= source.PlaylistCoverPath,
+			Description= source.Description,
 		};
 }

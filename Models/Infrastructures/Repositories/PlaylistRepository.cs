@@ -177,5 +177,41 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.PlaylistSongMetadata.Add(newMetadata);
 			_db.SaveChanges();
 		}
+
+		public void UpdatePlaylistDetail(int playlistId, PlaylistEditDTO dto)
+		{
+			var playlist = _db.Playlists.Single(playlist => playlist.Id == playlistId);
+
+			//Update the playlist with the data from the view model
+			playlist.ListName = dto.ListName;
+			playlist.Description = dto.Description;
+			playlist.PlaylistCoverPath= dto.PlaylistCoverPath;
+
+			//Save the changes to the database
+			_db.SaveChanges();
+		}
+
+		public void DeletePlaylist(int playlistId)
+		{
+			var playlist = _db.Playlists.Single(playlist =>playlist.Id == playlistId);
+
+			if (playlist != null)
+			{
+				_db.Playlists.Remove(playlist);
+				_db.SaveChanges();
+			}
+		}
+
+		public void DeleteSongfromPlaylist(int playlistId, int displayOrder)
+		{
+			var metadata = _db.PlaylistSongMetadata
+				.FirstOrDefault(m => m.PlayListId == playlistId && m.DisplayOrder == displayOrder);
+
+			if (metadata != null)
+			{
+				_db.PlaylistSongMetadata.Remove(metadata);
+				_db.SaveChanges();
+			}
+		}
 	}
 }

@@ -29,5 +29,11 @@ namespace api.iSMusic.Models.Services.Interfaces
 		IEnumerable<PlaylistIndexDTO> GetPlaylistsByName(string name, int skipRows, int takeRows);
 
 		void AddSongToPlaylist(int playlistId, int songId, int lastOrder);
+
+		void UpdatePlaylistDetail(int playlistId, PlaylistEditDTO dto);
+
+		void DeletePlaylist(int playlistId);
+
+		void DeleteSongfromPlaylist(int playlistId, int displayOrder);
 	}
 }
