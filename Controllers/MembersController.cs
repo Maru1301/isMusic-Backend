@@ -248,6 +248,20 @@ namespace api.iSMusic.Controllers
 			return Ok(result.Message);
 		}
 
+		[HttpPost]
+		[Route("{memberId}/FollowedArtists/{artistId}")]
+		public IActionResult FollowArtist(int memberId, int artistId)
+		{
+			var result = _memberService.FollowArtist(memberId, artistId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
 		[HttpDelete]
 		[Route("{memberId}/LikedSongs/{songId}")]
 		public IActionResult DeleteLikedSong(int memberId, int songId)
@@ -281,6 +295,20 @@ namespace api.iSMusic.Controllers
 		public IActionResult DeleteLikedAlbum(int memberId, int albumId)
 		{
 			var result = _memberService.DeleteLikedAlbum(memberId, albumId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+		[HttpDelete]
+		[Route("{memberId}/FollowedArtists/{artistId}")]
+		public IActionResult UnfollowArtist(int memberId, int artistId)
+		{
+			var result = _memberService.UnfollowArtist(memberId, artistId);
 
 			if (!result.Success)
 			{

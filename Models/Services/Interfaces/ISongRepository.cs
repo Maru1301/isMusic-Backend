@@ -6,7 +6,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 {
     public interface ISongRepository
 	{
-		IEnumerable<SongIndexDTO> GetPopularSongs(int artistId = 0, int rowNumber = 1);
+		IEnumerable<SongIndexDTO> GetPopularSongs(int contentId = 0, string mode = "", int rowNumber = 1);
 
 		IEnumerable<int> GetLikedSongIdsByMemberId(int memberId);
 

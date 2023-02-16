@@ -113,6 +113,16 @@ namespace api.iSMusic.Models.Services
 			return (true, "成功新增");
 		}
 
+		public (bool Success, string Message) FollowArtist(int memberId, int artistId)
+		{
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
+
+			if (CheckArtistExistence(artistId) == false) return (false, "表演者不存在");
+
+			_memberRepository.FollowArtist(memberId, artistId);
+			return (true, "成功新增");
+		}
+
 		public (bool Success, string Message) DeleteLikedSong(int memberId, int songId)
 		{
 			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
@@ -143,6 +153,16 @@ namespace api.iSMusic.Models.Services
 			return (true, "成功刪除");
 		}
 
+		public (bool Success, string Message) UnfollowArtist(int memberId, int artistId)
+		{
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
+
+			if (CheckArtistExistence(artistId) == false) return (false, "表演者不存在");
+
+			_memberRepository.UnfollowArtist(memberId, artistId);
+			return (true, "成功刪除");
+		}
+
 		private bool CheckSongExistence(int songId)
 		{
 			var song = _songRepository.GetSongById(songId);
@@ -159,14 +179,21 @@ namespace api.iSMusic.Models.Services
 
 		private bool CheckPlaylistExistence(int playlistId)
 		{
-			var playlist = _playlistRepository.GetPlaylistById(playlistId);
+			var playlist = _playlistRepository.GetPlaylistByIdForCheck(playlistId);
 
 			return playlist != null;
 		}
 
 		private bool CheckAlbumExistence(int albumId)
 		{
-			var playlist = _albumRepository.GetAlbumById(albumId);
+			var playlist = _albumRepository.GetAlbumByIdForCheck(albumId);
+
+			return playlist != null;
+		}
+
+		private bool CheckArtistExistence(int artistId)
+		{
+			var playlist = _artistRepository.GetArtistByIdForCheck(artistId);
 
 			return playlist != null;
 		}

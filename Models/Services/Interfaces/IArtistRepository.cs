@@ -14,5 +14,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 		IEnumerable<ArtistIndexDTO> GetArtistsByName(string artistName, int skipRows, int takeRows);
 
 		IEnumerable<ArtistIndexDTO> GetLikedArtists(int memberId, LikedQuery body);
+
+		ArtistAboutDTO GetArtistAbout(int artistId);
 	}
 }

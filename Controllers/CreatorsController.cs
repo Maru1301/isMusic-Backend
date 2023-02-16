@@ -16,10 +16,23 @@ namespace api.iSMusic.Controllers
 
 		private readonly CreatorService _service;
 
-		public CreatorsController(ICreatorRepository repository)
+		public CreatorsController(ICreatorRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
 			_repository = repository;
-			_service = new CreatorService(_repository);
+			_service = new CreatorService(_repository, songRepository, albumRepository, playlistRepository);
+		}
+
+		[HttpGet]
+		[Route("{creatorId}/Detail")]
+		public ActionResult<ArtistDetailVM> GetCreatorDetail(int creatorId)
+		{
+			var result = _service.GetCreatorDetail(creatorId);
+			if (!result.Success)
+			{
+				return NotFound(result.Message);
+			}
+
+			return Ok(result.dto.ToDetailVM());
 		}
 
 		[HttpGet]

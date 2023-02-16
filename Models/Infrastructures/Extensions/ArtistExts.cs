@@ -39,4 +39,15 @@ public static class ArtistExts
 			PopularAlbums = source.PopularAlbums,
 			IncludedPlaylists = source.IncludedPlaylists,
 		};
+
+	public static ArtistAboutVM ToAboutVM(this ArtistAboutDTO source)
+		=> new()
+		{
+			Id = source.Id,
+			ArtistName = source.ArtistName,
+			About = source.About,
+			Followers = source.Followers,
+			MonthlyPlayedTimes = source.MonthlyPlayedTimes,
+		};
+
 }

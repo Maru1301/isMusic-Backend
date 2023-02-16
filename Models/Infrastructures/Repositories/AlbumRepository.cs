@@ -151,17 +151,17 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			});
 		}
 
-		public IEnumerable<AlbumIndexDTO> GetPopularAlbums(int contentId, bool isFromArtist, int rowNumber = 1)
+		public IEnumerable<AlbumIndexDTO> GetPopularAlbums(int contentId, string mode, int rowNumber = 1)
 		{
 			var albums = _db.Albums
 				.Include(album => album.LikedAlbums)
 				.Where(album => album.Released <= DateTime.Now);
 
-			if(isFromArtist)
+			if(mode == "Artist")
 			{
 				albums = albums.Where(album => album.MainArtistId == contentId);
 			}
-			else
+			else if(mode == "Creator")
 			{
 				albums = albums.Where(album => album.MainCreatorId == contentId);
 			}
@@ -184,11 +184,39 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					TotalLikes = album.LikedAlbums.Count(),
 				})
 				.OrderByDescending(dto => dto.TotalLikes)
-				.Skip(rowNumber == 2 ? 0:(rowNumber - 1) * skipNumber)
-				.Take(takeNumber)
+				.Skip(rowNumber == 2 ? 0 : (rowNumber - 1) * skipNumber)
+				.Take(rowNumber == 2 ? takeNumber * 2 : takeNumber)
 				.ToList();
 
 			return dtos;
+		}
+
+		public IEnumerable<AlbumIndexDTO> GetAlbumsByArtistId(int artistId, int rowNumber)
+		{
+			return _db.Albums
+				.Where(album => album.MainArtistId == artistId)
+				.Include(album => album.LikedAlbums)
+				.Select(album => new AlbumIndexDTO
+				{
+					Id = album.Id,
+					AlbumName = album.AlbumName,
+					AlbumGenreId = album.AlbumGenreId,
+					AlbumTypeId = album.AlbumTypeId,
+					AlbumCoverPath = album.AlbumCoverPath,
+					Released = album.Released,
+					MainArtistId = album.MainArtistId,
+					MainArtistName = album.MainArtist != null ? album.MainArtist.ArtistName :
+						null,
+					MainCreatorId = album.MainCreatorId,
+					MainCreatorName = album.MainCreator != null ?
+						album.MainCreator.CreatorName :
+						null,
+					TotalLikes = album.LikedAlbums.Count(),
+				})
+				.OrderByDescending(dto => dto.TotalLikes)
+				.Skip(rowNumber == 2 ? 0 : (rowNumber - 1) * skipNumber)
+				.Take(takeNumber)
+				.ToList();
 		}
 	}
 }

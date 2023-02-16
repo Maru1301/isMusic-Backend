@@ -19,6 +19,18 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db = db;
 		}
 
+		public CreatorIndexDTO? GetCreatorById(int creatorId)
+		{
+			return _db.Creators
+				.Select(creator => new CreatorIndexDTO
+				{
+					Id = creator.Id,
+					CreatorName = creator.CreatorName,
+					CreatorPicPath = creator.CreatorPicPath,
+				})
+				.SingleOrDefault(dto => dto.Id == creatorId);
+		}
+
 		public IEnumerable<CreatorIndexDTO> GetCreatorsByName(string name, int rowNumber)
 		{
 			return _db.Creators

@@ -14,6 +14,8 @@ namespace api.iSMusic.Models.Services
 
 		private readonly IPlaylistRepository _playlistRepository;
 
+		private readonly string ArtistMode = "Artist";
+
 		public ArtistService(IArtistRepository artistRepository, ISongRepository songRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
 			_artistRepository = artistRepository;
@@ -27,11 +29,11 @@ namespace api.iSMusic.Models.Services
 			var artist = _artistRepository.GetArtistById(artistId);
 			if (artist == null) return (false, "表演者不存在", new ArtistDetailDTO());
 
-			var popularSongs = _songRepository.GetPopularSongs(artistId);
+			var popularSongs = _songRepository.GetPopularSongs(artistId, ArtistMode);
 
-			var popularAlbums = _albumRepository.GetPopularAlbums(artistId, true);
+			var popularAlbums = _albumRepository.GetPopularAlbums(artistId, ArtistMode);
 
-			var includedPlaylists = _playlistRepository.GetIncludedPlaylists(artistId);
+			var includedPlaylists = _playlistRepository.GetIncludedPlaylists(artistId, ArtistMode);
 
 			var dto = new ArtistDetailDTO
 			{
@@ -57,6 +59,34 @@ namespace api.iSMusic.Models.Services
 			}
 
 			return _artistRepository.GetArtistsByName(name, skip, take);
+		}
+
+		public (bool Success, string Message, IEnumerable<AlbumIndexDTO> Dtos)GetArtistAlbums(int artistId, int rowNumber)
+		{
+			if (CheckArtistExistence(artistId) == false) return (false, "表演者不存在", new List<AlbumIndexDTO>());
+
+			if(rowNumber <= 0) return (false, "行數不得為零或是小於零", new List<AlbumIndexDTO>());
+
+			var dtos = _albumRepository.GetAlbumsByArtistId(artistId, rowNumber);
+			return (true, string.Empty, dtos);
+		}
+
+		public (bool Success, string Message, IEnumerable<PlaylistIndexDTO> Dtos) GetArtistPlaylists(int artistId, int rowNumber)
+		{
+			if (CheckArtistExistence(artistId) == false) return (false, "表演者不存在", new List<PlaylistIndexDTO>());
+
+			if (rowNumber <= 0) return (false, "行數不得為零或是小於零", new List<PlaylistIndexDTO>());
+
+			var dtos = _playlistRepository.GetIncludedPlaylists(artistId, ArtistMode, rowNumber);
+			return (true, string.Empty, dtos);
+		}
+
+		public (bool Success, string Message, ArtistAboutDTO Dto) GetArtistAbout(int artistId)
+		{
+			if (CheckArtistExistence(artistId) == false) return (false, "表演者不存在", new ArtistAboutDTO());
+
+			var dto = _artistRepository.GetArtistAbout(artistId);
+			return (true, string.Empty, dto);
 		}
 
 		private bool CheckArtistExistence(int artistId)

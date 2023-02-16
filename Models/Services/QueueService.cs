@@ -73,7 +73,7 @@ namespace api.iSMusic.Models.Services
 					if(CheckArtistExistence(contentId) == false) throw new Exception("音樂家不存在");
 
 					var popularSongIds = _songRepository
-						.GetPopularSongs(contentId)
+						.GetPopularSongs(contentId, "Artist", 2)
 						.Select(song => song.Id)
 						.ToList();
 

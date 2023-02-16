@@ -92,5 +92,28 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.LikedAlbums.Remove(data);
 			_db.SaveChanges();
 		}
+
+		public void FollowArtist(int memberId, int artistId)
+		{
+			var data = new ArtistFollow
+			{
+				MemberId = memberId,
+				ArtistId = artistId,
+				Created = DateTime.Now,
+			};
+
+			_db.ArtistFollows.Add(data);
+			_db.SaveChanges();
+		}
+
+		public void UnfollowArtist(int memberId, int artistId)
+		{
+			var data = _db.ArtistFollows.SingleOrDefault(af => af.MemberId == memberId && af.ArtistId == artistId);
+
+			if (data == null) throw new Exception("此歌曲不在喜歡列表內");
+
+			_db.ArtistFollows.Remove(data);
+			_db.SaveChanges();
+		}
 	}
 }

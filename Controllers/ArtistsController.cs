@@ -47,5 +47,44 @@ namespace api.iSMusic.Controllers
 
 			return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
+
+		[HttpGet]
+		[Route("{artistId}/Albums")]
+		public IActionResult GetArtistAlbums(int artistId, [FromQuery]int rowNumber = 2)
+		{
+			var result = _service.GetArtistAlbums(artistId, rowNumber);
+			if(!result.Success)
+			{
+				return NotFound(result.Message);
+			}
+
+			return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
+		}
+
+		[HttpGet]
+		[Route("{artistId}/Playlists")]
+		public IActionResult GetArtistPlaylists(int artistId, [FromQuery]int rowNumber = 2)
+		{
+			var result = _service.GetArtistPlaylists(artistId, rowNumber);
+			if (!result.Success)
+			{
+				return NotFound(result.Message);
+			}
+
+			return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
+		}
+
+		[HttpGet]
+		[Route("{artistId}/About")]
+		public IActionResult GetArtistAbout(int artistId)
+		{
+			var result = _service.GetArtistAbout(artistId);
+			if (!result.Success)
+			{
+				return NotFound(result.Message);
+			}
+
+			return Ok(result.Dto.ToAboutVM());
+		}
 	}
 }

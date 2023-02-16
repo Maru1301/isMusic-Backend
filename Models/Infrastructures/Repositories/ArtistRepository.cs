@@ -82,6 +82,31 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			});
 		}
 
-		
+		public ArtistAboutDTO GetArtistAbout(int artistId)
+		{
+			var about = _db.Artists
+				.Include(artist => artist.ArtistFollows)
+				.Select(artist => new ArtistAboutDTO
+				{
+					Id = artist.Id,
+					ArtistName = artist.ArtistName,
+					About = artist.ArtistAbout,
+					Followers = artist.ArtistFollows.Count()
+				})
+				.Single(artist => artist.Id == artistId);
+
+			var artistSongIds = _db.SongArtistMetadata
+								.Where(metadata => metadata.ArtistId == artistId)
+								.Select(metadata => metadata.SongId)
+								.ToList();
+
+			var monthlyPlayedTimes = _db.SongPlayedRecords
+						.Where(record => artistSongIds.Contains(record.SongId) && record.PlayedDate.Month == DateTime.Now.Month)
+						.Count();
+
+			about.MonthlyPlayedTimes = monthlyPlayedTimes;
+
+			return about;
+		}
 	}
 }
