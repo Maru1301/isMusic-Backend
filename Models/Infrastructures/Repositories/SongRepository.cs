@@ -28,7 +28,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
-		public IEnumerable<SongIndexDTO> GetPopularSongs(int artistId = 0)
+		public IEnumerable<SongIndexDTO> GetPopularSongs(int artistId = 0, int rowNumber = 1)
 		{
 			var songs = _db.Songs.Where(s => s.AlbumId != null && s.Status != false);
 
@@ -39,7 +39,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 			var dtos = songs
 				.OrderByDescending(s => s.SongPlayedRecords.Count())
-				.Take(10)
+				.Skip((rowNumber - 1) * skipNumber)
+				.Take(takeNumber)
 				.Select(s => new SongIndexDTO
 				{
 					Id = s.Id,

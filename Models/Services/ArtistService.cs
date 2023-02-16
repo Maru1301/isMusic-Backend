@@ -8,22 +8,40 @@ namespace api.iSMusic.Models.Services
 	{
 		private readonly IArtistRepository _artistRepository;
 
-		public ArtistService(IArtistRepository artistRepository)
+		private readonly ISongRepository _songRepository;
+
+		private readonly IAlbumRepository _albumRepository;
+
+		private readonly IPlaylistRepository _playlistRepository;
+
+		public ArtistService(IArtistRepository artistRepository, ISongRepository songRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
-			_artistRepository= artistRepository;
+			_artistRepository = artistRepository;
+			_songRepository = songRepository;
+			_albumRepository = albumRepository;
+			_playlistRepository = playlistRepository;
 		}
 
 		public (bool Success, string Message, ArtistDetailDTO dto) GetArtistDetail(int artistId)
 		{
-			ArtistDetailDTO dto;
-			try
+			var artist = _artistRepository.GetArtistById(artistId);
+			if (artist == null) return (false, "表演者不存在", new ArtistDetailDTO());
+
+			var popularSongs = _songRepository.GetPopularSongs(artistId);
+
+			var popularAlbums = _albumRepository.GetPopularAlbums(artistId, true);
+
+			var includedPlaylists = _playlistRepository.GetIncludedPlaylists(artistId);
+
+			var dto = new ArtistDetailDTO
 			{
-				dto = _artistRepository.GetArtistDetail(artistId);
-			}
-			catch(Exception ex)
-			{
-				return (false, ex.Message, new ArtistDetailDTO());
-			}
+				Id= artistId,
+				ArtistName = artist.ArtistName,
+				ArtistPicPath = artist.ArtistPicPath,
+				PopularSongs = popularSongs.ToList(),
+				PopularAlbums = popularAlbums.ToList(),
+				IncludedPlaylists = includedPlaylists.ToList(),
+			};
 
 			return (true, string.Empty, dto);
 		}

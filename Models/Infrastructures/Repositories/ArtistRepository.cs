@@ -21,27 +21,6 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db = db;
 		}
 
-		public ArtistDetailDTO? GetArtistDetail(int artistId)
-		{
-			return _db.Artists
-				.Include(artist => artist.SongArtistMetadata)
-				.Include(artist => artist.Albums)
-				.Select(artist => new ArtistDetailDTO
-				{
-					Id = artistId,
-					ArtistName = artist.ArtistName,
-					ArtistPicPath = artist.ArtistPicPath,
-					PopularSongs = artist.SongArtistMetadata
-						.Where(metadata => metadata.ArtistId == artistId)
-						.Select(metadata => metadata.Song.ToInfoDTO())
-						.ToList(),
-					PopularAlbums = artist.Albums
-						.Where(album => album.MainArtistId == artistId)
-						.Select(album => album.ToIndexDTO())
-				})
-				.SingleOrDefault(dto => dto.Id == artistId);
-		}
-
 		public Artist? GetArtistByIdForCheck(int artistId)
 		{
 			return _db.Artists.Find(artistId);

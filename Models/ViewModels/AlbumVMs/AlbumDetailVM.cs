@@ -23,7 +23,7 @@ namespace api.iSMusic.Models.ViewModels.AlbumVMs
 
 		public string Description { get; set; } = null!;
 
-		public int MainArtistId { get; set; }
+		public int? MainArtistId { get; set; }
 
 		public string? MainArtistName { get; set; }
 

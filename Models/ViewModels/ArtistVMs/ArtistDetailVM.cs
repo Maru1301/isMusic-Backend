@@ -13,8 +13,10 @@ namespace api.iSMusic.Models.ViewModels.ArtistVMs
 
 		public string ArtistPicPath { get; set; } = null!;
 
-		public IEnumerable<SongInfoDTO> PopularSongs { get; set; } = null!;
+		public List<SongIndexDTO> PopularSongs { get; set; } = new();
 
-		public IEnumerable<AlbumIndexDTO> PopularAlbums { get; set; } = null!;
+		public List<AlbumIndexDTO> PopularAlbums { get; set; } = new();
+
+		public List<PlaylistIndexDTO> IncludedPlaylists { get; set; } = new();
 	}
 }

@@ -16,6 +16,9 @@ public static class AlbumExts
 			AlbumCoverPath= source.AlbumCoverPath,
 			Released = source.Released,
 			MainArtistId= source.MainArtistId,
+			MainArtistName= source.MainArtistName,
+			MainCreatorId= source.MainCreatorId,
+			MainCreatorName= source.MainCreatorName,
 			TotalLikes= source.TotalLikes,
 		};
 

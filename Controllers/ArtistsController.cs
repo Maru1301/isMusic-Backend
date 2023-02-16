@@ -20,10 +20,10 @@ namespace api.iSMusic.Controllers
 		
 		private readonly ArtistService _service;
 
-		public ArtistsController(IArtistRepository repository)
+		public ArtistsController(IArtistRepository repository, ISongRepository songrepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
 			_repository = repository;
-			_service = new ArtistService(_repository);
+			_service = new ArtistService(_repository, songrepository, albumRepository, playlistRepository);
 		}
 
 		[HttpGet]
@@ -36,22 +36,7 @@ namespace api.iSMusic.Controllers
 				return NotFound(result.Message);
 			}
 
-			var data = _db.Artists.SingleOrDefault(artist => artist.Id == artistId);
-
-			if (data == null) return NotFound();
-
-			var popularSongs = _db.Songs
-				.Include(song => song.SongArtistMetadata)
-				.Include(song => song.SongPlayedRecords)
-				.Where(song => song.SongArtistMetadata.Select(metadata => metadata.ArtistId).Contains(artistId))
-				.Select(song => new
-				{
-					song.Id,
-					song.SongName,
-
-				});
-
-			return Ok(data.ToDetailVM());
+			return Ok(result.dto.ToDetailVM());
 		}
 
 		[HttpGet]

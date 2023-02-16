@@ -238,6 +238,22 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SaveChanges();
 		}
 
-		
+		public IEnumerable<PlaylistIndexDTO> GetIncludedPlaylists(int artistId, int rowNumber = 1)
+		{
+			var playlists = from playlist in _db.Playlists
+							join metadata in _db.PlaylistSongMetadata on playlist.Id equals metadata.PlayListId
+							join songArtistMetadata in _db.SongArtistMetadata on metadata.SongId equals songArtistMetadata.SongId
+							where songArtistMetadata.ArtistId == artistId
+							select new PlaylistIndexDTO
+							{
+								Id = playlist.Id,
+								ListName = playlist.ListName,
+								PlaylistCoverPath = playlist.PlaylistCoverPath,
+								MemberId = playlist.MemberId,
+								PlaylistSongMetadata = playlist.PlaylistSongMetadata,
+							};
+
+			return playlists;
+		}
 	}
 }

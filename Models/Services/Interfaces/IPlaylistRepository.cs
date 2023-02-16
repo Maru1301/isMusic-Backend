@@ -15,6 +15,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		IEnumerable<PlaylistIndexDTO> GetLikedPlaylists(int memberId);
 
+		IEnumerable<PlaylistIndexDTO> GetIncludedPlaylists(int artistId, int rowNumber = 1);
+
 		Task<int> GetNumOfPlaylistsByMemberIdAsync(int memberId);
 
 		Task CreatePlaylistAsync(PlaylistCreateVM newPlaylist);

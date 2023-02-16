@@ -5,6 +5,7 @@ using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.AlbumVMs;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
 
 namespace api.iSMusic.Models.Infrastructures.Repositories
 {
@@ -104,9 +105,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					AlbumGenreName = album.AlbumGenre.GenreName,
 					Released = album.Released,
 					MainArtistId = album.MainArtistId,
-					MainArtistName = album.MainArtist.ArtistName,
+					MainArtistName = album.MainArtist != null ?
+						album.MainArtist.ArtistName:
+						string.Empty,
 					MainCreatorId= album.MainCreatorId,
-					MainCreatorName = album.MainCreator != null? album.MainCreator.CreatorName: string.Empty,
+					MainCreatorName = album.MainCreator != null ?					album.MainCreator.CreatorName: 
+						string.Empty,
 					Description = album.Description,
 					AlbumProducer = album.AlbumProducer,
 					AlbumCompany= album.AlbumCompany,
@@ -145,6 +149,46 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				MainArtistId= album.MainArtistId,
 				Released = album.Released,
 			});
+		}
+
+		public IEnumerable<AlbumIndexDTO> GetPopularAlbums(int contentId, bool isFromArtist, int rowNumber = 1)
+		{
+			var albums = _db.Albums
+				.Include(album => album.LikedAlbums)
+				.Where(album => album.Released <= DateTime.Now);
+
+			if(isFromArtist)
+			{
+				albums = albums.Where(album => album.MainArtistId == contentId);
+			}
+			else
+			{
+				albums = albums.Where(album => album.MainCreatorId == contentId);
+			}
+
+			var dtos = albums.Select(album => new AlbumIndexDTO
+				{
+					Id = album.Id,
+					AlbumName = album.AlbumName,
+					AlbumGenreId= album.AlbumGenreId,
+					AlbumTypeId= album.AlbumTypeId,
+					AlbumCoverPath= album.AlbumCoverPath,
+					Released = album.Released,
+					MainArtistId = album.MainArtistId,
+					MainArtistName = album.MainArtist != null ?						album.MainArtist.ArtistName:
+						null,
+					MainCreatorId = album.MainCreatorId,
+					MainCreatorName = album.MainCreator != null ?
+						album.MainCreator.CreatorName :
+						null,
+					TotalLikes = album.LikedAlbums.Count(),
+				})
+				.OrderByDescending(dto => dto.TotalLikes)
+				.Skip(rowNumber == 2 ? 0:(rowNumber - 1) * skipNumber)
+				.Take(takeNumber)
+				.ToList();
+
+			return dtos;
 		}
 	}
 }

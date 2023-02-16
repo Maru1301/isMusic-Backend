@@ -23,6 +23,8 @@ namespace api.iSMusic.Controllers
 
 		private readonly IQueueRepository _queueRepository;
 
+		private readonly IAlbumRepository _albumRepository;
+
 		private readonly MemberService _memberService;
 
 		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository , IQueueRepository queueRepository)
@@ -31,6 +33,7 @@ namespace api.iSMusic.Controllers
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
+			_albumRepository= albumRepository;
 			_memberService = new (_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository);
 		}
 
@@ -195,7 +198,7 @@ namespace api.iSMusic.Controllers
 				return BadRequest("Invalid member account");
 			}
 
-			var _playlistService = new PlaylistService(_playlistRepository, _songRepository);
+			var _playlistService = new PlaylistService(_playlistRepository, _songRepository, _albumRepository);
 
 			var playlistId = await _playlistService.CreatePlaylistAsync(memberId);
 

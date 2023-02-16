@@ -10,6 +10,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		IEnumerable<AlbumIndexDTO> GetAlbumsByGenreId(int genreId, int rowNumber);
 
+		IEnumerable<AlbumIndexDTO>  GetPopularAlbums(int artistId, bool isFromArtist, int rowNumber = 1);
+
 		AlbumDetailDTO? GetAlbumById(int albumId);
 
 		Album? GetAlbumByIdForCheck(int albumId);

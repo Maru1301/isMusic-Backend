@@ -28,4 +28,15 @@ public static class ArtistExts
 			ArtistName = source.ArtistName,
 			ArtistPicPath = source.ArtistPicPath,
 		};
+
+	public static ArtistDetailVM ToDetailVM(this ArtistDetailDTO source)
+		=> new ArtistDetailVM
+		{
+			Id = source.Id,
+			ArtistName = source.ArtistName,
+			ArtistPicPath = source.ArtistPicPath,
+			PopularSongs = source.PopularSongs,
+			PopularAlbums = source.PopularAlbums,
+			IncludedPlaylists = source.IncludedPlaylists,
+		};
 }
