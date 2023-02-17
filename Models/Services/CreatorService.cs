@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
 using Microsoft.Identity.Client;
@@ -8,11 +9,16 @@ namespace api.iSMusic.Models.Services
     public class CreatorService
 	{
 		private readonly ICreatorRepository _creatorRepository;
+
 		private readonly ISongRepository _songRepository;
+
 		private readonly IAlbumRepository _albumRepository;
+
 		private readonly IPlaylistRepository _playlistRepository;
 
-		public CreatorService(ICreatorRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
+        private readonly string CreatorMode = "Creator";
+
+        public CreatorService(ICreatorRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
 			_creatorRepository = repository;
 			_songRepository = songRepository;
@@ -25,13 +31,11 @@ namespace api.iSMusic.Models.Services
 			var creator = _creatorRepository.GetCreatorById(creatorId);
 			if (creator == null) return (false, "創作者不存在", new CreatorDetailDTO());
 
-			var creatorMode = "Creator";
+			var popularSongs = _songRepository.GetPopularSongs(creatorId, CreatorMode);
 
-			var popularSongs = _songRepository.GetPopularSongs(creatorId, creatorMode);
+			var popularAlbums = _albumRepository.GetPopularAlbums(creatorId, CreatorMode);
 
-			var popularAlbums = _albumRepository.GetPopularAlbums(creatorId, creatorMode);
-
-			var includedPlaylists = _playlistRepository.GetIncludedPlaylists(creatorId, creatorMode);
+			var includedPlaylists = _playlistRepository.GetIncludedPlaylists(creatorId, CreatorMode);
 
 			var dto = new CreatorDetailDTO
 			{
@@ -50,5 +54,32 @@ namespace api.iSMusic.Models.Services
 		{
 			return _creatorRepository.GetCreatorsByName(creatorName, rowNumber);
 		}
-	}
+
+        public (bool Success, string Message, IEnumerable<AlbumIndexDTO> Dtos) GetCreatorAlbums(int creatorId, int rowNumber)
+        {
+            if (CheckCreatorExistence(creatorId) == false) return (false, "創作者不存在", new List<AlbumIndexDTO>());
+
+            if (rowNumber <= 0) return (false, "行數不得為零或是小於零", new List<AlbumIndexDTO>());
+
+            var dtos = _albumRepository.GetAlbumsByContentId(creatorId, "Creator", rowNumber);
+            return (true, string.Empty, dtos);
+        }
+
+        public (bool Success, string Message, IEnumerable<PlaylistIndexDTO> Dtos) GetCreatorPlaylists(int creatorId, int rowNumber)
+		{
+            if (CheckCreatorExistence(creatorId) == false) return (false, "創作者不存在", new List<PlaylistIndexDTO>());
+
+            if (rowNumber <= 0) return (false, "行數不得為零或是小於零", new List<PlaylistIndexDTO>());
+
+            var dtos = _playlistRepository.GetIncludedPlaylists(creatorId, CreatorMode, rowNumber);
+            return (true, string.Empty, dtos);
+        }
+
+        private bool CheckCreatorExistence(int creatorId)
+        {
+            var creator = _creatorRepository.GetCreatorByIdForCheck(creatorId);
+
+			return creator!= null;
+        }
+    }
 }

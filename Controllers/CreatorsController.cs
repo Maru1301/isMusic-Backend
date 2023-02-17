@@ -43,5 +43,31 @@ namespace api.iSMusic.Controllers
 
 			return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
-	}
+
+        [HttpGet]
+        [Route("{creatorId}/Albums")]
+        public IActionResult GetCreatorAlbums(int creatorId, [FromQuery] int rowNumber = 2)
+        {
+            var result = _service.GetCreatorAlbums(creatorId, rowNumber);
+            if (!result.Success)
+            {
+                return NotFound(result.Message);
+            }
+
+            return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
+        }
+
+        [HttpGet]
+        [Route("{creatorId}/Playlists")]
+        public IActionResult GetCreatorPlaylists(int creatorId, [FromQuery] int rowNumber = 2)
+        {
+            var result = _service.GetCreatorPlaylists(creatorId, rowNumber);
+            if (!result.Success)
+            {
+                return NotFound(result.Message);
+            }
+
+            return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
+        }
+    }
 }

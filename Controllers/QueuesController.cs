@@ -187,27 +187,53 @@ namespace api.iSMusic.Controllers
 			return Ok(updatedQueue.ToIndexVM());
 		}
 
-		//[HttpDelete]
-		//[Route("Song")]
-		//public ActionResult<Song> DeleteSongFromQueue(int queueId)
-		//{
-		//	var queue = _db.Queues.SingleOrDefault(q => q.Id == queueId);
+		[HttpPut]
+		[Route("{queueId}/NextSong")]
+		public IActionResult NextSong(int queueId)
+		{
+			var result = _service.NextSong(queueId);
+			if(!result.Success)
+			{
+				return NotFound(result.Message);
+			}
 
-		//	if (queue == null)
-		//	{
-		//		return NotFound();
-		//	}
+			return Ok();
+		}
 
-		//	var song = _db.Songs.Where(song => song.Id == queue.CurrentSongId).Single();
+        [HttpPut]
+        [Route("{queueId}/Previous")]
+        public IActionResult PreviousSong(int queueId)
+        {
+            var result = _service.PreviousSong(queueId);
+            if (!result.Success)
+            {
+                return NotFound(result.Message);
+            }
 
-		//	var metadata = _db.QueueSongs.Where(q => q.SongId == queue.CurrentSongId && q.QueueId == queue.Id).Single();
-		//	_db.Entry(metadata).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
-		//	_db.SaveChanges();
+            return Ok();
+        }
 
-		//	return song;
-		//}
+        //[HttpDelete]
+        //[Route("Song")]
+        //public ActionResult<Song> DeleteSongFromQueue(int queueId)
+        //{
+        //	var queue = _db.Queues.SingleOrDefault(q => q.Id == queueId);
 
-		[HttpPatch]
+        //	if (queue == null)
+        //	{
+        //		return NotFound();
+        //	}
+
+        //	var song = _db.Songs.Where(song => song.Id == queue.CurrentSongId).Single();
+
+        //	var metadata = _db.QueueSongs.Where(q => q.SongId == queue.CurrentSongId && q.QueueId == queue.Id).Single();
+        //	_db.Entry(metadata).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
+        //	_db.SaveChanges();
+
+        //	return song;
+        //}
+
+        [HttpPatch]
 		[Route("{queueId}/Shuffle")]
 		public IActionResult ChangeShuffle(int queueId)
 		{

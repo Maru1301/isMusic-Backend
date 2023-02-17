@@ -67,7 +67,7 @@ namespace api.iSMusic.Models.Services
 
 			if(rowNumber <= 0) return (false, "行數不得為零或是小於零", new List<AlbumIndexDTO>());
 
-			var dtos = _albumRepository.GetAlbumsByArtistId(artistId, rowNumber);
+			var dtos = _albumRepository.GetAlbumsByContentId(artistId, ArtistMode, rowNumber);
 			return (true, string.Empty, dtos);
 		}
 

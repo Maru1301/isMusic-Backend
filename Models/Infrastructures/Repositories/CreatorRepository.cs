@@ -31,7 +31,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.SingleOrDefault(dto => dto.Id == creatorId);
 		}
 
-		public IEnumerable<CreatorIndexDTO> GetCreatorsByName(string name, int rowNumber)
+        public Creator? GetCreatorByIdForCheck(int creatorId)
+        {
+			return _db.Creators.Find(creatorId);
+        }
+
+        public IEnumerable<CreatorIndexDTO> GetCreatorsByName(string name, int rowNumber)
 		{
 			return _db.Creators
 				.Where(creator => creator.CreatorName.Contains(name))

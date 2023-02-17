@@ -191,10 +191,10 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			return dtos;
 		}
 
-		public IEnumerable<AlbumIndexDTO> GetAlbumsByArtistId(int artistId, int rowNumber)
+		public IEnumerable<AlbumIndexDTO> GetAlbumsByContentId(int contentId, string mode, int rowNumber)
 		{
 			return _db.Albums
-				.Where(album => album.MainArtistId == artistId)
+				.Where(album => (mode == "Artist") ? album.MainArtistId == contentId : album.MainCreatorId == contentId)
 				.Include(album => album.LikedAlbums)
 				.Select(album => new AlbumIndexDTO
 				{
