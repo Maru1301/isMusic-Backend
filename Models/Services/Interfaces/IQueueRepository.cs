@@ -23,7 +23,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void UpdateByDisplayOredr(int queueId, int displayOrder);
 
-		void NextSong(int queueId);
+        SongInfoDTO? NextSong(int queueId);
 
 		void PreviousSong(int queueId);
 

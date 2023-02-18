@@ -4,6 +4,8 @@ using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.SongVMs;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace api.iSMusic.Models.Infrastructures.Repositories
@@ -99,7 +101,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                 })
                 .ToList();
 
-            if (queue.IsRepeat.HasValue && queue.IsRepeat.Value == true && queue.SongInfos.Count < this.takeLimit)
+            if (queue.IsRepeat == true && queue.SongInfos.Count < this.takeLimit)
             {
                 // If the queue is set to repeat and the number of songs retrieved is less than the takeLimit,
                 // retrieve songs from the beginning of the queue until the takeLimit is reached.
@@ -357,104 +359,71 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SaveChanges();
 		}
 
-        public void NextSong(int queueId)
+        public SongInfoDTO? NextSong(int queueId)
         {
-			var queue = _db.Queues
-				.Include(queue => queue.QueueSongs)
-				.Single(queue => queue.Id == queueId);
+            var queue = _db.Queues
+                .Include(q => q.QueueSongs)
+                .Single(q => q.Id == queueId);
 
-			if (queue.CurrentSongOrder == 0) throw new Exception("佇列為空");
-
-            var queueSongs = (queue.IsShuffle) ? 
-							queue.QueueSongs.OrderBy(qs => qs.ShuffleOrder):
-							queue.QueueSongs.OrderBy(qs => qs.DisplayOrder);
-
-            var currentSong = queueSongs.First();
-            var nextSong = queueSongs.Skip(1).FirstOrDefault();
-
-            int order = 1;
-            foreach (var queueSong in queueSongs.Skip(1))
+            if (queue.CurrentSongOrder == null)
             {
-                if (queue.IsShuffle)
-                {
-                    queueSong.ShuffleOrder = order++;
-                }
-                else
-                {
-                    queueSong.DisplayOrder = order++;
-                }
+                throw new Exception("佇列為空");
             }
 
-			if (queue.IsRepeat ?? false)
-			{
-				if (queue.IsShuffle)
-				{
-                    queueSongs.First().ShuffleOrder = order;
+            var queueSongs = queue.QueueSongs;
+            int numOfSongs = queueSongs.Count;
+			int currentOrder = queue.CurrentSongOrder.Value;
+
+            if (queue.IsRepeat == false || numOfSongs * 2 <= takeLimit || numOfSongs * 2 - currentOrder <= takeLimit)
+            {
+                return null;
+            }
+
+            int displayOrder = 0;
+            if (queue.IsRepeat == null)
+            {
+                if (numOfSongs <= takeLimit)
+                {
+                    return null;
+                }
+				else if (numOfSongs - currentOrder > takeLimit)
+                {
+					displayOrder = currentOrder + takeLimit;
                 }
 				else
 				{
-                    queueSongs.First().DisplayOrder = order;
+                    displayOrder =  takeLimit - (numOfSongs - currentOrder);
                 }
-			}
-			else
-			{
-                _db.QueueSongs.Remove(currentSong);
             }
-
-            queue.CurrentSongOrder = nextSong?.SongId;
-            queue.CurrentSongTime = 0;
-
-			_db.SaveChanges();
-        }
-
-        public void PreviousSong(int queueId)
-        {
-            var queue = _db.Queues
-                .Include(queue => queue.QueueSongs)
-                .Single(queue => queue.Id == queueId);
-
-            if (queue.CurrentSongOrder == 0) throw new Exception("佇列為空");
-
-            var queueSongs = (queue.IsShuffle) ?
-                            queue.QueueSongs.OrderBy(qs => qs.ShuffleOrder) :
-                            queue.QueueSongs.OrderBy(qs => qs.DisplayOrder);
-
-            var currentSong = queueSongs.First();
-            var previousSong = queueSongs.Last();
-
-            int order = 1;
-            foreach (var queueSong in queueSongs.Skip(1))
+            else if (queue.IsRepeat == true && numOfSongs * 2 > takeLimit && numOfSongs * 2 - currentOrder > takeLimit)
             {
-                if (queue.IsShuffle)
+                if (numOfSongs == takeLimit - 1 || queue.CurrentSongOrder + takeLimit - 1 >= numOfSongs)
                 {
-                    queueSong.ShuffleOrder = order++;
+                    displayOrder =  takeLimit - (numOfSongs - currentOrder + 1);
                 }
                 else
                 {
-                    queueSong.DisplayOrder = order++;
+                    displayOrder =  currentOrder + takeLimit;
                 }
             }
 
-            if (queue.IsRepeat ?? false)
-            {
-                if (queue.IsShuffle)
-                {
-                    queueSongs.First().ShuffleOrder = order;
-                }
-                else
-                {
-                    queueSongs.First().DisplayOrder = order;
-                }
-            }
-            else
-            {
-                _db.QueueSongs.Remove(currentSong);
-            }
-
-            queue.CurrentSongOrder = previousSong?.SongId;
+			queue.CurrentSongOrder = queue.IsRepeat switch {
+				null => currentOrder,
+				false => (currentOrder == numOfSongs) ? 0 : currentOrder + 1,
+				true => (currentOrder == numOfSongs) ? 1 : currentOrder + 1
+            };
             queue.CurrentSongTime = 0;
 
             _db.SaveChanges();
+
+            SongInfoDTO? result = _db.Songs.Single(song => song.Id == queueSongs.Single(qs => qs.DisplayOrder == displayOrder).SongId).ToInfoDTO();
+
+            return result;
+		}
+
+        public void PreviousSong(int queueId)
+        {
+            
         }
     }
 }

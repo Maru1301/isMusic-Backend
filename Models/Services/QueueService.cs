@@ -131,7 +131,7 @@ namespace api.iSMusic.Models.Services
 			{
                 if (CheckQueueExistence(queueId) == false) throw new Exception("佇列不存在");
 
-                _queueRepository.NextSong(queueId);
+                var addedQueueSong = _queueRepository.NextSong(queueId);
             }
 			catch(Exception ex)
 			{
