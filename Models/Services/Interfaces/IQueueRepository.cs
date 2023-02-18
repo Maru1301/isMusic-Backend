@@ -23,6 +23,10 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void UpdateByDisplayOredr(int queueId, int displayOrder);
 
+		void NextSong(int queueId);
+
+		void PreviousSong(int queueId);
+
 		void ChangeShuffle(int queueId);
 
 		void ChangeRepeat(int queueId, string mode);

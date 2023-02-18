@@ -2,6 +2,7 @@
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
+using api.iSMusic.Models.ViewModels.SongVMs;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 
@@ -27,44 +28,24 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		public QueueIndexDTO? GetQueueById(int queueId)
 		{
-			var queue = _db.Queues
+            var queue = _db.Queues
 				.Include(q => q.QueueSongs)
 				.Select(queue => new QueueIndexDTO
 				{
 					Id = queueId,
-					CurrentSongId = queue.CurrentSongId,
+                    CurrentSongOrder = queue.CurrentSongOrder,
 					CurrentSongTime = queue.CurrentSongTime,
 					IsRepeat = queue.IsRepeat,
 					IsShuffle= queue.IsShuffle,
 					MemberId= queue.MemberId,
-					SongInfos = queue.IsShuffle ?
-						queue.QueueSongs
-						.OrderBy(qs => qs.ShuffleOrder)
-						.Take(this.takeLimit)
-						.Select(qs => qs.Song.ToInfoDTO())
-						.ToList() :
-						queue.QueueSongs
-						.OrderBy(qs => qs.DisplayOrder)
-						.Take(this.takeLimit)
-						.Select(qs => qs.Song.ToInfoDTO())
-						.ToList(),
-					AlbumId = queue.AlbumId,
+                    AlbumId = queue.AlbumId,
 					ArtistId= queue.ArtistId,
 					PlaylistId= queue.PlaylistId,
-					QueueSongs = queue.QueueSongs.OrderBy(qs => qs.DisplayOrder).ToList(),
 				})
 				.Single(queue => queue.Id == queueId);
 
-			//update the song property "FromList"
-			var fromLists = queue.QueueSongs.Select(qs => qs.FromPlaylist).ToList();
-
-			for(int i = 0; i < queue.SongInfos.Count; ++i)
-			{
-				queue.SongInfos[i].FromList = fromLists[i];
-			}
-
-			//check isRepeat
-			queue = CheckisRepeat(queue);
+            //check isRepeat
+            queue = CheckisRepeat(queue);
 
 			return queue;
 		}
@@ -76,43 +57,75 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.Select(queue => new QueueIndexDTO
 				{
 					Id= queue.Id,
-					CurrentSongId= queue.CurrentSongId,
+                    CurrentSongOrder = queue.CurrentSongOrder,
 					CurrentSongTime= queue.CurrentSongTime,
 					IsShuffle= queue.IsShuffle,
 					IsRepeat= queue.IsRepeat,
 					MemberId= memberId,
-					SongInfos = queue.IsShuffle ? 
-						queue.QueueSongs
-						.OrderBy(qs => qs.ShuffleOrder)
-						.Take(this.takeLimit)
-						.Select(qs => qs.Song.ToInfoDTO())
-						.ToList() :
-						queue.QueueSongs.OrderBy(qs => qs.DisplayOrder)
-						.Take(this.takeLimit)
-						.Select(qs => qs.Song.ToInfoDTO())
-						.ToList(),
 					AlbumId = queue.AlbumId,
 					ArtistId = queue.ArtistId,
 					PlaylistId = queue.PlaylistId,
 				})
 				.SingleAsync(q => q.MemberId == memberId);
 
-			//check isRepeat
-			queue = CheckisRepeat(queue);
+            //check isRepeat
+            queue = CheckisRepeat(queue);
 
 			return queue;
 		}
 
-		private QueueIndexDTO? CheckisRepeat(QueueIndexDTO? queue)
+		private QueueIndexDTO? CheckisRepeat(QueueIndexDTO queue)
 		{
-			if (queue?.IsRepeat == true && queue.SongInfos.Count < this.takeLimit)
-			{
-				var firstSong = queue.SongInfos.FirstOrDefault();
-				if (firstSong != null)
-				{
-					queue.SongInfos.Add(firstSong);
-				}
-			}
+            queue.SongInfos = _db.QueueSongs
+                .Where(qs => qs.QueueId == queue.Id)
+                .OrderBy(qs => queue.IsShuffle ? qs.ShuffleOrder : qs.DisplayOrder)
+                .Skip(queue.CurrentSongOrder - 1 ?? 0)
+                .Take(this.takeLimit)
+                .Join(_db.Songs, qs => qs.SongId, s => s.Id, (qs, s) => new SongInfoDTO
+                {
+                    Id = qs.SongId,
+                    SongName = s.SongName,
+                    SongCoverPath = s.SongCoverPath,
+                    SongPath = s.SongPath,
+                    AlbumId = s.AlbumId,
+                    AlbumName = s.Album != null ?
+                                s.Album.AlbumName :
+                                string.Empty,
+                    Duration = s.Duration,
+                    Status = s.Status,
+                    FromList = qs.FromPlaylist,
+                    IsExplicit = s.IsExplicit,
+                    Released = s.Released,
+                })
+                .ToList();
+
+            if (queue.IsRepeat.HasValue && queue.IsRepeat.Value == true && queue.SongInfos.Count < this.takeLimit)
+            {
+                // If the queue is set to repeat and the number of songs retrieved is less than the takeLimit,
+                // retrieve songs from the beginning of the queue until the takeLimit is reached.
+                var remainingSongCount = this.takeLimit - queue.SongInfos.Count;
+                var repeatSongs = _db.QueueSongs
+                    .Where(qs => qs.QueueId == queue.Id)
+                    .OrderBy(qs => queue.IsShuffle ? qs.ShuffleOrder : qs.DisplayOrder)
+                    .Take(remainingSongCount)
+                    .Join(_db.Songs, qs => qs.SongId, s => s.Id, (qs, s) => new SongInfoDTO
+                    {
+                        Id = s.Id,
+                        SongName = s.SongName,
+                        SongCoverPath = s.SongCoverPath,
+                        SongPath = s.SongPath,
+                        AlbumId = s.AlbumId,
+                        AlbumName = s.Album != null ?
+                                s.Album.AlbumName :
+                                string.Empty,
+                        Duration = s.Duration,
+                        Status = s.Status,
+                        FromList = qs.FromPlaylist,
+                        IsExplicit = s.IsExplicit,
+                        Released = s.Released,
+                    });
+                queue.SongInfos.AddRange(repeatSongs);
+            }
 
 			return queue;
 		}
@@ -184,7 +197,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				}
 			}
 
-			queue.CurrentSongId = queueSongs.OrderBy(qs => qs.DisplayOrder).First().SongId;
+			queue.CurrentSongOrder = 1;
 			queue.CurrentSongTime = 0;
 
 			_db.QueueSongs.AddRange(queueSongs);
@@ -208,7 +221,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				FromPlaylist = false,
 			};
 
-			queue.CurrentSongId = queueSong.SongId;
+			queue.CurrentSongOrder = 1;
 			queue.CurrentSongTime = 0;
 
 			_db.QueueSongs.Add(queueSong);
@@ -222,25 +235,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		public void UpdateByDisplayOredr(int queueId, int displayOrder)
 		{
-			var isShuffle = _db.Queues.Single(queue => queue.Id == queueId).IsShuffle;
+			var queue = _db.Queues.Single(queue => queue.Id == queueId);
 
-			var queueSongs = _db.QueueSongs
-			.Where(qs => qs.QueueId == queueId)
-			.OrderBy(qs => isShuffle ? qs.ShuffleOrder : qs.DisplayOrder)
-			.ToList();
-
-			int newDisplayOrder = 1;
-
-			foreach (var song in queueSongs)
-			{
-				int currentIndex = (song.DisplayOrder + displayOrder - 1) % queueSongs.Count;
-
-				var targetSong = queueSongs[currentIndex];
-				if (isShuffle)
-					targetSong.ShuffleOrder = newDisplayOrder++;
-				else
-					targetSong.DisplayOrder = newDisplayOrder++;
-			}
+			queue.CurrentSongOrder = displayOrder;
 
 			_db.SaveChanges();
 		}
@@ -359,5 +356,105 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 			_db.SaveChanges();
 		}
-	}
+
+        public void NextSong(int queueId)
+        {
+			var queue = _db.Queues
+				.Include(queue => queue.QueueSongs)
+				.Single(queue => queue.Id == queueId);
+
+			if (queue.CurrentSongOrder == 0) throw new Exception("佇列為空");
+
+            var queueSongs = (queue.IsShuffle) ? 
+							queue.QueueSongs.OrderBy(qs => qs.ShuffleOrder):
+							queue.QueueSongs.OrderBy(qs => qs.DisplayOrder);
+
+            var currentSong = queueSongs.First();
+            var nextSong = queueSongs.Skip(1).FirstOrDefault();
+
+            int order = 1;
+            foreach (var queueSong in queueSongs.Skip(1))
+            {
+                if (queue.IsShuffle)
+                {
+                    queueSong.ShuffleOrder = order++;
+                }
+                else
+                {
+                    queueSong.DisplayOrder = order++;
+                }
+            }
+
+			if (queue.IsRepeat ?? false)
+			{
+				if (queue.IsShuffle)
+				{
+                    queueSongs.First().ShuffleOrder = order;
+                }
+				else
+				{
+                    queueSongs.First().DisplayOrder = order;
+                }
+			}
+			else
+			{
+                _db.QueueSongs.Remove(currentSong);
+            }
+
+            queue.CurrentSongOrder = nextSong?.SongId;
+            queue.CurrentSongTime = 0;
+
+			_db.SaveChanges();
+        }
+
+        public void PreviousSong(int queueId)
+        {
+            var queue = _db.Queues
+                .Include(queue => queue.QueueSongs)
+                .Single(queue => queue.Id == queueId);
+
+            if (queue.CurrentSongOrder == 0) throw new Exception("佇列為空");
+
+            var queueSongs = (queue.IsShuffle) ?
+                            queue.QueueSongs.OrderBy(qs => qs.ShuffleOrder) :
+                            queue.QueueSongs.OrderBy(qs => qs.DisplayOrder);
+
+            var currentSong = queueSongs.First();
+            var previousSong = queueSongs.Last();
+
+            int order = 1;
+            foreach (var queueSong in queueSongs.Skip(1))
+            {
+                if (queue.IsShuffle)
+                {
+                    queueSong.ShuffleOrder = order++;
+                }
+                else
+                {
+                    queueSong.DisplayOrder = order++;
+                }
+            }
+
+            if (queue.IsRepeat ?? false)
+            {
+                if (queue.IsShuffle)
+                {
+                    queueSongs.First().ShuffleOrder = order;
+                }
+                else
+                {
+                    queueSongs.First().DisplayOrder = order;
+                }
+            }
+            else
+            {
+                _db.QueueSongs.Remove(currentSong);
+            }
+
+            queue.CurrentSongOrder = previousSong?.SongId;
+            queue.CurrentSongTime = 0;
+
+            _db.SaveChanges();
+        }
+    }
 }

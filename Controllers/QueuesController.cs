@@ -197,7 +197,16 @@ namespace api.iSMusic.Controllers
 				return NotFound(result.Message);
 			}
 
-			return Ok();
+            var updatedQueue = _repository.GetQueueById(queueId);
+
+            if (updatedQueue == null)
+            {
+                return NoContent();
+            }
+
+            updatedQueue = ProcessLikedSongs(updatedQueue);
+
+            return Ok(updatedQueue);
 		}
 
         [HttpPut]

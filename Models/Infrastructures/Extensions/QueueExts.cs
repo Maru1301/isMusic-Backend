@@ -9,7 +9,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
 			=> new()
 			{
 				Id= source.Id,
-				CurrentSongId= source.CurrentSongId,
+				CurrentSongOrder = source.CurrentSongOrder,
 				CurrentSongTime= source.CurrentSongTime,
 				IsShuffle= source.IsShuffle,
 				IsRepeat= source.IsRepeat,
