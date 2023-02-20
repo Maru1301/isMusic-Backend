@@ -58,12 +58,15 @@ namespace api.iSMusic.Controllers
 				RowNumber = 2;
 				IncludedLiked = true;
 				Condition = "RecentlyAdded";
+				Value = string.Empty;
 			}
 			public int RowNumber { get; set; }
 
 			public bool IncludedLiked { get; set; }
 
 			public string Condition { get; set; }
+
+			public string Value { get; set; }
 		}
 
 		[HttpGet]

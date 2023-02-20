@@ -49,7 +49,7 @@ namespace api.iSMusic.Models.Services
 
 			var dtos = _artistRepository.GetLikedArtists(memberId, query);
 
-			return (true, "", dtos);
+			return (true, string.Empty, dtos);
 		}
 
 		public (bool Success, string Message, IEnumerable<CreatorIndexDTO> CreatorsDtos) GetLikedCreators(int memberId, LikedQuery query)

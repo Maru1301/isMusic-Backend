@@ -46,12 +46,22 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		{
 			bool includedLiked = query.IncludedLiked;
 
-			var memberPlaylists = _db.Playlists
-				.Where(playlist => includedLiked ?
-				(playlist.MemberId == memberId || playlist.LikedPlaylists.Select(liked => liked.MemberId).Contains(memberId)) : (playlist.MemberId == memberId));
-				
+            var memberPlaylists = _db.Playlists.Where(playlist => playlist.MemberId == memberId);
 
-			switch (query.Condition)
+			if (!string.IsNullOrEmpty(query.Value))
+			{
+				memberPlaylists = memberPlaylists.Where(playlist => playlist.ListName.Contains(query.Value));
+			}
+
+            if (includedLiked)
+            {
+                memberPlaylists = memberPlaylists
+                    .Union(_db.Playlists
+                        .Where(playlist => playlist.LikedPlaylists
+                            .Any(liked => liked.MemberId == memberId)));
+            }
+
+            switch (query.Condition)
 			{
 				case "Alphatically":
 					memberPlaylists = memberPlaylists.OrderBy(playlist => playlist.ListName);

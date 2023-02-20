@@ -3,6 +3,7 @@ using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Services.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.IdentityModel.Tokens;
 
 namespace api.iSMusic.Models.Infrastructures.Repositories
 {
@@ -53,10 +54,10 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
-		public IEnumerable<CreatorIndexDTO> GetLikedCreators(int memberId, MembersController.LikedQuery body)
+		public IEnumerable<CreatorIndexDTO> GetLikedCreators(int memberId, MembersController.LikedQuery query)
 		{
 			var follows = _db.CreatorFollows.Where(follow => follow.MemberId == memberId);
-			IEnumerable<Creator> creators = body.Condition switch
+			IEnumerable<Creator> creators = query.Condition switch
 			{
 				"RecentlyAdded" => follows
 										.OrderByDescending(follow => follow.Created)
@@ -67,9 +68,14 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				_ => (IEnumerable<Creator>)new List<Artist>(),
 			};
 
-			creators = body.RowNumber == 2 ?
+			if (!string.IsNullOrEmpty(query.Input))
+			{
+				creators = creators.Where(creator => creator.CreatorName.Contains(query.Input));
+			}
+
+			creators = query.RowNumber == 2 ?
 				creators.Take(takeNumber * 2) :
-				creators.Skip((body.RowNumber - 1) * skipNumber)
+				creators.Skip((query.RowNumber - 1) * skipNumber)
 				.Take(takeNumber);
 
 			return creators.Select(artist => new CreatorIndexDTO 

@@ -58,6 +58,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		public IEnumerable<ArtistIndexDTO> GetLikedArtists(int memberId, LikedQuery query)
 		{
 			var follows = _db.ArtistFollows.Where(follow => follow.MemberId == memberId);
+
 			IEnumerable<Artist> artists = query.Condition switch
 			{
 				"RecentlyAdded" => follows
@@ -68,6 +69,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 										.OrderBy(artist => artist.ArtistName),
 				_ => new List<Artist>(),
 			};
+
+			if (!string.IsNullOrEmpty(query.Input))
+			{
+				artists = artists.Where(artist => artist.ArtistName.Contains(query.Input));
+			}
 
 			artists = query.RowNumber == 2 ?
 				artists.Take(takeNumber * 2) :
