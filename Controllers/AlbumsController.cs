@@ -42,18 +42,34 @@ namespace api.iSMusic.Controllers
 		[Route("SongGenres/{genreId}")]
 		public IActionResult GetAlbumsByGenreId(int genreId, [FromQuery]int rowNumber = 2)
 		{
-			var dtos = _service.GetAlbumsByGenreId(genreId, rowNumber);
+			var result = _service.GetAlbumsByGenreId(genreId, rowNumber);
 
-			return Ok(dtos.Select(dtos => dtos.ToIndexVM()));
+			if(!result.Success)
+			{
+				return BadRequest(result.Message);
+			}else if (!result.Dtos.Any())
+			{
+				return NoContent();
+			}
+
+			return Ok(result.Dtos.Select(dtos => dtos.ToIndexVM()));
 		}
 
 		[HttpGet]
 		[Route("{albumName}")]
 		public IActionResult GetAlbumByName(string albumName, [FromQuery]int rowNumber = 2)
 		{
-			var dtos = _service.GetAlbumsByName(albumName, rowNumber);
+            var result = _service.GetAlbumsByName(albumName, rowNumber);
 
-			return Ok(dtos.Select(dto => dto.ToIndexVM()));
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}else if(!result.Dtos.Any())
+			{
+				return NoContent();
+			}
+
+			return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
 		}
 
 		[HttpGet]
@@ -66,7 +82,5 @@ namespace api.iSMusic.Controllers
 
 			return Ok(dto.ToDetailVM());
 		}
-
-		
 	}
 }

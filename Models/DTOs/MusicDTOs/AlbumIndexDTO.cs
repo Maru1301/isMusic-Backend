@@ -10,7 +10,11 @@
 
         public int AlbumTypeId { get; set; }
 
+        public string? AlbumTypeName { get; set; }
+
         public int AlbumGenreId { get; set; }
+
+        public string? AlbumGenreName { get; set; }
 
         public DateTime Released { get; set; }
 

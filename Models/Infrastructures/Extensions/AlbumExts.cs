@@ -25,14 +25,23 @@ public static class AlbumExts
 	public static AlbumIndexDTO ToIndexDTO(this Album source)
 		=> new()
 		{
-			Id = source.Id,
-			AlbumName = source.AlbumName,
-			AlbumGenreId = source.AlbumGenreId,
-			AlbumTypeId = source.AlbumTypeId,
-			AlbumCoverPath = source.AlbumCoverPath,
-			Released = source.Released,
-			MainArtistId = source.MainArtistId,
-		};
+            Id = source.Id,
+            AlbumCoverPath = source.AlbumCoverPath,
+            AlbumName = source.AlbumName,
+            AlbumGenreId = source.AlbumGenreId,
+            AlbumGenreName = source.AlbumGenre.GenreName,
+            AlbumTypeId = source.AlbumTypeId,
+            AlbumTypeName = source.AlbumType.TypeName,
+            Released = source.Released,
+            MainArtistId = source.MainArtistId,
+            MainArtistName = source.MainArtist != null ?
+                        source.MainArtist.ArtistName :
+                        string.Empty,
+            MainCreatorId = source.MainCreatorId,
+            MainCreatorName = source.MainCreator != null ? source.MainCreator.CreatorName :
+                        string.Empty,
+            TotalLikes = source.LikedAlbums.Count,
+        };
 
 	public static AlbumDetailVM ToDetailVM(this AlbumDetailDTO source)
 		=> new()

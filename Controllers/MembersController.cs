@@ -182,10 +182,13 @@ namespace api.iSMusic.Controllers
 			{
 				RowNumber = 2;
 				Condition = "RecentlyAdded";
+				Input = string.Empty;
 			}
 			public int RowNumber { get; set; }
 
 			public string Condition { get; set; }
+
+			public string Input { get; set; }
 		}
 
 		[HttpPost]

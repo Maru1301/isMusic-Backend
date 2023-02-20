@@ -19,14 +19,28 @@ namespace api.iSMusic.Models.Services
 			return _repository.GetRecommended();
 		}
 
-		public IEnumerable<AlbumIndexDTO> GetAlbumsByGenreId(int genreId, int rowNumber)
+		public (bool Success, string Message, IEnumerable<AlbumIndexDTO> Dtos)GetAlbumsByGenreId(int genreId, int rowNumber)
 		{
-			return _repository.GetAlbumsByGenreId(genreId, rowNumber);
-		}
+            if (rowNumber <= 0)
+            {
+                return (false, "要求列數不存在", new List<AlbumIndexDTO>());
+            }
 
-		public IEnumerable<AlbumIndexDTO> GetAlbumsByName(string name, int rowNumber)
+            var dtos = _repository.GetAlbumsByGenreId(genreId, rowNumber);
+
+            return (true, string.Empty, dtos);
+        }
+
+		public (bool Success, string Message, IEnumerable<AlbumIndexDTO> Dtos) GetAlbumsByName(string name, int rowNumber)
 		{
-			return _repository.GetAlbumsByName(name, rowNumber);
+			if(rowNumber <= 0)
+			{
+				return (false, "要求列數不存在", new List<AlbumIndexDTO>());
+			}
+
+			var dtos = _repository.GetAlbumsByName(name, rowNumber);
+
+			return (true, string.Empty, dtos);
 		}
 
 		public AlbumDetailDTO? GetAlbumById(int albumId)
