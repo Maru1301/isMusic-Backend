@@ -5,6 +5,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 {
     public interface IQueueRepository
 	{
+		void CreateQueue(int memeberId);
+
 		QueueIndexDTO? GetQueueById(int queueId);
 
 		Queue? GetQueueByIdForCheck(int queueId);

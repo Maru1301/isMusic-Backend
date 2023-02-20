@@ -28,23 +28,6 @@ namespace api.iSMusic.Controllers
 			_service = new(_repository, songRepository, artistRepository, albumRepository, playlistRepository);
 		}
 
-		//[HttpPost]
-		//[Route("{memberId}")]
-		////todo edit the method
-		//public void CreateQueue(int memberId)
-		//{
-		//	var queue = new Queue()
-		//	{
-		//		MemberId = memberId,
-		//		CurrentSongId = null,
-		//		CurrentSongTime = null,
-		//		IsShuffle = false,
-		//		IsRepeat = null,
-		//	};
-		//	_db.Queues.Add(queue);
-		//	_db.SaveChanges();
-		//}
-
 		[HttpPost]
 		[Route("{queueId}/Songs/{songId}")]
 		public IActionResult AddSongIntoQueue(int queueId, int songId)
@@ -220,26 +203,6 @@ namespace api.iSMusic.Controllers
 
             return Ok(result.Dto);
         }
-
-        //[HttpDelete]
-        //[Route("Song")]
-        //public ActionResult<Song> DeleteSongFromQueue(int queueId)
-        //{
-        //	var queue = _db.Queues.SingleOrDefault(q => q.Id == queueId);
-
-        //	if (queue == null)
-        //	{
-        //		return NotFound();
-        //	}
-
-        //	var song = _db.Songs.Where(song => song.Id == queue.CurrentSongId).Single();
-
-        //	var metadata = _db.QueueSongs.Where(q => q.SongId == queue.CurrentSongId && q.QueueId == queue.Id).Single();
-        //	_db.Entry(metadata).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
-        //	_db.SaveChanges();
-
-        //	return song;
-        //}
 
         [HttpPatch]
 		[Route("{queueId}/Shuffle")]

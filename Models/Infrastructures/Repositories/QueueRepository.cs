@@ -24,7 +24,24 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db = db;
 		}
 
-		public Queue? GetQueueByIdForCheck(int queueId)
+		public void CreateQueue(int memberId)
+		{
+            var queue = new Queue()
+			{
+				MemberId = memberId,
+				CurrentSongOrder = null,
+				CurrentSongTime = null,
+				IsShuffle = false,
+				IsRepeat = null,
+				AlbumId= null,
+				ArtistId= null,
+				PlaylistId= null,
+			};
+			_db.Queues.Add(queue);
+			_db.SaveChanges();
+		}
+
+        public Queue? GetQueueByIdForCheck(int queueId)
 		{
 			return _db.Queues.Find(queueId);
 		}
