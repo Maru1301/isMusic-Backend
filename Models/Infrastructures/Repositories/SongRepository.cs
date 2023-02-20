@@ -186,5 +186,18 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.Take(50)
 				.ToList();
 		}
-	}
+
+        public void CreatePlayRecord(int songId, int memberId)
+        {
+			var newRecord = new SongPlayedRecord
+			{
+				SongId = songId,
+				MemberId = memberId,
+				PlayedDate = DateTime.Now,
+			};
+
+			_db.SongPlayedRecords.Add(newRecord);
+			_db.SaveChanges();
+        }
+    }
 }

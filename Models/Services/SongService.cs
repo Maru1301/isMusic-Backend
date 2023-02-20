@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.SongVMs;
@@ -34,5 +35,10 @@ namespace api.iSMusic.Models.Services
 
 			return (true, string.Empty, recentlyPlayedSongs);
 		}
-	}
+
+		public void CreatePlayRecord(int songId, int memberId)
+		{
+			_songRepository.CreatePlayRecord(songId, memberId);
+		}
+    }
 }

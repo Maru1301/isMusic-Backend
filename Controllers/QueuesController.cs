@@ -21,11 +21,11 @@ namespace api.iSMusic.Controllers
 
 		private readonly QueueService _service;
 
-		public QueuesController(IQueueRepository repository, ISongRepository songRepository, IArtistRepository artistRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
+		public QueuesController(IQueueRepository repository, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
 			_repository = repository;
 			_songRepository = songRepository;
-			_service = new(_repository, songRepository, artistRepository, albumRepository, playlistRepository);
+			_service = new(_repository, songRepository, artistRepository, creatorRepository, albumRepository, playlistRepository);
 		}
 
 		[HttpPost]
@@ -115,7 +115,7 @@ namespace api.iSMusic.Controllers
 
 		[HttpPut]
 		[Route("{queueId}/{contentId}")]
-		public IActionResult ChangeQueueContent(int queueId, int contentId, [FromBody] Condition condition)
+		public IActionResult ChangeQueueContent(int queueId, int contentId, [FromBody]string condition)
 		{
 			var result = _service.ChangeQueueContent(queueId, contentId, condition);
 
@@ -134,17 +134,6 @@ namespace api.iSMusic.Controllers
 			updatedQueue = ProcessLikedSongs(updatedQueue);
 
 			return Ok(updatedQueue.ToIndexVM());
-		}
-
-		public class Condition
-		{
-			public bool SingleSong { get; set; }
-
-			public bool Artist { get; set; }
-
-			public bool Album { get; set; }
-
-			public bool Playlist { get; set; }
 		}
 
 		[HttpPut]

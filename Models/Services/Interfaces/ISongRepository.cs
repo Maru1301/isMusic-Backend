@@ -23,5 +23,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 		Song? GetSongByIdForCheck(int songId);
 
 		IEnumerable<SongIndexDTO> GetSongsByName(string name, int rowNumber);
-	}
+
+        void CreatePlayRecord(int songId, int memberId);
+    }
 }

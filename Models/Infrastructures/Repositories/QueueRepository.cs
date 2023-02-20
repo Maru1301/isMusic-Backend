@@ -163,21 +163,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			var isShuffle = queue.IsShuffle;
 			var isRepeat = queue.IsRepeat;
 
-			switch (fromWhere)
-			{
-				case "Artist":
-					queue.ArtistId = contentId;
-					break;
-				case "Album":
-					queue.AlbumId = contentId;
-					break;
-				case "Playlist":
-					queue.PlaylistId = contentId;
-					break;
-			}
+            queue.ArtistId = fromWhere == "Artist" ? contentId : (int?)null;
+            queue.AlbumId = fromWhere == "Album" ? contentId : (int?)null;
+            queue.PlaylistId = fromWhere == "Playlist" ? contentId : (int?)null;
 
-			//update new songs
-			int NumOfSongs = songIds.Count;
+            //update new songs
+            int NumOfSongs = songIds.Count;
 			List<QueueSong> queueSongs = new(NumOfSongs);
 
 			if (isShuffle)
@@ -401,8 +392,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             queue.CurrentSongTime = 0;
 
 			var currentSong = queue.QueueSongs.Single(qs => (queue.IsShuffle)?
-												qs.ShuffleOrder == currentOrder:
-												qs.DisplayOrder == currentOrder);
+											qs.ShuffleOrder == currentOrder:
+											qs.DisplayOrder == currentOrder);
+
 			if(queue.IsRepeat != false && currentSong.FromPlaylist == false)
 			{
 				_db.QueueSongs.Remove(currentSong);
