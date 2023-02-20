@@ -4,6 +4,7 @@ using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.SongVMs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -367,63 +368,84 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
             if (queue.CurrentSongOrder == null)
             {
-                throw new Exception("佇列為空");
+                throw new InvalidOperationException("佇列為空");
             }
 
             var queueSongs = queue.QueueSongs;
             int numOfSongs = queueSongs.Count;
 			int currentOrder = queue.CurrentSongOrder.Value;
 
-            if (queue.IsRepeat == false || numOfSongs * 2 <= takeLimit || numOfSongs * 2 - currentOrder <= takeLimit)
+            queue.CurrentSongOrder = queue.IsRepeat switch
             {
-                return null;
-            }
+                false => currentOrder,
+                null => (currentOrder == numOfSongs) ? 0 : currentOrder + 1,
+                true => (currentOrder == numOfSongs) ? 1 : currentOrder + 1
+            };
+            queue.CurrentSongTime = 0;
 
-            int displayOrder = 0;
-            if (queue.IsRepeat == null)
-            {
-                if (numOfSongs <= takeLimit)
-                {
-                    return null;
-                }
-				else if (numOfSongs - currentOrder > takeLimit)
-                {
-					displayOrder = currentOrder + takeLimit;
-                }
-				else
+			var currentSong = queue.QueueSongs.Single(qs => (queue.IsShuffle)?
+												qs.ShuffleOrder == currentOrder:
+												qs.DisplayOrder == currentOrder);
+			if(queue.IsRepeat != false && currentSong.FromPlaylist == false)
+			{
+				_db.QueueSongs.Remove(currentSong);
+			}
+
+            _db.SaveChanges();
+
+            if (queue.IsRepeat == true && numOfSongs - currentOrder < takeLimit)
+			{
+				int takeOrder = takeLimit - (numOfSongs - currentOrder);
+
+				if(queueSongs.Count >= takeOrder)
 				{
-                    displayOrder =  takeLimit - (numOfSongs - currentOrder);
+					return _db.Songs.Single(song => song.Id == queueSongs.Single(qs => qs.DisplayOrder == takeOrder).SongId).ToInfoDTO();
                 }
             }
-            else if (queue.IsRepeat == true && numOfSongs * 2 > takeLimit && numOfSongs * 2 - currentOrder > takeLimit)
-            {
-                if (numOfSongs == takeLimit - 1 || queue.CurrentSongOrder + takeLimit - 1 >= numOfSongs)
-                {
-                    displayOrder =  takeLimit - (numOfSongs - currentOrder + 1);
-                }
-                else
-                {
-                    displayOrder =  currentOrder + takeLimit;
-                }
+			
+			if(numOfSongs - currentOrder >= takeLimit)
+			{
+				return _db.Songs.Single(song => song.Id == queueSongs.Single(qs => qs.DisplayOrder == currentOrder + takeLimit).SongId).ToInfoDTO();
             }
 
-			queue.CurrentSongOrder = queue.IsRepeat switch {
-				null => currentOrder,
-				false => (currentOrder == numOfSongs) ? 0 : currentOrder + 1,
-				true => (currentOrder == numOfSongs) ? 1 : currentOrder + 1
+            return null;
+		}
+
+        public SongInfoDTO? PreviousSong(int queueId)
+        {
+            var queue = _db.Queues
+                .Include(q => q.QueueSongs)
+                .Single(q => q.Id == queueId);
+
+            if (queue.CurrentSongOrder == null)
+            {
+                throw new Exception("佇列為空");
+            }
+
+            var queueSongs = queue.QueueSongs;
+            int firstOrder = 1;
+            int currentOrder = queue.CurrentSongOrder.Value;
+
+            queue.CurrentSongOrder = queue.IsRepeat switch
+            {
+                false => currentOrder,
+                null => (currentOrder == firstOrder) ? 
+						firstOrder : 
+						currentOrder - 1,
+                true => (currentOrder == firstOrder) ? 
+						queueSongs.Count : 
+						currentOrder - 1
             };
             queue.CurrentSongTime = 0;
 
             _db.SaveChanges();
 
-            SongInfoDTO? result = _db.Songs.Single(song => song.Id == queueSongs.Single(qs => qs.DisplayOrder == displayOrder).SongId).ToInfoDTO();
+			if(queue.IsRepeat == false)
+			{
+				return null;
+			}
 
-            return result;
-		}
-
-        public void PreviousSong(int queueId)
-        {
-            
+            return _db.Songs.Single(song => song.Id == queueSongs.Single(qs => qs.DisplayOrder == queue.CurrentSongOrder).SongId).ToInfoDTO();
         }
     }
 }

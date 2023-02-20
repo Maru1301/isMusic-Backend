@@ -1,4 +1,5 @@
-﻿using api.iSMusic.Models.EFModels;
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
 using static api.iSMusic.Controllers.QueuesController;
@@ -125,36 +126,48 @@ namespace api.iSMusic.Models.Services
 			return (true, string.Empty);
 		}
 
-        public (bool Success, string Message) NextSong(int queueId)
+        public (bool Success, string Message, SongInfoDTO? Dto) NextSong(int queueId)
 		{
-			try
+			string message = string.Empty;
+			SongInfoDTO? addedQueueSong = new();
+            try
 			{
                 if (CheckQueueExistence(queueId) == false) throw new Exception("佇列不存在");
 
-                var addedQueueSong = _queueRepository.NextSong(queueId);
+                addedQueueSong = _queueRepository.NextSong(queueId);
+
+				message = (addedQueueSong == null) ?
+					"不須增加佇列項目" :
+                    message;
             }
-			catch(Exception ex)
+            catch (Exception ex)
 			{
-				return (false, ex.Message);
+				return (false, ex.Message, addedQueueSong);
 			}
 
-			return (true, string.Empty);
+			return (true, message, addedQueueSong);
         }
 
-        public (bool Success, string Message) PreviousSong(int queueId)
+        public (bool Success, string Message, SongInfoDTO? Dto) PreviousSong(int queueId)
         {
-			try
+            string message = string.Empty;
+            SongInfoDTO? addedQueueSong = new();
+            try
 			{
-                if (CheckQueueExistence(queueId) == false) return (false, "佇列不存在");
+                if (CheckQueueExistence(queueId) == false) throw new Exception ("佇列不存在");
 
-                _queueRepository.PreviousSong(queueId);
+                addedQueueSong = _queueRepository.PreviousSong(queueId);
+
+                message = (addedQueueSong == null) ?
+                    "不須增加佇列項目" :
+                    message;
             }
             catch(Exception ex)
 			{
-				return (false, ex.Message);
+				return (false, ex.Message, addedQueueSong);
 			}
 
-            return (true, string.Empty);
+            return (true, message, addedQueueSong);
         }
 
         public (bool Success, string Message) ChangeShuffle(int queueId)

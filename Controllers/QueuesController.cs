@@ -196,17 +196,12 @@ namespace api.iSMusic.Controllers
 			{
 				return NotFound(result.Message);
 			}
+			else if(result.Dto == null)
+			{
+				return Accepted(result.Message);
+			}
 
-            var updatedQueue = _repository.GetQueueById(queueId);
-
-            if (updatedQueue == null)
-            {
-                return NoContent();
-            }
-
-            updatedQueue = ProcessLikedSongs(updatedQueue);
-
-            return Ok(updatedQueue);
+            return Ok(result.Dto);
 		}
 
         [HttpPut]
@@ -218,8 +213,12 @@ namespace api.iSMusic.Controllers
             {
                 return NotFound(result.Message);
             }
+            else if (result.Dto == null)
+            {
+                return Accepted(result.Message);
+            }
 
-            return Ok();
+            return Ok(result.Dto);
         }
 
         //[HttpDelete]

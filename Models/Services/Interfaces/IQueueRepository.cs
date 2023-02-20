@@ -25,7 +25,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         SongInfoDTO? NextSong(int queueId);
 
-		void PreviousSong(int queueId);
+        SongInfoDTO? PreviousSong(int queueId);
 
 		void ChangeShuffle(int queueId);
 
