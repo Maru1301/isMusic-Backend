@@ -144,22 +144,40 @@ namespace api.iSMusic.Models.Services
 
 			if (dto.PlaylistCover != null)
 			{
-				var fileName = Path.GetFileName(dto.PlaylistCover.FileName);
-				var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", fileName);
+				var coverPath = "https://localhost:44373/Uploads/Covers";
 
-				using (var stream = new FileStream(filePath, FileMode.Create))
+                var fileName = Path.GetFileName(dto.PlaylistCover.FileName);
+                string newFileName = GetNewFileName(coverPath, fileName);
+                var fullPath = Path.Combine(coverPath, fileName);
+
+                using (var stream = new FileStream(fullPath, FileMode.Create))
 				{
 					dto.PlaylistCover.CopyTo(stream);
 				}
 
-				dto.PlaylistCoverPath = Path.Combine("uploads", fileName);
+				dto.PlaylistCoverPath = newFileName;
 			}
 
 			_repository.UpdatePlaylistDetail(playlistId, dto);
 			return (true, "更新成功");
 		}
 
-		public (bool Success, string Message) ChangePrivacySetting(int playlistId)
+        private string GetNewFileName(string path, string fileName)
+        {
+            string ext = System.IO.Path.GetExtension(fileName); // 取得副檔名,例如".jpg"
+            string newFileName;
+            string fullPath;
+            // todo use song name + artists name instead of guid, so when uploading the new file it will replace the old one.
+            do
+            {
+                newFileName = Guid.NewGuid().ToString("N") + ext;
+                fullPath = System.IO.Path.Combine(path, newFileName);
+            } while (System.IO.File.Exists(fullPath) == true); // 如果同檔名的檔案已存在,就重新再取一個新檔名
+
+            return newFileName;
+        }
+
+        public (bool Success, string Message) ChangePrivacySetting(int playlistId)
 		{
 			if(CheckPlaylistExistence(playlistId)==false) return (false, "清單不存在");
 
