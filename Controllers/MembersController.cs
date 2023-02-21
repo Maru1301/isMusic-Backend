@@ -3,11 +3,13 @@ using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services;
 using api.iSMusic.Models.Services.Interfaces;
+using api.iSMusic.Models.ViewModels.MemberVMs;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using api.iSMusic.Models.ViewModels.QueueVMs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace api.iSMusic.Controllers
 {
@@ -25,14 +27,82 @@ namespace api.iSMusic.Controllers
 
 		private readonly MemberService _memberService;
 
-		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository , IQueueRepository queueRepository)
+		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository, IQueueRepository queueRepository)
 		{
 			_memberRepository = memberRepo;
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_memberService = new (_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository);
+			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository);
 		}
+
+
+		[HttpGet]
+        [Route("Members/{memberId}")]
+        public IActionResult GetMemberInfo([FromRoute] int memberId)
+        {
+			// 取得 memberId
+            var member = _memberService.GetMemberInfo(memberId);
+            if (member == null)
+            {
+                return NotFound("Member not found");
+            }
+
+            return Ok(member);
+        }
+
+        [HttpPut]
+		[Route("Members/{memberId}")]
+		public IActionResult UpdateMember(int memberId, [FromForm] MemberEditVM member)
+		{
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = _memberService.UpdateMember(memberId, member.ToMemberDTO());
+
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
+		}
+
+		[HttpPost]
+		[Route("Members/Register")]
+		public IActionResult MemberRegister([FromForm] MemberRegisterVM member)
+		{
+			// email驗證網址
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActiveRegister?memberid={0}&confirmCode={1}";
+			
+
+            var result = _memberService.MemberRegister(member.ToMemberDTO());
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		[HttpGet]
 		[Route("{memberId}/Playlists")]

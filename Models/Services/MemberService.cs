@@ -1,13 +1,15 @@
-﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+﻿using api.iSMusic.Models.DTOs.MemberDTOs;
+using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
+using api.iSMusic.Models.ViewModels.MemberVMs;
 using static api.iSMusic.Controllers.MembersController;
 using static api.iSMusic.Controllers.QueuesController;
 
 namespace api.iSMusic.Models.Services
 {
-	public class MemberService
+    public class MemberService
 	{
 		private readonly IMemberRepository _memberRepository;
 
@@ -143,5 +145,40 @@ namespace api.iSMusic.Models.Services
 
 			return playlist != null;
 		}
-	}
+
+        public (bool Success, string Message) UpdateMember(int memberId, MemberDTO memberDTO)
+		{
+			var member = _memberRepository.FindMemberById(memberId);
+			if (member == null) return (false, "此帳號不存在");
+            // TODO 驗證修改的資料(暱稱是否存在...)
+
+            _memberRepository.UpdateMember(memberId, memberDTO);
+            return (true, "更新成功");
+        }
+
+        public MemberDTO GetMemberInfo(int memberId)
+        {            
+			// 用 memberId 取的資料庫資料
+			return _memberRepository.GetMemberInfo(memberId)!;
+        }
+
+		public (bool Success, string Message) MemberRegister(MemberRegisterDTO dto)
+		{
+            if (_memberRepository.IsExist(dto.MemberAccount!, dto.MemberNickName!))
+            {
+                return (false, "帳號已存在");
+            }
+            dto.ConfirmCode = Guid.NewGuid().ToString("N");
+
+            _memberRepository.MemberRegister(dto);
+
+            // 發email
+            //string url = string.Format(urlTemplate, entity.id, dto.ConfirmCode);
+
+            //new EmailHelper().SendConfirmRegisterEmail(url, dto.NickName, dto.Email);
+
+            return (true, "");
+        }
+
+    }
 }
