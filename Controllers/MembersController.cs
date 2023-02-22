@@ -339,7 +339,7 @@ namespace api.iSMusic.Controllers
 		}
 
         [HttpDelete]
-        [Route("{memberId}/FollowedArtists/{artistId}")]
+        [Route("{memberId}/FollowedCreators/{creatorId}")]
         public IActionResult UnfollowCreator(int memberId, int creatorId)
         {
             var result = _memberService.UnfollowCreator(memberId, creatorId);
