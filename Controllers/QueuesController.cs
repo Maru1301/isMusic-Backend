@@ -21,29 +21,12 @@ namespace api.iSMusic.Controllers
 
 		private readonly QueueService _service;
 
-		public QueuesController(IQueueRepository repository, ISongRepository songRepository, IArtistRepository artistRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
+		public QueuesController(IQueueRepository repository, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
 			_repository = repository;
 			_songRepository = songRepository;
-			_service = new(_repository, songRepository, artistRepository, albumRepository, playlistRepository);
+			_service = new(_repository, songRepository, artistRepository, creatorRepository, albumRepository, playlistRepository);
 		}
-
-		//[HttpPost]
-		//[Route("{memberId}")]
-		////todo edit the method
-		//public void CreateQueue(int memberId)
-		//{
-		//	var queue = new Queue()
-		//	{
-		//		MemberId = memberId,
-		//		CurrentSongId = null,
-		//		CurrentSongTime = null,
-		//		IsShuffle = false,
-		//		IsRepeat = null,
-		//	};
-		//	_db.Queues.Add(queue);
-		//	_db.SaveChanges();
-		//}
 
 		[HttpPost]
 		[Route("{queueId}/Songs/{songId}")]
@@ -89,6 +72,28 @@ namespace api.iSMusic.Controllers
 			return Ok(updatedQueue.ToIndexVM());
 		}
 
+		[HttpPost]
+		[Route("{queueId}/Albums/{albumId}")]
+		public IActionResult AddAlbumIntoQueue(int queueId, int albumId)
+		{
+			var result = _service.AddAlbumIntoQueue(queueId, albumId);
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			var updatedQueue = _repository.GetQueueById(queueId);
+
+			if (updatedQueue == null)
+			{
+				return NoContent();
+			}
+
+			updatedQueue = ProcessLikedSongs(updatedQueue);
+
+			return Ok(updatedQueue.ToIndexVM());
+		}
+
 		private QueueIndexDTO ProcessLikedSongs(QueueIndexDTO updatedQueue)
 		{
 			var queueSongIds = updatedQueue.SongInfos.Select(info => info.Id);
@@ -110,7 +115,7 @@ namespace api.iSMusic.Controllers
 
 		[HttpPut]
 		[Route("{queueId}/{contentId}")]
-		public IActionResult ChangeQueueContent(int queueId, int contentId, [FromBody] Condition condition)
+		public IActionResult ChangeQueueContent(int queueId, int contentId, [FromBody]string condition)
 		{
 			var result = _service.ChangeQueueContent(queueId, contentId, condition);
 
@@ -129,17 +134,6 @@ namespace api.iSMusic.Controllers
 			updatedQueue = ProcessLikedSongs(updatedQueue);
 
 			return Ok(updatedQueue.ToIndexVM());
-		}
-
-		public class Condition
-		{
-			public bool SingleSong { get; set; }
-
-			public bool Artist { get; set; }
-
-			public bool Album { get; set; }
-
-			public bool Playlist { get; set; }
 		}
 
 		[HttpPut]
@@ -165,45 +159,64 @@ namespace api.iSMusic.Controllers
 			return Ok(updatedQueue.ToIndexVM());
 		}
 
-		//[HttpDelete]
-		//[Route("Song")]
-		//public ActionResult<Song> DeleteSongFromQueue(int queueId)
-		//{
-		//	var queue = _db.Queues.SingleOrDefault(q => q.Id == queueId);
+		[HttpPut]
+		[Route("{queueId}/NextSong")]
+		public IActionResult NextSong(int queueId)
+		{
+			var result = _service.NextSong(queueId);
+			if(!result.Success)
+			{
+				return NotFound(result.Message);
+			}
+			else if(result.Dto == null)
+			{
+				return Accepted(result.Message);
+			}
 
-		//	if (queue == null)
-		//	{
-		//		return NotFound();
-		//	}
+            return Ok(result.Dto);
+		}
 
-		//	var song = _db.Songs.Where(song => song.Id == queue.CurrentSongId).Single();
+        [HttpPut]
+        [Route("{queueId}/Previous")]
+        public IActionResult PreviousSong(int queueId)
+        {
+            var result = _service.PreviousSong(queueId);
+            if (!result.Success)
+            {
+                return NotFound(result.Message);
+            }
+            else if (result.Dto == null)
+            {
+                return Accepted(result.Message);
+            }
 
-		//	var metadata = _db.QueueSongs.Where(q => q.SongId == queue.CurrentSongId && q.QueueId == queue.Id).Single();
-		//	_db.Entry(metadata).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
-		//	_db.SaveChanges();
+            return Ok(result.Dto);
+        }
 
-		//	return song;
-		//}
-
-		[HttpPatch]
-		[Route("{queueId}/shuffle")]
+        [HttpPatch]
+		[Route("{queueId}/Shuffle")]
 		public IActionResult ChangeShuffle(int queueId)
 		{
 			var result = _service.ChangeShuffle(queueId);
+			if(!result.Success)
+				return NotFound(result.Message);
 
 			return Ok(result.Message);
 		}
 
-		//[HttpPatch]
-		//[Route("Member/{memberId}/repeat")]
-		//public void ChangeRepeat(int memberId, [FromBody] bool? isRepeat)
-		//{
-		//	Queue queue = _db.Queues.Where(queue => queue.MemberId == memberId).Single();
+		[HttpPatch]
+		[Route("{queueId}/Repeat")]
+		public IActionResult ChangeRepeat(int queueId, [FromQuery]string mode)
+		{
+			var result = _service.ChangeRepeat(queueId, mode);
+			if (!result.Success)
+				return NotFound(result.Message);
 
-		//	queue.IsRepeat = isRepeat;
+			var queue = _repository.GetQueueById(queueId);
+			if (queue == null)
+				return NotFound("佇列不存在");
 
-		//	_db.Entry(queue).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-		//	_db.SaveChanges();
-		//}
+			return Ok(queue.ToIndexVM());
+		}
 	}
 }

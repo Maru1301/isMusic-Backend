@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.AlbumVMs;
 
 namespace api.iSMusic.Models.Infrastructures.Extensions;
@@ -15,8 +16,32 @@ public static class AlbumExts
 			AlbumCoverPath= source.AlbumCoverPath,
 			Released = source.Released,
 			MainArtistId= source.MainArtistId,
+			MainArtistName= source.MainArtistName,
+			MainCreatorId= source.MainCreatorId,
+			MainCreatorName= source.MainCreatorName,
 			TotalLikes= source.TotalLikes,
 		};
+
+	public static AlbumIndexDTO ToIndexDTO(this Album source)
+		=> new()
+		{
+            Id = source.Id,
+            AlbumCoverPath = source.AlbumCoverPath,
+            AlbumName = source.AlbumName,
+            AlbumGenreId = source.AlbumGenreId,
+            AlbumGenreName = source.AlbumGenre.GenreName,
+            AlbumTypeId = source.AlbumTypeId,
+            AlbumTypeName = source.AlbumType.TypeName,
+            Released = source.Released,
+            MainArtistId = source.MainArtistId,
+            MainArtistName = source.MainArtist != null ?
+                        source.MainArtist.ArtistName :
+                        string.Empty,
+            MainCreatorId = source.MainCreatorId,
+            MainCreatorName = source.MainCreator != null ? source.MainCreator.CreatorName :
+                        string.Empty,
+            TotalLikes = source.LikedAlbums.Count,
+        };
 
 	public static AlbumDetailVM ToDetailVM(this AlbumDetailDTO source)
 		=> new()

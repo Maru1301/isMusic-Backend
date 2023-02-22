@@ -10,7 +10,7 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
         public int MemberId { get; set; }
 
-        public int? CurrentSongId { get; set; }
+        public int? CurrentSongOrder { get; set; }
 
         public int? CurrentSongTime { get; set; }
 

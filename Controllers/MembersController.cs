@@ -23,6 +23,8 @@ namespace api.iSMusic.Controllers
 
 		private readonly IQueueRepository _queueRepository;
 
+		private readonly IAlbumRepository _albumRepository;
+
 		private readonly MemberService _memberService;
 
 		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository , IQueueRepository queueRepository)
@@ -31,6 +33,7 @@ namespace api.iSMusic.Controllers
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
+			_albumRepository= albumRepository;
 			_memberService = new (_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository);
 		}
 
@@ -55,12 +58,15 @@ namespace api.iSMusic.Controllers
 				RowNumber = 2;
 				IncludedLiked = true;
 				Condition = "RecentlyAdded";
+				Value = string.Empty;
 			}
 			public int RowNumber { get; set; }
 
 			public bool IncludedLiked { get; set; }
 
 			public string Condition { get; set; }
+
+			public string Value { get; set; }
 		}
 
 		[HttpGet]
@@ -179,10 +185,13 @@ namespace api.iSMusic.Controllers
 			{
 				RowNumber = 2;
 				Condition = "RecentlyAdded";
+				Input = string.Empty;
 			}
 			public int RowNumber { get; set; }
 
 			public string Condition { get; set; }
+
+			public string Input { get; set; }
 		}
 
 		[HttpPost]
@@ -195,7 +204,7 @@ namespace api.iSMusic.Controllers
 				return BadRequest("Invalid member account");
 			}
 
-			var _playlistService = new PlaylistService(_playlistRepository, _songRepository);
+			var _playlistService = new PlaylistService(_playlistRepository, _songRepository, _albumRepository);
 
 			var playlistId = await _playlistService.CreatePlaylistAsync(memberId);
 
@@ -221,7 +230,7 @@ namespace api.iSMusic.Controllers
 		[Route("{memberId}/LikedPlaylists/{playlistId}")]
 		public IActionResult AddLikedPlaylist(int memberId, int playlistId)
 		{
-			var result = _memberService.AddLikedPlaylists(memberId, playlistId);
+			var result = _memberService.AddLikedPlaylist(memberId, playlistId);
 
 			if (!result.Success)
 			{
@@ -231,7 +240,49 @@ namespace api.iSMusic.Controllers
 			return Ok(result.Message);
 		}
 
-		[HttpDelete]
+		[HttpPost]
+		[Route("{memberId}/LikedAlbums/{albumId}")]
+		public IActionResult AddLikedAlbum(int memberId, int albumId)
+		{
+			var result = _memberService.AddLikedAlbum(memberId, albumId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+		[HttpPost]
+		[Route("{memberId}/FollowedArtists/{artistId}")]
+		public IActionResult FollowArtist(int memberId, int artistId)
+		{
+			var result = _memberService.FollowArtist(memberId, artistId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+        [HttpPost]
+        [Route("{memberId}/FollowedCreators/{creatorId}")]
+        public IActionResult FollowCreator(int memberId, int creatorId)
+        {
+            var result = _memberService.FollowCreator(memberId, creatorId);
+
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
+        }
+
+        [HttpDelete]
 		[Route("{memberId}/LikedSongs/{songId}")]
 		public IActionResult DeleteLikedSong(int memberId, int songId)
 		{
@@ -258,5 +309,47 @@ namespace api.iSMusic.Controllers
 
 			return Ok(result.Message);
 		}
-	}
+
+		[HttpDelete]
+		[Route("{memberId}/LikedAlbums/{albumId}")]
+		public IActionResult DeleteLikedAlbum(int memberId, int albumId)
+		{
+			var result = _memberService.DeleteLikedAlbum(memberId, albumId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+		[HttpDelete]
+		[Route("{memberId}/FollowedArtists/{artistId}")]
+		public IActionResult UnfollowArtist(int memberId, int artistId)
+		{
+			var result = _memberService.UnfollowArtist(memberId, artistId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+        [HttpDelete]
+        [Route("{memberId}/FollowedArtists/{artistId}")]
+        public IActionResult UnfollowCreator(int memberId, int creatorId)
+        {
+            var result = _memberService.UnfollowCreator(memberId, creatorId);
+
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
+        }
+    }
 }

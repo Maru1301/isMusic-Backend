@@ -1,6 +1,8 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics.Internal;
 using static api.iSMusic.Controllers.MembersController;
 
@@ -56,6 +58,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		public IEnumerable<ArtistIndexDTO> GetLikedArtists(int memberId, LikedQuery query)
 		{
 			var follows = _db.ArtistFollows.Where(follow => follow.MemberId == memberId);
+
 			IEnumerable<Artist> artists = query.Condition switch
 			{
 				"RecentlyAdded" => follows
@@ -66,6 +69,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 										.OrderBy(artist => artist.ArtistName),
 				_ => new List<Artist>(),
 			};
+
+			if (!string.IsNullOrEmpty(query.Input))
+			{
+				artists = artists.Where(artist => artist.ArtistName.Contains(query.Input));
+			}
 
 			artists = query.RowNumber == 2 ?
 				artists.Take(takeNumber * 2) :
@@ -78,6 +86,33 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				ArtistName = artist.ArtistName, 
 				ArtistPicPath= artist.ArtistPicPath,
 			});
+		}
+
+		public ArtistAboutDTO GetArtistAbout(int artistId)
+		{
+			var about = _db.Artists
+				.Include(artist => artist.ArtistFollows)
+				.Select(artist => new ArtistAboutDTO
+				{
+					Id = artist.Id,
+					ArtistName = artist.ArtistName,
+					About = artist.ArtistAbout,
+					Followers = artist.ArtistFollows.Count()
+				})
+				.Single(artist => artist.Id == artistId);
+
+			var artistSongIds = _db.SongArtistMetadata
+								.Where(metadata => metadata.ArtistId == artistId)
+								.Select(metadata => metadata.SongId)
+								.ToList();
+
+			var monthlyPlayedTimes = _db.SongPlayedRecords
+						.Where(record => artistSongIds.Contains(record.SongId) && record.PlayedDate.Month == DateTime.Now.Month)
+						.Count();
+
+			about.MonthlyPlayedTimes = monthlyPlayedTimes;
+
+			return about;
 		}
 	}
 }

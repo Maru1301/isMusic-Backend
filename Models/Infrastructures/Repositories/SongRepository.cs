@@ -28,18 +28,23 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
-		public IEnumerable<SongIndexDTO> GetPopularSongs(int artistId = 0)
+		public IEnumerable<SongIndexDTO> GetPopularSongs(int contentId, string mode, int rowNumber = 1)
 		{
 			var songs = _db.Songs.Where(s => s.AlbumId != null && s.Status != false);
 
-			if(artistId != 0)
+			if(contentId != 0 && mode == "Artist")
 			{
-				songs = songs.Where(song => song.SongArtistMetadata.Select(metadata => metadata.ArtistId).Contains(artistId));
+				songs = songs
+					.Include(song => song.SongArtistMetadata)
+					.Where(song => song.SongArtistMetadata.Select(metadata => metadata.ArtistId).Contains(contentId));
+			}else if(contentId != 0 && mode == "Creator")
+			{
+				songs = songs
+					.Include(song => song.SongCreatorMetadata)
+					.Where(song => song.SongCreatorMetadata.Select(metadata => metadata.CreatorId).Contains(contentId));
 			}
 
 			var dtos = songs
-				.OrderByDescending(s => s.SongPlayedRecords.Count())
-				.Take(10)
 				.Select(s => new SongIndexDTO
 				{
 					Id = s.Id,
@@ -53,6 +58,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					Artistlist = s.SongArtistMetadata.Select(m => m.Artist.ToInfoVM()).ToList(),
 					Creatorlist = s.SongCreatorMetadata.Select(m => m.Creator.ToInfoVM()).ToList(),
 				})
+				.OrderByDescending(dto => dto.PlayedTimes)
+				.Skip(rowNumber == 2 ? 0 :(rowNumber - 1) * skipNumber)
+				.Take(rowNumber == 2 ? takeNumber * 2 : takeNumber)
 				.ToList();
 
 			return dtos;
@@ -178,5 +186,18 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.Take(50)
 				.ToList();
 		}
-	}
+
+        public void CreatePlayRecord(int songId, int memberId)
+        {
+			var newRecord = new SongPlayedRecord
+			{
+				SongId = songId,
+				MemberId = memberId,
+				PlayedDate = DateTime.Now,
+			};
+
+			_db.SongPlayedRecords.Add(newRecord);
+			_db.SaveChanges();
+        }
+    }
 }

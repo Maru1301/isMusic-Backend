@@ -49,7 +49,7 @@ namespace api.iSMusic.Models.Services
 
 			var dtos = _artistRepository.GetLikedArtists(memberId, query);
 
-			return (true, "", dtos);
+			return (true, string.Empty, dtos);
 		}
 
 		public (bool Success, string Message, IEnumerable<CreatorIndexDTO> CreatorsDtos) GetLikedCreators(int memberId, LikedQuery query)
@@ -93,7 +93,7 @@ namespace api.iSMusic.Models.Services
 			return (true, "成功新增");
 		}
 
-		public (bool Success, string Message) AddLikedPlaylists(int memberId, int playlistId)
+		public (bool Success, string Message) AddLikedPlaylist(int memberId, int playlistId)
 		{
 			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
 
@@ -103,7 +103,37 @@ namespace api.iSMusic.Models.Services
 			return (true, "成功新增");
 		}
 
-		public (bool Success, string Message) DeleteLikedSong(int memberId, int songId)
+		public (bool Success, string Message) AddLikedAlbum(int memberId, int albumId)
+		{
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
+
+			if (CheckAlbumExistence(albumId) == false) return (false, "專輯不存在");
+
+			_memberRepository.AddLikedAlbum(memberId, albumId);
+			return (true, "成功新增");
+		}
+
+		public (bool Success, string Message) FollowArtist(int memberId, int artistId)
+		{
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
+
+			if (CheckArtistExistence(artistId) == false) return (false, "表演者不存在");
+
+			_memberRepository.FollowArtist(memberId, artistId);
+			return (true, "成功新增");
+		}
+
+        public (bool Success, string Message) FollowCreator(int memberId, int creatorId)
+        {
+            if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
+
+            if (CheckCreatorExistence(creatorId) == false) return (false, "表演者不存在");
+
+            _memberRepository.FollowCreator(memberId, creatorId);
+            return (true, "成功新增");
+        }
+
+        public (bool Success, string Message) DeleteLikedSong(int memberId, int songId)
 		{
 			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
 
@@ -123,7 +153,37 @@ namespace api.iSMusic.Models.Services
 			return (true, "成功刪除");
 		}
 
-		private bool CheckSongExistence(int songId)
+		public (bool Success, string Message) DeleteLikedAlbum(int memberId, int albumId)
+		{
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
+
+			if (CheckAlbumExistence(albumId) == false) return (false, "專輯不存在");
+
+			_memberRepository.DeleteLikedAlbum(memberId, albumId);
+			return (true, "成功刪除");
+		}
+
+		public (bool Success, string Message) UnfollowArtist(int memberId, int artistId)
+		{
+			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
+
+			if (CheckArtistExistence(artistId) == false) return (false, "表演者不存在");
+
+			_memberRepository.UnfollowArtist(memberId, artistId);
+			return (true, "成功刪除");
+		}
+
+        public (bool Success, string Message) UnfollowCreator(int memberId, int creatorId)
+        {
+            if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
+
+            if (CheckCreatorExistence(creatorId) == false) return (false, "表演者不存在");
+
+            _memberRepository.UnfollowCreator(memberId, creatorId);
+            return (true, "成功刪除");
+        }
+
+        private bool CheckSongExistence(int songId)
 		{
 			var song = _songRepository.GetSongById(songId);
 
@@ -139,9 +199,30 @@ namespace api.iSMusic.Models.Services
 
 		private bool CheckPlaylistExistence(int playlistId)
 		{
-			var playlist = _playlistRepository.GetPlaylistById(playlistId);
+			var playlist = _playlistRepository.GetPlaylistByIdForCheck(playlistId);
 
 			return playlist != null;
+		}
+
+		private bool CheckAlbumExistence(int albumId)
+		{
+			var playlist = _albumRepository.GetAlbumByIdForCheck(albumId);
+
+			return playlist != null;
+		}
+
+		private bool CheckArtistExistence(int artistId)
+		{
+			var artist = _artistRepository.GetArtistByIdForCheck(artistId);
+
+			return artist != null;
+		}
+
+		private bool CheckCreatorExistence(int creatorId)
+		{
+			var creator = _creatorRepository.GetCreatorByIdForCheck(creatorId);
+
+			return creator != null;
 		}
 	}
 }

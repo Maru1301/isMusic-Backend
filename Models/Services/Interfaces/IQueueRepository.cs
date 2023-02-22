@@ -5,6 +5,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 {
     public interface IQueueRepository
 	{
+		void CreateQueue(int memeberId);
+
 		QueueIndexDTO? GetQueueById(int queueId);
 
 		Queue? GetQueueByIdForCheck(int queueId);
@@ -15,12 +17,20 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void AddPlaylistIntoQueue(int queueId, int playlistId);
 
+		void AddAlbumIntoQueue(int queueId, int albumId);
+
 		void UpdateQueueBySong(int queueId, int Id);
 
 		void UpdateQueueBySongs(int queueId, List<int> SongIds, string fromWhere, int contentId);
 
 		void UpdateByDisplayOredr(int queueId, int displayOrder);
 
+        SongInfoDTO? NextSong(int queueId);
+
+        SongInfoDTO? PreviousSong(int queueId);
+
 		void ChangeShuffle(int queueId);
+
+		void ChangeRepeat(int queueId, string mode);
 	}
 }

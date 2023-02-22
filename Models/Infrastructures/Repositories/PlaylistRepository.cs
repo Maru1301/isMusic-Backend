@@ -46,12 +46,22 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		{
 			bool includedLiked = query.IncludedLiked;
 
-			var memberPlaylists = _db.Playlists
-				.Where(playlist => includedLiked ?
-				(playlist.MemberId == memberId || playlist.LikedPlaylists.Select(liked => liked.MemberId).Contains(memberId)) : (playlist.MemberId == memberId));
-				
+            var memberPlaylists = _db.Playlists.Where(playlist => playlist.MemberId == memberId);
 
-			switch (query.Condition)
+			if (!string.IsNullOrEmpty(query.Value))
+			{
+				memberPlaylists = memberPlaylists.Where(playlist => playlist.ListName.Contains(query.Value));
+			}
+
+            if (includedLiked)
+            {
+                memberPlaylists = memberPlaylists
+                    .Union(_db.Playlists
+                        .Where(playlist => playlist.LikedPlaylists
+                            .Any(liked => liked.MemberId == memberId)));
+            }
+
+            switch (query.Condition)
 			{
 				case "Alphatically":
 					memberPlaylists = memberPlaylists.OrderBy(playlist => playlist.ListName);
@@ -171,10 +181,25 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			{
 				SongId = songId,
 				PlayListId = playlistId,
-				DisplayOrder = lastOrder + 1
+				DisplayOrder = lastOrder + 1,
+				AddedTime= DateTime.Now,
 			};
 
 			_db.PlaylistSongMetadata.Add(newMetadata);
+			_db.SaveChanges();
+		}
+
+		public void AddSongsToPlaylist(int playlistId, List<int> selectedSongs, int order)
+		{
+			var newMetadata = selectedSongs.Select((songId, index) => new PlaylistSongMetadatum
+			{
+				SongId = songId,
+				PlayListId = playlistId,
+				DisplayOrder = order + index,
+				AddedTime= DateTime.Now,
+			}).ToList();
+
+			_db.PlaylistSongMetadata.AddRange(newMetadata);
 			_db.SaveChanges();
 		}
 
@@ -212,6 +237,45 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				_db.PlaylistSongMetadata.Remove(metadata);
 				_db.SaveChanges();
 			}
+		}
+
+		public void ChangePrivacySetting(int playlistId)
+		{
+			var playlist = _db.Playlists.First(playlist => playlist.Id == playlistId);
+
+			playlist.IsPublic = !playlist.IsPublic;
+
+			_db.SaveChanges();
+		}
+
+		public IEnumerable<PlaylistIndexDTO> GetIncludedPlaylists(int contentId, string mode, int rowNumber = 1)
+		{
+			var playlists = mode == "Artist" ? from playlist in _db.Playlists
+							join metadata in _db.PlaylistSongMetadata on playlist.Id equals metadata.PlayListId
+							join songArtistMetadata in _db.SongArtistMetadata on metadata.SongId equals songArtistMetadata.SongId
+							where songArtistMetadata.ArtistId == contentId
+							select new PlaylistIndexDTO
+							{
+								Id = playlist.Id,
+								ListName = playlist.ListName,
+								PlaylistCoverPath = playlist.PlaylistCoverPath,
+								MemberId = playlist.MemberId,
+								PlaylistSongMetadata = playlist.PlaylistSongMetadata,
+							} :
+							from playlist in _db.Playlists
+							join metadata in _db.PlaylistSongMetadata on playlist.Id equals metadata.PlayListId
+							join songCreatorMetadata in _db.SongCreatorMetadata on metadata.SongId equals songCreatorMetadata.SongId
+							where songCreatorMetadata.CreatorId == contentId
+							select new PlaylistIndexDTO
+							{
+								Id = playlist.Id,
+								ListName = playlist.ListName,
+								PlaylistCoverPath = playlist.PlaylistCoverPath,
+								MemberId = playlist.MemberId,
+								PlaylistSongMetadata = playlist.PlaylistSongMetadata,
+							};
+
+			return playlists;
 		}
 	}
 }

@@ -70,5 +70,14 @@ namespace api.iSMusic.Controllers
 
 			return Ok(Credits);
 		}
+
+		[HttpPost]
+		[Route("{songId}/Records/{memberId}")]
+		public IActionResult CreatePlayRecord(int songId, int memberId)
+		{
+			_service.CreatePlayRecord(songId, memberId);
+
+            return Ok();
+		}
 	}
 }

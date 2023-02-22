@@ -15,6 +15,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		IEnumerable<PlaylistIndexDTO> GetLikedPlaylists(int memberId);
 
+		IEnumerable<PlaylistIndexDTO> GetIncludedPlaylists(int artistId, string mode, int rowNumber = 1);
+
 		Task<int> GetNumOfPlaylistsByMemberIdAsync(int memberId);
 
 		Task CreatePlaylistAsync(PlaylistCreateVM newPlaylist);
@@ -30,7 +32,11 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void AddSongToPlaylist(int playlistId, int songId, int lastOrder);
 
+		void AddSongsToPlaylist(int playlistId, List<int> selectedSongs, int order);
+
 		void UpdatePlaylistDetail(int playlistId, PlaylistEditDTO dto);
+
+		void ChangePrivacySetting(int playlistId);
 
 		void DeletePlaylist(int playlistId);
 

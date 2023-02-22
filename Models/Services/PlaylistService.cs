@@ -14,10 +14,13 @@ namespace api.iSMusic.Models.Services
 
 		private readonly ISongRepository _songRepository;
 
-		public PlaylistService(IPlaylistRepository repository, ISongRepository songRepository)
+		private readonly IAlbumRepository _albumRepository;
+
+		public PlaylistService(IPlaylistRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository)
 		{
 			_repository = repository;
 			_songRepository = songRepository;
+			_albumRepository = albumRepository;
 		}
 
 		public IEnumerable<PlaylistIndexDTO> GetRecommended()
@@ -79,7 +82,7 @@ namespace api.iSMusic.Models.Services
 			return _repository.GetPlaylistsByName(name, skip, take);
 		}
 
-		public (bool Success, string Message)AddSongToPlaylist(int playlistId, int songId, bool Force)
+		public (bool Success, string Message) AddSongToPlaylist(int playlistId, int songId, bool Force)
 		{
 			var playlist = _repository.GetPlaylistById(playlistId);
 			if(playlist == null) return (false, "清單不存在");
@@ -88,7 +91,7 @@ namespace api.iSMusic.Models.Services
 
 			if(!Force && metadata.Select(metadatum => metadatum.SongId).Contains(songId))
 			{
-				return (false, "清單內已有歌曲");
+				return (false, string.Empty);
 			}
 
 			var lastOrder = metadata != null ? metadata.Max(metadatum => metadatum.DisplayOrder) : 0;
@@ -98,28 +101,91 @@ namespace api.iSMusic.Models.Services
 			return (true, "新增成功");
 		}
 
+		public (bool Success, string Message) AddAlbumToPlaylist(int playlistId, int albumId, string mode)
+		{
+			var playlist = _repository.GetPlaylistById(playlistId);
+			if (playlist == null) return (false, "播放清單不存在");
+
+			var album = _albumRepository.GetAlbumById(albumId);
+			if (album == null) return (false, "專輯不存在");
+
+			var songIdsInPlaylist = playlist.PlayListSongMetadata.Select(metadata => metadata.SongId).ToHashSet();
+
+			var selectedSongs = album.Songs.Select(song => song.Id).ToList();
+
+			if (mode == "Normal")
+			{
+				bool contained = songIdsInPlaylist.IsSupersetOf(selectedSongs);
+				if (contained)
+				{
+					return (false, "整張專輯已經在播放清單中");
+				}
+				else if (songIdsInPlaylist.Overlaps(selectedSongs))
+				{
+					return (false, "此播放清單已包部分歌曲");
+				}
+			}
+			else if(mode == "Partial")
+			{
+				selectedSongs = selectedSongs.Where(songId => songIdsInPlaylist.Contains(songId) == false).ToList();
+			}
+
+			var metadata = playlist.PlayListSongMetadata;
+
+			var newOrder = metadata != null ? metadata.Max(metadatum => metadatum.DisplayOrder)+1 : 0;
+
+			_repository.AddSongsToPlaylist(playlistId, selectedSongs, newOrder);
+			return (true, "新增成功");
+		}
+
 		public (bool Success, string Messgae) UpdatePlaylistDetail(int playlistId, PlaylistEditDTO dto)
 		{
 			if (CheckPlaylistExistence(playlistId)) return (false, "清單不存在");
 
 			if (dto.PlaylistCover != null)
 			{
-				var fileName = Path.GetFileName(dto.PlaylistCover.FileName);
-				var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", fileName);
+				var coverPath = "https://localhost:44373/Uploads/Covers";
 
-				using (var stream = new FileStream(filePath, FileMode.Create))
+                var fileName = Path.GetFileName(dto.PlaylistCover.FileName);
+                string newFileName = GetNewFileName(coverPath, fileName);
+                var fullPath = Path.Combine(coverPath, fileName);
+
+                using (var stream = new FileStream(fullPath, FileMode.Create))
 				{
 					dto.PlaylistCover.CopyTo(stream);
 				}
 
-				dto.PlaylistCoverPath = Path.Combine("uploads", fileName);
+				dto.PlaylistCoverPath = newFileName;
 			}
 
 			_repository.UpdatePlaylistDetail(playlistId, dto);
 			return (true, "更新成功");
 		}
 
-		public (bool Success, string Messgae) DeletePlaylist(int playlistId)
+        private string GetNewFileName(string path, string fileName)
+        {
+            string ext = System.IO.Path.GetExtension(fileName); // 取得副檔名,例如".jpg"
+            string newFileName;
+            string fullPath;
+            // todo use song name + artists name instead of guid, so when uploading the new file it will replace the old one.
+            do
+            {
+                newFileName = Guid.NewGuid().ToString("N") + ext;
+                fullPath = System.IO.Path.Combine(path, newFileName);
+            } while (System.IO.File.Exists(fullPath) == true); // 如果同檔名的檔案已存在,就重新再取一個新檔名
+
+            return newFileName;
+        }
+
+        public (bool Success, string Message) ChangePrivacySetting(int playlistId)
+		{
+			if(CheckPlaylistExistence(playlistId)==false) return (false, "清單不存在");
+
+			_repository.ChangePrivacySetting(playlistId);
+			return (true, "更新成功");
+		}
+
+		public (bool Success, string Message) DeletePlaylist(int playlistId)
 		{
 			if(CheckPlaylistExistence(playlistId) == false) return(false, "清單不存在");
 
@@ -127,7 +193,7 @@ namespace api.iSMusic.Models.Services
 			return (true, "刪除成功");
 		}
 
-		public (bool Success, string Messgae) DeleteSongfromPlaylist(int playlistId, int displayOrder)
+		public (bool Success, string Message) DeleteSongfromPlaylist(int playlistId, int displayOrder)
 		{
 			if (CheckPlaylistExistence(playlistId) == false) return (false, "清單不存在");
 

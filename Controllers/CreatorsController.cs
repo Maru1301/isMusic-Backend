@@ -16,10 +16,23 @@ namespace api.iSMusic.Controllers
 
 		private readonly CreatorService _service;
 
-		public CreatorsController(ICreatorRepository repository)
+		public CreatorsController(ICreatorRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
 			_repository = repository;
-			_service = new CreatorService(_repository);
+			_service = new CreatorService(_repository, songRepository, albumRepository, playlistRepository);
+		}
+
+		[HttpGet]
+		[Route("{creatorId}/Detail")]
+		public ActionResult<ArtistDetailVM> GetCreatorDetail(int creatorId)
+		{
+			var result = _service.GetCreatorDetail(creatorId);
+			if (!result.Success)
+			{
+				return NotFound(result.Message);
+			}
+
+			return Ok(result.dto.ToDetailVM());
 		}
 
 		[HttpGet]
@@ -30,5 +43,31 @@ namespace api.iSMusic.Controllers
 
 			return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
-	}
+
+        [HttpGet]
+        [Route("{creatorId}/Albums")]
+        public IActionResult GetCreatorAlbums(int creatorId, [FromQuery] int rowNumber = 2)
+        {
+            var result = _service.GetCreatorAlbums(creatorId, rowNumber);
+            if (!result.Success)
+            {
+                return NotFound(result.Message);
+            }
+
+            return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
+        }
+
+        [HttpGet]
+        [Route("{creatorId}/Playlists")]
+        public IActionResult GetCreatorPlaylists(int creatorId, [FromQuery] int rowNumber = 2)
+        {
+            var result = _service.GetCreatorPlaylists(creatorId, rowNumber);
+            if (!result.Success)
+            {
+                return NotFound(result.Message);
+            }
+
+            return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
+        }
+    }
 }

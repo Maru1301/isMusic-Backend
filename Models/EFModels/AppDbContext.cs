@@ -160,10 +160,8 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Albums_AlbumTypes");
 
-            entity.HasOne(d => d.MainArtist).WithMany(p => p.Albums)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Albums_Artists");
-                
+            entity.HasOne(d => d.MainArtist).WithMany(p => p.Albums).HasConstraintName("FK_Albums_Artists");
+
             entity.HasOne(d => d.MainCreator).WithMany(p => p.Albums).HasConstraintName("FK_Albums_Creators");
         });
 
@@ -344,8 +342,6 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Artist).WithMany(p => p.Queues)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_Queues_Artists");
-
-            entity.HasOne(d => d.CurrentSong).WithMany(p => p.Queues).HasConstraintName("FK_Queues_Songs");
 
             entity.HasOne(d => d.Member).WithMany(p => p.Queues)
                 .OnDelete(DeleteBehavior.ClientSetNull)

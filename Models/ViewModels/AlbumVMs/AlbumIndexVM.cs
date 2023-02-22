@@ -16,7 +16,13 @@ namespace api.iSMusic.Models.ViewModels.AlbumVMs
 
 		public DateTime Released { get; set; }
 
-		public int MainArtistId { get; set; }
+		public int? MainArtistId { get; set; }
+
+		public string? MainArtistName { get; set; }
+
+		public int? MainCreatorId { get; set; }
+
+		public string? MainCreatorName { get; set; }
 
 		public int TotalLikes { get; set; }
 	}
