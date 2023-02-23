@@ -7,31 +7,40 @@ namespace api.iSMusic.Models.Infrastructures.Extensions;
 public static class ArtistExts
 {
 	public static ArtistInfoVM ToInfoVM(this Artist source)
-		=> new ArtistInfoVM
-		{
+		=> new()
+        {
 			ArtistId = source.Id,
 			ArtistName = source.ArtistName
 		};
 
-	public static ArtistIndexVM ToIndexVM(this ArtistIndexDTO source)
-		=> new ArtistIndexVM
+	public static ArtistIndexDTO ToIndexDTO(this Artist source)
+		=> new()
 		{
+			Id = source.Id,
+			ArtistName = source.ArtistName,
+			ArtistPicPath= source.ArtistPicPath,
+			TotalFollows = source.ArtistFollows.Count(),
+		};
+
+	public static ArtistIndexVM ToIndexVM(this ArtistIndexDTO source)
+		=> new()
+        {
 			Id = source.Id,
 			ArtistName = source.ArtistName,
 			ArtistPicPath = source.ArtistPicPath,
 		};
 
 	public static ArtistDetailVM ToDetailVM(this Artist source)
-		=> new ArtistDetailVM
-		{
+		=> new()
+        {
 			Id = source.Id,
 			ArtistName = source.ArtistName,
 			ArtistPicPath = source.ArtistPicPath,
 		};
 
 	public static ArtistDetailVM ToDetailVM(this ArtistDetailDTO source)
-		=> new ArtistDetailVM
-		{
+		=> new()
+        {
 			Id = source.Id,
 			ArtistName = source.ArtistName,
 			ArtistPicPath = source.ArtistPicPath,

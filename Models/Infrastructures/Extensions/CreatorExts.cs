@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.ArtistVMs;
 using api.iSMusic.Models.ViewModels.CreatorVMs;
 
@@ -6,6 +7,15 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
 {
     public static class CreatorExts
 	{
+		public static CreatorIndexDTO ToIndexDTO(this Creator source)
+			=> new()
+			{
+				Id= source.Id,
+				CreatorName= source.CreatorName,
+				CreatorPicPath= source.CreatorPicPath,
+				TotalFollows = source.CreatorFollows.Count,
+			};
+
 		public static CreatorIndexVM ToIndexVM(this CreatorIndexDTO source)
 			=> new()
 			{

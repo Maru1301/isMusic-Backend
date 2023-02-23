@@ -22,7 +22,21 @@ namespace api.iSMusic.Controllers
 			_service = new CreatorService(_repository, songRepository, albumRepository, playlistRepository);
 		}
 
-		[HttpGet]
+        [HttpGet]
+        [Route("Recommended")]
+        public IActionResult GetRecommended()
+        {
+            var result = _service.GetRecommended();
+
+            if (!result.Success)
+            {
+                return NoContent();
+            }
+
+            return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
+        }
+
+        [HttpGet]
 		[Route("{creatorId}/Detail")]
 		public ActionResult<ArtistDetailVM> GetCreatorDetail(int creatorId)
 		{

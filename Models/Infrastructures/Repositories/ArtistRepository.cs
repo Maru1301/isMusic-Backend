@@ -21,7 +21,19 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db = db;
 		}
 
-		public Artist? GetArtistByIdForCheck(int artistId)
+        public IEnumerable<ArtistIndexDTO> GetRecommended()
+        {
+            var dtos = _db.Artists
+                .Include(artist => artist.ArtistFollows)
+                .Select(artist => artist.ToIndexDTO())
+                .OrderByDescending(dto => dto.TotalFollows)
+                .Take(takeNumber)
+                .ToList();
+
+            return dtos;
+        }
+
+        public Artist? GetArtistByIdForCheck(int artistId)
 		{
 			return _db.Artists.Find(artistId);
 		}
@@ -47,9 +59,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					Id = artist.Id,
 					ArtistName = artist.ArtistName,
 					ArtistPicPath = artist.ArtistPicPath,
-					Follows = artist.ArtistFollows.Count(),
+					TotalFollows = artist.ArtistFollows.Count(),
 				})
-				.OrderBy(dto => dto.Follows)
+				.OrderByDescending(dto => dto.TotalFollows)
 				.Skip(skipRows)
 				.Take(takeRows)
 				.ToList();
@@ -114,5 +126,5 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 			return about;
 		}
-	}
+    }
 }

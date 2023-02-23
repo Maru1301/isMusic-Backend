@@ -27,6 +27,20 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
+		[Route("Recommended")]
+        public IActionResult GetRecommended()
+        {
+            var result = _service.GetRecommended();
+
+            if (!result.Success)
+            {
+                return NoContent();
+            }
+
+            return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
+        }
+
+        [HttpGet]
 		[Route("{artistId}/Detail")]
 		public ActionResult<ArtistDetailVM> GetArtistDetail(int artistId)
 		{

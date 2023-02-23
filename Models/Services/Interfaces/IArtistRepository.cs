@@ -7,7 +7,9 @@ namespace api.iSMusic.Models.Services.Interfaces
 {
     public interface IArtistRepository
 	{
-		ArtistIndexDTO? GetArtistById(int artistId);
+        IEnumerable<ArtistIndexDTO>  GetRecommended();
+
+        ArtistIndexDTO? GetArtistById(int artistId);
 
 		Artist? GetArtistByIdForCheck(int artistId);
 

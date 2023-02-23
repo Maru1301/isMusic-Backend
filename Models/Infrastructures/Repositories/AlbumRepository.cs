@@ -50,7 +50,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.Include(album => album.LikedAlbums)
 				.Select(album => album.ToIndexDTO())
 				.OrderByDescending(x => x.TotalLikes)
-				.Take(takeNumber * 2)
+				.Take(takeNumber)
 				.ToList();
 
 			return recommendedAlbums;
