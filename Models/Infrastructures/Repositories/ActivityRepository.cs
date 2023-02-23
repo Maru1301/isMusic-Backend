@@ -53,5 +53,26 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
             return activities.Select(activity => activity.ToIndexDTO());
         }
+
+        public void AddNewActivity(ActivityCreateDTO dto)
+        {
+            var activity = new Activity
+            {
+                ActivityName = dto.ActivityName,
+                ActivityStartTime = dto.ActivityStartTime,
+                ActivityEndTime = dto.ActivityEndTime,
+                ActivityLocation = dto.ActivityLocation,
+                ActivityTypeId = dto.ActivityTypeId,
+                ActivityInfo = dto.ActivityInfo,
+                ActivityOrganizerId = dto.ActivityOrganizerId,
+                ActivityImagePath = dto.ActivityImagePath,
+                PublishedStatus = dto.PublishedStatus,
+                CheckedById = null,
+                Updated = dto.Updated,
+            };
+
+            _db.Activities.Add(activity);
+            _db.SaveChanges();
+        }
     }
 }

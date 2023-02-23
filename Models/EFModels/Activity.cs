@@ -45,7 +45,7 @@ public partial class Activity
     public bool PublishedStatus { get; set; }
 
     [Column("checkedById")]
-    public int CheckedById { get; set; }
+    public int? CheckedById { get; set; }
 
     [Column("updated", TypeName = "datetime")]
     public DateTime Updated { get; set; }

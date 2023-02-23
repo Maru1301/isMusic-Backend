@@ -11,5 +11,7 @@ namespace api.iSMusic.Models.Services.Interfaces
         ActivityType? GetTypeByIdForCheck(int typeId);
 
         IEnumerable<ActivityType> GetActivityTypes();
+
+        void AddNewActivity(ActivityCreateDTO dto);
     }
 }

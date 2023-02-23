@@ -1,6 +1,7 @@
 ﻿using api.iSMusic.Models.DTOs.ActivityDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Services.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using static api.iSMusic.Controllers.ActivitiesController;
 
 namespace api.iSMusic.Models.Services
@@ -9,15 +10,21 @@ namespace api.iSMusic.Models.Services
     {
         private readonly IActivityRepository _activityRepository;
 
+        private readonly IMemberRepository _memberRepository;
+
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
         private string _searchInput = string.Empty;
 
         private string _searchSort = string.Empty;
         
         private int _searchType = 0;
 
-        public ActivityService(IActivityRepository activityRepository)
+        public ActivityService(IActivityRepository activityRepository, IMemberRepository memberRepository, IWebHostEnvironment webHostEnvironment)
         {
             _activityRepository = activityRepository;
+            _memberRepository = memberRepository;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public IEnumerable<ActivityIndexDTO> GetMainPageActivities()
@@ -46,11 +53,67 @@ namespace api.iSMusic.Models.Services
             return (true, string.Empty, dtos);
         }
 
+        public (bool Success, string Message) AddNewActivity(int memberId, ActivityCreateDTO dto)
+        {
+            if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
+
+            if(dto.ActivityImage == null || dto.ActivityImage.Length == 0)
+            {
+                dto.ActivityImagePath = string.Empty;
+            }
+            else
+            {
+                var parentPath = Directory.GetParent(_webHostEnvironment.ContentRootPath).FullName;
+                var coverPath = Path.Combine(parentPath, "iSMusic.ServerSide/iSMusic/Uploads/Covers");
+
+                var fileName = Path.GetFileName(dto.ActivityImage.FileName);
+                string newFileName = GetNewFileName(coverPath, fileName);
+                var fullPath = Path.Combine(coverPath, newFileName);
+
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    dto.ActivityImage.CopyTo(stream);
+                }
+
+                dto.ActivityImagePath = newFileName;
+            }
+            dto.PublishedStatus = false;
+            dto.ActivityOrganizerId = memberId;
+            dto.Updated = DateTime.Now;
+
+            _activityRepository.AddNewActivity(dto);
+
+            return (true, "新增成功");
+        }
+
+        private string GetNewFileName(string path, string fileName)
+        {
+            string ext = System.IO.Path.GetExtension(fileName); // 取得副檔名,例如".jpg"
+            string newFileName;
+            string fullPath;
+            // todo use song name + artists name instead of guid, so when uploading the new file it will replace the old one.
+            do
+            {
+                newFileName = Guid.NewGuid().ToString("N") + ext;
+                fullPath = System.IO.Path.Combine(path, newFileName);
+            } while (System.IO.File.Exists(fullPath) == true); // 如果同檔名的檔案已存在,就重新再取一個新檔名
+
+            return newFileName;
+        }
+
+        private bool CheckMemberExistence(int memberId)
+        {
+            var member = _memberRepository.GetMemberById(memberId);
+
+            return member != null;
+        }
+
         private bool CheckTypeExistence(int typeId)
         {
             var type = _activityRepository.GetTypeByIdForCheck(typeId);
 
             return type != null;
         }
+
     }
 }

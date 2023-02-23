@@ -1,7 +1,9 @@
 ﻿using api.iSMusic.Models.Services;
 using api.iSMusic.Models.Services.Interfaces;
+using api.iSMusic.Models.ViewModels.ActivityVMs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace api.iSMusic.Controllers
 {
@@ -13,10 +15,10 @@ namespace api.iSMusic.Controllers
 
         private readonly ActivityService _service;
 
-        public ActivitiesController(IActivityRepository activityRepository)
+        public ActivitiesController(IActivityRepository activityRepository, IMemberRepository memberRepository, IWebHostEnvironment webHostEnvironment)
         {
             _activityRepository = activityRepository;
-            _service = new ActivityService(activityRepository);
+            _service = new ActivityService(activityRepository, memberRepository, webHostEnvironment);
         }
 
         [HttpGet]
@@ -55,6 +57,24 @@ namespace api.iSMusic.Controllers
             var types = _activityRepository.GetActivityTypes();
 
             return Ok(types);
+        }
+
+        [HttpPost]
+        [Route("Organizers/{memberId}")]
+        public IActionResult AddNewActivity(int memberId, [FromForm] ActivityCreateVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity("存在非法欄位");
+            }
+
+            var result = _service.AddNewActivity(memberId, model.ToDTO());
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
         }
     }
 }

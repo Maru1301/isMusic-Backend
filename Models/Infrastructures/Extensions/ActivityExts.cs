@@ -35,4 +35,17 @@ public static class ActivityExts
             Updated = source.Updated,
             TotalFollows = source.TotalFollows,
         };
+
+    public static ActivityCreateDTO ToDTO(this ActivityCreateVM source)
+        => new()
+        {
+            ActivityName = source.ActivityName,
+            ActivityStartTime = source.ActivityStartTime,
+            ActivityEndTime = source.ActivityEndTime,
+            ActivityLocation = source.ActivityLocation,
+            ActivityTypeId = source.ActivityTypeId,
+            ActivityInfo = source.ActivityInfo,
+            ActivityImagePath = source.ActivityImagePath,
+            ActivityImage = source.ActivityImage,
+        };
 }
