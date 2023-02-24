@@ -27,19 +27,19 @@ namespace api.iSMusic.Controllers
 
 		private readonly MemberService _memberService;
 
-		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository , IQueueRepository queueRepository)
+		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository, IQueueRepository queueRepository, IActivityRepository activityRepository)
 		{
 			_memberRepository = memberRepo;
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_albumRepository= albumRepository;
-			_memberService = new (_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository);
+			_albumRepository = albumRepository;
+			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository);
 		}
 
 		[HttpGet]
 		[Route("{memberId}/Playlists")]
-		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromQuery]InputQuery query)
+		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromQuery] InputQuery query)
 		{
 			var dtos = _memberService.GetMemberPlaylists(memberId, query);
 
@@ -100,9 +100,10 @@ namespace api.iSMusic.Controllers
 
 				var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
 
-				foreach(int songId in queueSongIds)
+				foreach (int songId in queueSongIds)
 				{
-					if (likedSongIds.Contains(songId)){
+					if (likedSongIds.Contains(songId))
+					{
 						queue.SongInfos.Single(info => info.Id == songId).IsLiked = true;
 					}
 				}
@@ -148,7 +149,7 @@ namespace api.iSMusic.Controllers
 				return BadRequest(result.Message);
 			}
 
-			return Ok(result.ArtistDtos.Select(dto=> dto.ToIndexVM()));
+			return Ok(result.ArtistDtos.Select(dto => dto.ToIndexVM()));
 		}
 
 		[HttpGet]
@@ -193,6 +194,20 @@ namespace api.iSMusic.Controllers
 
 			public string Input { get; set; }
 		}
+
+		[HttpGet]
+		[Route("{memberId}/Activities")]
+		public IActionResult GetMemberFollowedActivities(int memberId)
+		{
+			var result = _memberService.GetMemberFollowedActivities(memberId);
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
+
+        }
 
 		[HttpPost]
 		[Route("{memberId}/LikedSongs/{songId}")]
@@ -250,21 +265,35 @@ namespace api.iSMusic.Controllers
 			return Ok(result.Message);
 		}
 
-        [HttpPost]
-        [Route("{memberId}/FollowedCreators/{creatorId}")]
-        public IActionResult FollowCreator(int memberId, int creatorId)
-        {
-            var result = _memberService.FollowCreator(memberId, creatorId);
+		[HttpPost]
+		[Route("{memberId}/FollowedCreators/{creatorId}")]
+		public IActionResult FollowCreator(int memberId, int creatorId)
+		{
+			var result = _memberService.FollowCreator(memberId, creatorId);
 
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
 
-            return Ok(result.Message);
-        }
+			return Ok(result.Message);
+		}
 
-        [HttpDelete]
+		[HttpPost]
+		[Route("{memberId}/Activities/{activityId}/{attendDate}")]
+		public IActionResult FollowActivity(int memberId, int activityId, DateTime attendDate)
+		{
+			var result = _memberService.FollowActivity(memberId, activityId, attendDate);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+		[HttpDelete]
 		[Route("{memberId}/LikedSongs/{songId}")]
 		public IActionResult DeleteLikedSong(int memberId, int songId)
 		{
@@ -320,18 +349,32 @@ namespace api.iSMusic.Controllers
 			return Ok(result.Message);
 		}
 
-        [HttpDelete]
-        [Route("{memberId}/FollowedCreators/{creatorId}")]
-        public IActionResult UnfollowCreator(int memberId, int creatorId)
-        {
-            var result = _memberService.UnfollowCreator(memberId, creatorId);
+		[HttpDelete]
+		[Route("{memberId}/FollowedCreators/{creatorId}")]
+		public IActionResult UnfollowCreator(int memberId, int creatorId)
+		{
+			var result = _memberService.UnfollowCreator(memberId, creatorId);
 
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
 
-            return Ok(result.Message);
-        }
-    }
+			return Ok(result.Message);
+		}
+
+		[HttpDelete]
+		[Route("{memberId}/Activities/{activityId}")]
+		public IActionResult UnfollowActivity(int memberId, int activityId)
+		{
+			var result = _memberService.UnfollowActivity(memberId, activityId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+	}
 }

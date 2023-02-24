@@ -77,7 +77,7 @@ public partial class Song
     [InverseProperty("Song")]
     public virtual ICollection<QueueSong> QueueSongs { get; } = new List<QueueSong>();
 
-    [InverseProperty("CurrentSong")]
+    [InverseProperty("CurrentSongOrderNavigation")]
     public virtual ICollection<Queue> Queues { get; } = new List<Queue>();
 
     [InverseProperty("Song")]
