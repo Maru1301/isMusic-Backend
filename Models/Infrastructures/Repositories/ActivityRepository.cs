@@ -74,5 +74,39 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             _db.Activities.Add(activity);
             _db.SaveChanges();
         }
+
+        public Activity? GetActivityByIdForCheck(int activityId)
+        {
+            return _db.Activities.Find(activityId);
+        }
+
+        public void FollowActivity(int memberId, int activityId, DateTime attendDate)
+        {
+            var followActivity = new ActivityFollow
+            { 
+                MemberId = memberId,
+                ActivityId = activityId,
+                AttendDate = attendDate,
+            };
+
+            _db.ActivityFollows.Add(followActivity);
+            _db.SaveChanges();
+        }
+
+        public void UnfollowActivity(int memberId, int activityId)
+        {
+            var followActivity = _db.ActivityFollows.Single(af => af.MemberId == memberId && af.ActivityId == activityId);
+
+            _db.ActivityFollows.Remove(followActivity);
+            _db.SaveChanges();
+        }
+
+        public IEnumerable<ActivityIndexDTO> GetMemberFollowedActivities(int memberId)
+        {
+            return _db.ActivityFollows
+                .Where(af => af.MemberId == memberId && af.AttendDate.Year == DateTime.Now.Year)
+                .Select(af => af.Activity)
+                .Select(activity => activity.ToIndexDTO());
+        }
     }
 }

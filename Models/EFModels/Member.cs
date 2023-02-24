@@ -95,9 +95,6 @@ public partial class Member
     public virtual CreditCard? CreditCard { get; set; }
 
     [InverseProperty("Member")]
-    public virtual ICollection<LikedActivity> LikedActivities { get; } = new List<LikedActivity>();
-
-    [InverseProperty("Member")]
     public virtual ICollection<LikedAlbum> LikedAlbums { get; } = new List<LikedAlbum>();
 
     [InverseProperty("Member")]
