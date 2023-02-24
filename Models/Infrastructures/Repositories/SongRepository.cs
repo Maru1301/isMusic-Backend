@@ -199,5 +199,31 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SongPlayedRecords.Add(newRecord);
 			_db.SaveChanges();
         }
-    }
+
+		public void CreateUploadSong(string coverPath, string songPath, CreatorUploadSongDTO dto)
+		{
+			var newSong = new Song
+			{
+				SongName = dto.SongName,
+				GenreId= dto.GenreId,
+				Duration= dto.Duration,
+				IsInstrumental= dto.IsInstrumental,
+				Language= dto.Language,
+				IsExplicit= dto.IsExplicit,
+				Released= dto.Released,
+				SongWriter= dto.SongWriter,
+				Lyric= dto.Lyric,
+				SongCoverPath= coverPath,
+				SongPath= songPath,
+				Status= dto.Status,
+				AlbumId= dto.AlbumId,
+
+			};
+
+			_db.Songs.Add(newSong);
+			_db.SaveChanges();
+		
+		}
+
+	}
 }

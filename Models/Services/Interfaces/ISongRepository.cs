@@ -25,5 +25,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 		IEnumerable<SongIndexDTO> GetSongsByName(string name, int rowNumber);
 
         void CreatePlayRecord(int songId, int memberId);
-    }
+
+		void CreateUploadSong(string coverPath, string songPath, CreatorUploadSongDTO creatoruploadsongdto);
+
+	}
 }

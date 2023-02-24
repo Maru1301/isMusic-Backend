@@ -5,6 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using api.iSMusic.Models.ViewModels.ArtistVMs;
 using api.iSMusic.Models.ViewModels.CreatorVMs;
 using api.iSMusic.Models.Infrastructures.Extensions;
+using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.DTOs.MusicDTOs;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.Extensions.Hosting.Internal;
+using System;
 
 namespace api.iSMusic.Controllers
 {
@@ -15,12 +20,15 @@ namespace api.iSMusic.Controllers
 		private readonly ICreatorRepository _repository;
 
 		private readonly CreatorService _service;
+		//private readonly ISongRepository _songRepository;
+		
 
 		public CreatorsController(ICreatorRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
 		{
 			_repository = repository;
 			_service = new CreatorService(_repository, songRepository, albumRepository, playlistRepository);
-		}
+		}	
+
 
 		[HttpGet]
 		[Route("{creatorId}/Detail")]
@@ -69,5 +77,16 @@ namespace api.iSMusic.Controllers
 
             return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
         }
+
+		[HttpPost]
+		[Route("Creators/")]
+		public IActionResult CreatorUploadSong([FromForm] CreatorUploadSongDTO creatoruploadsongdto)
+		{
+			string coverPath = "C:\\Users\\ispan\\Desktop\finalprojectapi\\Uploads\\Covers";
+			string songPath = "C:\\Users\\ispan\\Desktop\finalprojectapi\\Uploads\\Songs";
+			var result = _service.CreatorUploadSong(coverPath, songPath, creatoruploadsongdto);
+
+			return Ok(result.Message);
+		}
     }
 }

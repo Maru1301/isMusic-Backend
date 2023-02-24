@@ -81,5 +81,12 @@ namespace api.iSMusic.Models.Services
 
 			return creator!= null;
         }
+
+		public (bool Success, string Message) CreatorUploadSong(string coverPath, string songPath, CreatorUploadSongDTO creatoruploadsongdto)
+		{
+			_songRepository.CreateUploadSong(coverPath, songPath, creatoruploadsongdto);
+
+			return (true, "新增歌曲成功");
+		}
     }
 }

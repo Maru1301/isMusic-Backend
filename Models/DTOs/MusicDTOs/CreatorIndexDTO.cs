@@ -7,6 +7,8 @@
         public string CreatorName { get; set; } = null!;
 
         public string CreatorPicPath { get; set; } = null!;
+        public string? CreatorAbout { get; set; }
+        public string? CreatorCoverPath { get; set; }
 
         public int TotalFollows { get; set; }
     }
