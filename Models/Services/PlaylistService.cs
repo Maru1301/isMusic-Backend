@@ -16,11 +16,14 @@ namespace api.iSMusic.Models.Services
 
 		private readonly IAlbumRepository _albumRepository;
 
-		public PlaylistService(IPlaylistRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        public PlaylistService(IPlaylistRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository,IWebHostEnvironment webHostEnvironment)
 		{
 			_repository = repository;
 			_songRepository = songRepository;
 			_albumRepository = albumRepository;
+			_webHostEnvironment = webHostEnvironment;
 		}
 
 		public IEnumerable<PlaylistIndexDTO> GetRecommended()
@@ -140,15 +143,16 @@ namespace api.iSMusic.Models.Services
 
 		public (bool Success, string Messgae) UpdatePlaylistDetail(int playlistId, PlaylistEditDTO dto)
 		{
-			if (CheckPlaylistExistence(playlistId)) return (false, "清單不存在");
+			if (CheckPlaylistExistence(playlistId) == false) return (false, "清單不存在");
 
 			if (dto.PlaylistCover != null)
 			{
-				var coverPath = "https://localhost:44373/Uploads/Covers";
+				var parentPath = Directory.GetParent(_webHostEnvironment.ContentRootPath).FullName;
+				var coverPath = Path.Combine(parentPath, "iSMusic.ServerSide/iSMusic/Uploads/Covers");
 
                 var fileName = Path.GetFileName(dto.PlaylistCover.FileName);
                 string newFileName = GetNewFileName(coverPath, fileName);
-                var fullPath = Path.Combine(coverPath, fileName);
+                var fullPath = Path.Combine(coverPath, newFileName);
 
                 using (var stream = new FileStream(fullPath, FileMode.Create))
 				{

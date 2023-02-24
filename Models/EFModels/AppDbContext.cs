@@ -343,6 +343,8 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_Queues_Artists");
 
+            entity.HasOne(d => d.CurrentSong).WithMany(p => p.Queues).HasConstraintName("FK_Queues_Songs");
+
             entity.HasOne(d => d.Member).WithMany(p => p.Queues)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Queues_Members");

@@ -21,13 +21,13 @@ namespace api.iSMusic.Controllers
 
 		private readonly ISongRepository _songRepository;
 
-		private readonly PlaylistService _service;
+        private readonly PlaylistService _service;
 
-		public PlaylistsController(IPlaylistRepository repo, ISongRepository songRepository,IAlbumRepository albumRepository)
+		public PlaylistsController(IPlaylistRepository repo, ISongRepository songRepository,IAlbumRepository albumRepository, IWebHostEnvironment webHostEnvironment)
 		{
 			_repository = repo;
 			_songRepository = songRepository;
-			_service = new(_repository, _songRepository, albumRepository);
+			_service = new(_repository, _songRepository, albumRepository, webHostEnvironment);
 		}
 
 		[HttpGet]
@@ -63,7 +63,7 @@ namespace api.iSMusic.Controllers
 		/// <param name="rowNumber">the default number is 1</param>
 		/// <returns>a list of playlists</returns>
 		[HttpGet]
-		[Route("{playlistName}")]
+		[Route("Search/{playlistName}")]
 		public ActionResult<IEnumerable<PlaylistIndexVM>> GetPlaylistsByName([FromRoute] string playlistName, [FromQuery]int rowNumber = 2)
 		{
 			var data = _service.GetPlaylistsByName(playlistName, rowNumber);
@@ -71,7 +71,23 @@ namespace api.iSMusic.Controllers
 			return Ok(data.Select(p => p.ToIndexVM()));
 		}
 
-		[HttpPost]
+        [HttpPost]
+        [Route("{memberId}")]
+        public async Task<IActionResult> CreatePlaylist([FromRoute] int memberId)
+        {
+            //Check if the provided memberAccount is valid
+            if (memberId <= 0)
+            {
+                return BadRequest("Invalid member account");
+            }
+
+            var playlistId = await _service.CreatePlaylistAsync(memberId);
+
+            //Return a 201 Created status code along with the newly created playlist's information
+            return Ok(playlistId);
+        }
+
+        [HttpPost]
 		[Route("{playlistId}/Songs/{songId}")]
 		public IActionResult AddSongToPlaylist(int playlistId, int songId, [FromBody]bool Force)
 		{

@@ -42,6 +42,7 @@ public static class PlaylistExts
 		{
 			ListName = source.ListName,
 			MemberId = source.MemberId,
+			Created = DateTime.Now,
 		};
 
 	public static PlaylistSongMetadataVM ToVM(this PlaylistSongMetadatum source)

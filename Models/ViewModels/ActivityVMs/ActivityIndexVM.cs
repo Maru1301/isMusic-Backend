@@ -1,12 +1,6 @@
-﻿using api.iSMusic.Models.EFModels;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
-namespace api.iSMusic.Models.ViewModels.ActivityVMs
+﻿namespace api.iSMusic.Models.ViewModels.ActivityVMs
 {
-    public class ActivityDetailVM
+    public class ActivityIndexVM
     {
         public int Id { get; set; }
 
@@ -20,13 +14,9 @@ namespace api.iSMusic.Models.ViewModels.ActivityVMs
 
         public int ActivityTypeId { get; set; }
 
-        public string ActivityTypeName { get; set; } = null!;
-
         public string ActivityInfo { get; set; } = null!;
 
         public int ActivityOrganizerId { get; set; }
-
-        public string ActivityOrganizerName { get; set; } = null!;
 
         public string ActivityImagePath { get; set; } = null!;
 

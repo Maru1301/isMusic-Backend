@@ -57,6 +57,9 @@ public partial class Song
     [Column("albumId")]
     public int? AlbumId { get; set; }
 
+    [Column("displayOrderInAlbum")]
+    public int? DisplayOrderInAlbum { get; set; }
+
     [ForeignKey("AlbumId")]
     [InverseProperty("Songs")]
     public virtual Album? Album { get; set; }
@@ -73,6 +76,9 @@ public partial class Song
 
     [InverseProperty("Song")]
     public virtual ICollection<QueueSong> QueueSongs { get; } = new List<QueueSong>();
+
+    [InverseProperty("CurrentSong")]
+    public virtual ICollection<Queue> Queues { get; } = new List<Queue>();
 
     [InverseProperty("Song")]
     public virtual ICollection<SongArtistMetadatum> SongArtistMetadata { get; } = new List<SongArtistMetadatum>();

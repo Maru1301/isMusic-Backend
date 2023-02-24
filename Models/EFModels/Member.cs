@@ -22,7 +22,7 @@ public partial class Member
 
     [Column("memberEncryptedPassword")]
     [StringLength(100)]
-    public string MemberEncryptedPassword { get; set; } = null!;
+    public string? MemberEncryptedPassword { get; set; }
 
     [Column("memberEmail")]
     [StringLength(50)]

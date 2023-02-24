@@ -195,24 +195,6 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{memberId}/Playlist")]
-		public async Task<IActionResult> CreatePlaylist([FromRoute] int memberId)
-		{
-			//Check if the provided memberAccount is valid
-			if (memberId <= 0)
-			{
-				return BadRequest("Invalid member account");
-			}
-
-			var _playlistService = new PlaylistService(_playlistRepository, _songRepository, _albumRepository);
-
-			var playlistId = await _playlistService.CreatePlaylistAsync(memberId);
-
-			//Return a 201 Created status code along with the newly created playlist's information
-			return Ok(playlistId);
-		}
-
-		[HttpPost]
 		[Route("{memberId}/LikedSongs/{songId}")]
 		public IActionResult AddLikedSong(int memberId, int songId)
 		{
