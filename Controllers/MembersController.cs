@@ -37,11 +37,11 @@ namespace api.iSMusic.Controllers
 		}
 
 
-		[HttpGet]
-        [Route("Members/{memberId}")]
+        [HttpGet]
+        [Route("{memberId}")]
         public IActionResult GetMemberInfo([FromRoute] int memberId)
         {
-			// 取得 memberId
+            // 取得 memberId
             var member = _memberService.GetMemberInfo(memberId);
             if (member == null)
             {
@@ -52,9 +52,9 @@ namespace api.iSMusic.Controllers
         }
 
         [HttpPut]
-		[Route("Members/{memberId}")]
-		public IActionResult UpdateMember(int memberId, [FromForm] MemberEditVM member)
-		{
+        [Route("{memberId}")]
+        public IActionResult UpdateMember(int memberId, [FromForm] MemberEditVM member)
+        {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -67,23 +67,62 @@ namespace api.iSMusic.Controllers
             }
 
             return Ok(result.Message);
-		}
+        }
 
-		[HttpPost]
-		[Route("Members/Register")]
-		public IActionResult MemberRegister([FromForm] MemberRegisterVM member)
-		{
-			// email驗證網址
+        [HttpPost]
+        [Route("Register")]
+        public IActionResult MemberRegister([FromForm] MemberRegisterVM member)
+        {
+            // email驗證網址
             string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActiveRegister?memberid={0}&confirmCode={1}";
-			
 
-            var result = _memberService.MemberRegister(member.ToMemberDTO());
+
+            var result = _memberService.MemberRegister(member.ToMemberDTO(), urlTemplate);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
 
-            return Ok(result);
+            return Ok(result.Message);
+        }
+
+        [HttpGet]
+        [Route("ActiveRegister")]
+        public IActionResult ActiveRegister(int memberId, string confirmCode)
+        {
+            var result = _memberService.ActiveRegister(memberId, confirmCode);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPost]
+        [Route("MemberLogin")]
+        public IActionResult MemberLogin(string account, string password)
+        {
+            var result = _memberService.MemberLogin(account, password);
+
+
+            return Ok(result.Message);
+        }
+
+        [HttpGet]
+        [Route("ForgetPassword")]
+        public ActionResult ForgetPassword(string email)
+        {
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ResetPassword?memberid={0}&confirmCode={1}";
+
+            var result = _memberService.RequestResetPassword(email, urlTemplate);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPatch]
+        [Route("ResetPassword")]
+        public ActionResult ResetPassword([FromForm] int memberId, string confirmCode, string password)
+        {
+
+            var result = _memberService.ResetPassword(memberId, confirmCode, password);
+            return Ok(result.Message);
         }
 
 
@@ -103,8 +142,7 @@ namespace api.iSMusic.Controllers
 
 
 
-
-		[HttpGet]
+        [HttpGet]
 		[Route("{memberId}/Playlists")]
 		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromQuery]InputQuery query)
 		{

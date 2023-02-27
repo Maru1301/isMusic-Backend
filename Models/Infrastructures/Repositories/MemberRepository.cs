@@ -18,14 +18,46 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db = db;
 		}
 
-		public Member? GetMemberById(int memberId)
+        public MemberDTO Load(int memberId)
+        {
+            Member entity = _db.Members.SingleOrDefault(x => x.Id == memberId)!;
+            if (entity == null) return null!;
+
+            MemberDTO result = new MemberDTO
+            {
+                Id = entity.Id,
+                MemberAccount = entity.MemberAccount,
+                MemberEmail = entity.MemberEmail,
+                IsConfirmed = entity.IsConfirmed,
+                ConfirmCode = entity.ConfirmCode
+            };
+
+            return result;
+        }
+
+        public bool NickNameExist(string nickName)
+        {
+            var entity = _db.Members.Where(m => m.MemberNickName == nickName).SingleOrDefault();
+
+            return (entity != null);
+        }
+
+        public bool EmailExist(string email)
+        {
+            var entity = _db.Members.Where(m => m.MemberEmail == email).SingleOrDefault();
+
+            return (entity != null);
+        }
+
+        public Member? GetMemberById(int memberId)
 		{
 			return _db.Members.SingleOrDefault(m => m.Id == memberId);
 		}
-		public Member? FindMemberById(int memberId)
-		{
-			return _db.Members.Find(memberId);
-		}
+
+        public Member? GetByEmail(string email)
+        {
+            return _db.Members.SingleOrDefault(m => m.MemberEmail == email);
+        }
 
         public MemberDTO GetByAccount(string Account)
         {
@@ -35,9 +67,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             return data.ToDTO();
         }
 
-        public bool IsExist(string account, string nickName)
+        public bool IsExist(string account)
 		{			
-            var entity = _db.Members.Where(m => m.MemberAccount == account || m.MemberNickName == nickName).SingleOrDefault();
+            var entity = _db.Members.Where(m => m.MemberAccount == account).SingleOrDefault();
 
             return (entity != null);
         }
@@ -93,57 +125,58 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SaveChanges();
 		}
 
-		public void UpdateMember(int memberId, MemberDTO memberDTO)
-		{
-			// 將 DTO 的值修改到資料庫
-			var member = _db.Members.Single(m => m.Id == memberId);
-			
-			member.MemberNickName = memberDTO.MemberNickName;
-			member.MemberEmail = memberDTO.MemberEmail;
-			member.MemberAddress = memberDTO.MemberAddress;
-			member.MemberCellphone = memberDTO.MemberCellphone;
-			member.MemberDateOfBirth = memberDTO.MemberDateOfBirth;
-			//Avatar = memberDTO.Avatar,
-			member.MemberReceivedMessage = memberDTO.MemberReceivedMessage;
-			member.MemberSharedData = memberDTO.MemberSharedData;
-			member.LibraryPrivacy = memberDTO.LibraryPrivacy;
-			member.CalenderPrivacy = memberDTO.CalenderPrivacy;
-			// 信用卡?
+        public void UpdateMember(int memberId, MemberDTO memberDTO)
+        {
+            // 將 DTO 的值修改到資料庫
+            var member = _db.Members.Single(m => m.Id == memberId);
 
-			_db.SaveChanges();
-		}
+            member.MemberNickName = memberDTO.MemberNickName;
+            member.MemberEmail = memberDTO.MemberEmail;
+            member.MemberAddress = memberDTO.MemberAddress;
+            member.MemberCellphone = memberDTO.MemberCellphone;
+            member.MemberDateOfBirth = memberDTO.MemberDateOfBirth;
+            //Avatar = memberDTO.Avatar,
+            member.MemberReceivedMessage = memberDTO.MemberReceivedMessage;
+            member.MemberSharedData = memberDTO.MemberSharedData;
+            member.LibraryPrivacy = memberDTO.LibraryPrivacy;
+            member.CalenderPrivacy = memberDTO.CalenderPrivacy;
+            // 信用卡?
 
-		public MemberDTO? GetMemberInfo(int memberId)
-		{
-			// 得到的 memberId 跟資料庫做比較，如果符合取出那筆資料的值
-            var result = _db.Members.Where(m => m.Id == memberId).Include(m=>m.Avatar)
-				.Select(member => new MemberDTO  // 將取到的值轉成DTO
-			{				
-				MemberNickName = member.MemberNickName,
-				MemberEmail= member.MemberEmail,
-				MemberAccount= member.MemberAccount,
-				MemberAddress= member.MemberAddress,
-				MemberCellphone= member.MemberCellphone,
-				MemberDateOfBirth= member.MemberDateOfBirth,				
-				MemberReceivedMessage= member.MemberReceivedMessage,
-				MemberSharedData= member.MemberSharedData,				
-				LibraryPrivacy= member.LibraryPrivacy,
-				CalenderPrivacy= member.CalenderPrivacy,
-				Avatar= member.Avatar,
-			}).SingleOrDefault();
+            _db.SaveChanges();
+        }
+
+        public MemberDTO? GetMemberInfo(int memberId)
+        {
+            // 得到的 memberId 跟資料庫做比較，如果符合取出那筆資料的值
+            var result = _db.Members.Where(m => m.Id == memberId).Include(m => m.Avatar)
+                .Select(member => new MemberDTO  // 將取到的值轉成DTO
+                {
+                    Id = memberId,
+                    MemberNickName = member.MemberNickName,
+                    MemberEmail = member.MemberEmail,
+                    MemberAccount = member.MemberAccount,
+                    MemberAddress = member.MemberAddress,
+                    MemberCellphone = member.MemberCellphone,
+                    MemberDateOfBirth = member.MemberDateOfBirth,
+                    MemberReceivedMessage = member.MemberReceivedMessage,
+                    MemberSharedData = member.MemberSharedData,
+                    LibraryPrivacy = member.LibraryPrivacy,
+                    CalenderPrivacy = member.CalenderPrivacy,
+                    Avatar = member.Avatar,
+                }).SingleOrDefault();
 
             return result;
         }
 
-		public void MemberRegister(MemberRegisterDTO dto)
-		{
-			var member = new Member
-			{
-				MemberAccount = dto.MemberAccount!,
-				MemberEncryptedPassword= dto.MemberEncryptedPassword!,
+        public void MemberRegister(MemberRegisterDTO dto)
+        {
+            var member = new Member
+            {
+                MemberAccount = dto.MemberAccount!,
+                MemberEncryptedPassword = dto.MemberEncryptedPassword!,
                 MemberNickName = dto.MemberNickName!,
-				MemberEmail= dto.MemberEmail!,
-				IsConfirmed= false, //預設是未確認的會員
+                MemberEmail = dto.MemberEmail!,
+                IsConfirmed = false, //預設是未確認的會員
                 ConfirmCode = dto.ConfirmCode
             };
             _db.Members.Add(member);
@@ -155,6 +188,17 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             var member = _db.Members.Find(memberId)!;
             member.IsConfirmed = true;
             member.ConfirmCode = null;
+            _db.SaveChanges();
+        }
+
+        public void UpdatePassword(int memberId, string newEncryptedPassword)
+        {
+            var member = _db.Members.Find(memberId);
+
+            member!.MemberEncryptedPassword = newEncryptedPassword;
+            // 將confirmCode清空
+            member.ConfirmCode = null;
+
             _db.SaveChanges();
         }
 

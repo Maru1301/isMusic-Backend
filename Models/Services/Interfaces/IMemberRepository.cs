@@ -9,9 +9,6 @@ namespace api.iSMusic.Models.Services.Interfaces
 	{
 		Member? GetMemberById(int memberId);
 
-		Member? FindMemberById(int memberId);
-
-
         Task<Member?> GetMemberAsync(int memberId);
 
 		void AddLikedSong(int memberId, int songId);
@@ -22,15 +19,27 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void DeleteLikedPlaylist(int memberId, int playlistId);
 
-		void UpdateMember(int memberId, MemberDTO memberDTO);
+        Member? GetByEmail(string email);
 
-		MemberDTO? GetMemberInfo(int memberId);
+        MemberDTO GetByAccount(string Account);
 
-		void MemberRegister(MemberRegisterDTO source);
+        void UpdateMember(int memberId, MemberDTO memberDTO);
 
-		bool IsExist(string account, string nickName);
+        MemberDTO? GetMemberInfo(int memberId);
 
-		void ActiveRegister(int memberId);
+        MemberDTO Load(int memberId);
+
+        void MemberRegister(MemberRegisterDTO source);
+
+        bool IsExist(string account);
+
+        bool NickNameExist(string nickName);
+
+        bool EmailExist(string email);
+
+        void ActiveRegister(int memberId);
+
+        void UpdatePassword(int memberId, string newEncryptedPassword);
 
     }
 }

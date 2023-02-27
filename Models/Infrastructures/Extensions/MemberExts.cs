@@ -41,8 +41,8 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
         {
             return new()
             {
-                //Id = entity.Id,
-				MemberAccount = entity.MemberAccount,
+                Id = entity.Id,
+                MemberAccount = entity.MemberAccount,
                 //MemberEncryptedPassword = entity.MemberEncryptedPassword,
                 MemberEmail = entity.MemberEmail,
                 MemberNickName = entity.MemberNickName,
@@ -50,7 +50,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
                 IsConfirmed = entity.IsConfirmed,
                 ConfirmCode = entity.ConfirmCode,
                 MemberAddress = entity.MemberAddress,
-                MemberDateOfBirth = entity.MemberDateOfBirth,                
+                MemberDateOfBirth = entity.MemberDateOfBirth,
             };
         }
 

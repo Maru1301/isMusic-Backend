@@ -1,9 +1,12 @@
 ﻿using api.iSMusic.Models.DTOs.MemberDTOs;
 using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.MemberVMs;
+using BookStore.Site.Models.Infrastructures;
+using iSMusic.Models.Infrastructures;
 using static api.iSMusic.Controllers.MembersController;
 using static api.iSMusic.Controllers.QueuesController;
 
@@ -147,9 +150,9 @@ namespace api.iSMusic.Models.Services
 		}
 
         public (bool Success, string Message) UpdateMember(int memberId, MemberDTO memberDTO)
-		{
-			var member = _memberRepository.FindMemberById(memberId);
-			if (member == null) return (false, "此帳號不存在");
+        {
+            var member = _memberRepository.GetMemberById(memberId);
+            if (member == null) return (false, "此帳號不存在");
             // TODO 驗證修改的資料(暱稱是否存在...)
 
             _memberRepository.UpdateMember(memberId, memberDTO);
@@ -157,27 +160,128 @@ namespace api.iSMusic.Models.Services
         }
 
         public MemberDTO GetMemberInfo(int memberId)
-        {            
-			// 用 memberId 取的資料庫資料
-			return _memberRepository.GetMemberInfo(memberId)!;
+        {
+            // 用 memberId 取的資料庫資料
+            return _memberRepository.GetMemberInfo(memberId)!;
         }
 
-		public (bool Success, string Message) MemberRegister(MemberRegisterDTO dto)
-		{
-            if (_memberRepository.IsExist(dto.MemberAccount!, dto.MemberNickName!))
+        public (bool Success, string Message) MemberRegister(MemberRegisterDTO dto, string urlTemplate)
+        {
+            if (_memberRepository.IsExist(dto.MemberAccount!))
             {
                 return (false, "帳號已存在");
             }
+            // 驗證暱稱是否重複
+            if (_memberRepository.NickNameExist(dto.MemberNickName!))
+            {
+                return (false, "暱稱已存在");
+            }
+
+            if (_memberRepository.EmailExist(dto.MemberEmail!))
+            {
+                return (false, "信箱已存在");
+            }
+
             dto.ConfirmCode = Guid.NewGuid().ToString("N");
 
             _memberRepository.MemberRegister(dto);
 
+            MemberDTO entity = _memberRepository.GetByAccount(dto.MemberAccount!);
             // 發email
-            //string url = string.Format(urlTemplate, entity.id, dto.ConfirmCode);
+            string url = string.Format(urlTemplate, entity.Id, dto.ConfirmCode);
 
-            //new EmailHelper().SendConfirmRegisterEmail(url, dto.NickName, dto.Email);
+            new EmailHelper().SendConfirmRegisterEmail(url, dto.MemberNickName!, dto.MemberEmail!);
 
-            return (true, "");
+            return (true, "註冊成功，已發送驗證信");
+        }
+
+        public (bool Success, string Message) ActiveRegister(int memberId, string confirmCode)
+        {
+            MemberDTO dto = _memberRepository.Load(memberId);
+            if (dto == null) return (false, "驗證成功");
+
+            if (string.Compare(dto.ConfirmCode, confirmCode) != 0) return (false, "驗證成功");
+
+            _memberRepository.ActiveRegister(memberId);
+            return (true, "驗證成功");
+        }
+
+        public (bool Success, string? Message) MemberLogin(string account, string password)
+        {
+            MemberDTO member = _memberRepository.GetByAccount(account);
+
+            if (member == null)
+            {
+                return (false, "帳密有誤");
+            }
+            if (member.IsConfirmed == false)
+            {
+                return (false, "會員資格尚未確認");
+            }
+            //if (member.IsConfirmed.HasValue == false || member.IsConfirmed.HasValue && member.IsConfirmed.Value == false)
+            //{
+            //	return (false, "會員資格尚未確認");
+            //}
+
+            string encryptedPwd = HashUtility.ToSHA256(password, MemberRegisterDTO.SALT);
+
+            return (String.CompareOrdinal(member.MemberEncryptedPassword, encryptedPwd) == 0)
+                ? (true, "登入成功") : (false, "帳密有誤");
+        }
+
+        public (bool Success, string? Message) RequestResetPassword(string email, string urlTemplate)
+        {
+            var entity = _memberRepository.GetByEmail(email);
+
+            if (entity == null)
+            {
+                throw new Exception("帳號或 Email 錯誤");
+            }
+
+            if (string.Compare(email, entity!.MemberEmail) != 0)
+            {
+                return (false, "帳號或 Email 錯誤");
+            }
+
+            //檢查 IsConfirmed必需是true
+            if (entity.IsConfirmed == false)
+            {
+                return (false, "您還沒有啟用本帳號, 請先完成才能重設密碼");
+            }
+
+            // 更新記錄, 填入 confirmCode
+            string confirmCode = Guid.NewGuid().ToString("N");
+            entity.ConfirmCode = confirmCode;
+            _memberRepository.UpdateMember(entity.Id, entity.ToDTO());
+
+            // 發email
+            string url = string.Format(urlTemplate, entity.Id, confirmCode);
+
+            new EmailHelper().SendForgetPasswordEmail(url, entity.MemberAccount, email);
+            return (true, "已重新發送信件");
+        }
+
+        public (bool Success, string? Message) ResetPassword(int memberId, string confirmCode, string plainTextPassword)
+        {
+            // todo 檢查傳入參數值是否合理
+
+
+            string encryptedPassword = HashUtility.ToSHA256(plainTextPassword, MemberRegisterDTO.SALT);
+
+            MemberDTO entity = _memberRepository.Load(memberId);
+            // 檢查有沒有記錄
+            if (entity == null) throw new Exception("找不到對應的會員記錄");
+
+            // 檢查confirmcode 
+            if (string.Compare(confirmCode, entity.ConfirmCode) != 0)
+            {
+                throw new Exception("找不到對應的會員記錄");
+            }
+
+            // 更新密碼
+            _memberRepository.UpdatePassword(memberId, encryptedPassword);
+
+            return (true, "重設密碼成功");
         }
 
     }

@@ -9,7 +9,7 @@ namespace api.iSMusic.Models.DTOs.MemberDTOs
 {
     public class MemberDTO
     {
-        //public int Id { get; set; }
+        public int Id { get; set; }
 
         public string MemberNickName { get; set; } = null!;
 
@@ -31,9 +31,9 @@ namespace api.iSMusic.Models.DTOs.MemberDTOs
 
         public bool MemberSharedData { get; set; }
 
-        public bool? LibraryPrivacy { get; set; }
+        public bool LibraryPrivacy { get; set; }
 
-        public bool? CalenderPrivacy { get; set; }
+        public bool CalenderPrivacy { get; set; }
 
         public int? CreditCardId { get; set; }
 
