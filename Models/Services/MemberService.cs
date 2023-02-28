@@ -284,5 +284,18 @@ namespace api.iSMusic.Models.Services
             return (true, "重設密碼成功");
         }
 
+        public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId)
+        {
+            //if (_memberRepository.SubscriptionRecordExist(memberId) == null)
+            //{
+            //    return ("找不到訂閱紀錄");
+            //}
+            return _memberRepository.GetMemberSubscriptionPlan(memberId)!;
+        }       
+
+        public IEnumerable<OrderDTO> GetMemberOrder(int memberId)
+        {
+            return _memberRepository.GetMemberOrder(memberId)!;
+        }
     }
 }

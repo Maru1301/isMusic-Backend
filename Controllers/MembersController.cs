@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models;
+using api.iSMusic.Models.DTOs.MemberDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services;
@@ -107,7 +108,7 @@ namespace api.iSMusic.Controllers
 
         [HttpGet]
         [Route("ForgetPassword")]
-        public ActionResult ForgetPassword(string email)
+        public IActionResult ForgetPassword(string email)
         {
             string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ResetPassword?memberid={0}&confirmCode={1}";
 
@@ -118,13 +119,32 @@ namespace api.iSMusic.Controllers
 
         [HttpPatch]
         [Route("ResetPassword")]
-        public ActionResult ResetPassword([FromForm] int memberId, string confirmCode, string password)
+        public IActionResult ResetPassword([FromForm] int memberId, string confirmCode, string password)
         {
 
             var result = _memberService.ResetPassword(memberId, confirmCode, password);
             return Ok(result.Message);
         }
 
+		[HttpGet]
+		[Route("{memberId}/SubscriptionPlan")]
+		public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan([FromRoute]int memberId)
+		{
+			var result = _memberService.GetMemberSubscriptionPlan(memberId);
+
+			//--------------------------------------------------------------------------
+            return result;
+
+        }
+
+		[HttpGet]
+		[Route("{memberId}/Orders")]
+		public IEnumerable<OrderDTO> GetMemberOrder([FromRoute] int memberId)
+		{
+			var result = _memberService.GetMemberOrder(memberId);
+
+			return result;
+		}
 
 
 
@@ -141,8 +161,7 @@ namespace api.iSMusic.Controllers
 
 
 
-
-        [HttpGet]
+		[HttpGet]
 		[Route("{memberId}/Playlists")]
 		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromQuery]InputQuery query)
 		{
@@ -155,7 +174,7 @@ namespace api.iSMusic.Controllers
 
 			return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
-
+		
 		public class InputQuery
 		{
 			public InputQuery()

@@ -35,6 +35,13 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             return result;
         }
 
+        public bool SubscriptionRecordExist(int memberId)
+        {
+            var entity = _db.SubscriptionRecords.Where(s => s.Member.Id == memberId).SingleOrDefault();
+
+            return (entity != null);
+        }
+
         public bool NickNameExist(string nickName)
         {
             var entity = _db.Members.Where(m => m.MemberNickName == nickName).SingleOrDefault();
@@ -202,5 +209,53 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             _db.SaveChanges();
         }
 
+        public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId)
+        {
+            // 得到的 memberId 跟資料庫做比較，如果符合取出那筆資料的值
+            var result = _db.SubscriptionRecords
+                .Include(s => s.Member)
+                .Include(s => s.SubscriptionPlan)
+                .Include(s => s.Member.Avatar)
+                .Where(s => s.MemberId == memberId)
+                .Select(s => new SubscriptionPlanDTO  // 將取到的值轉成DTO
+                {
+                    MemberId = memberId,
+                    MemberNickName = s.Member.MemberNickName,
+                    SubscriptionPlanId = s.SubscriptionPlanId,
+                    SubscribedTime = s.SubscribedTime,
+                    PlanName = s.SubscriptionPlan.PlanName,
+                    Price = s.SubscriptionPlan.Price,
+                    numberOfUsers = s.SubscriptionPlan.NumberOfUsers,
+                })
+                .ToList();
+
+            return result;
+        }
+
+        public IEnumerable<OrderDTO> GetMemberOrder(int memberId)
+        {
+            var result = _db.Orders
+                .Include(o => o.Member)
+                .Include(o => o.Coupon)
+                .Where(o => o.MemberId== memberId)
+                .Select(o => new OrderDTO
+                {
+                    MemberId = memberId,
+                    MemberNickName = o.Member.MemberNickName,
+                    CouponText = o.Coupon.CouponText,
+                    StartDate = o.Coupon.StartDate,
+                    ExpiredDate = o.Coupon.ExpiredDate,
+                    Discounts = o.Coupon.Discounts,  
+                    Payments = o.Payments,
+                    OrderStatus = o.OrderStatus,
+                    Paid = o.Paid,
+                    Created = o.Created,
+                    Receiver = o.Receiver,
+                    Address = o.Address,
+                    Cellphone = o.Cellphone
+                })
+                .ToList();
+            return result;
+        }
     }
 }

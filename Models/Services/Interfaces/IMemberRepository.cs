@@ -37,9 +37,14 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         bool EmailExist(string email);
 
+        bool SubscriptionRecordExist(int memberId);
+
         void ActiveRegister(int memberId);
 
         void UpdatePassword(int memberId, string newEncryptedPassword);
 
+        IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId);
+
+        IEnumerable<OrderDTO> GetMemberOrder(int memberId);
     }
 }
