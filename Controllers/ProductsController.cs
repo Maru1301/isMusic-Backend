@@ -137,20 +137,90 @@ namespace api.iSMusic.Controllers
         //    return Ok(productCategories);
         //}
 
-        //[HttpGet]
-        //[Route("SongLanguages")]
-        //public IActionResult GetSongslanguages()
-        //{
-        //    return Ok(_language);
-        //}
+        [HttpGet]
+        [Route("SongGenre/{genreName}")]
+        public IEnumerable<ProductIndexDTO> GetSongsGenre([FromRoute] string genreName)
+        {
+
+            var data = _db.Products
+                .Include(product => product.Album)//.ThenInclude(album => album.AlbumType)
+                .Include(product => product.Album.AlbumType)
+                .Include(product => product.Album.AlbumGenre)
+                .Include(product => product.Album.MainArtist)
+                .Where(product => product.Status == true)
+                .Where(product => product.Album.AlbumGenre.GenreName == genreName)
+                .OrderByDescending(product => product.Album.Released)
+                .Select(product => new ProductIndexDTO
+                {
+                    Id = product.Id,
+                    CategoryName = product.ProductCategory.CategoryName,
+                    ProductPrice = product.ProductPrice,
+                    AlbumInfo = product.Album.ToInfoVM(),
+                    productName = product.ProductName,
+                    stock = product.Stock,
+                    status = product.Status,
+                }).ToList();
+            return data;
+        }
+
+        [HttpGet]
+        [Route("ProductSearch/{words}")]
+        public IEnumerable<ProductIndexDTO> GetProductSearch([FromRoute] string words , string AAA)
+        {
+            if (AAA == "artist")
+            {
+
+                var data = _db.Products
+                    .Include(product => product.Album)//.ThenInclude(album => album.AlbumType)
+                    .Include(product => product.Album.AlbumType)
+                    .Include(product => product.Album.AlbumGenre)
+                    .Include(product => product.Album.MainArtist)
+                    .Where(product => product.Status == true)
+                    .Where(product => product.Album.MainArtist!.ArtistName.Contains(words))
+                    .OrderByDescending(product => product.Album.Released)
+                    .Select(product => new ProductIndexDTO
+                    {
+                        Id = product.Id,
+                        CategoryName = product.ProductCategory.CategoryName,
+                        ProductPrice = product.ProductPrice,
+                        AlbumInfo = product.Album.ToInfoVM(),
+                        productName = product.ProductName,
+                        stock = product.Stock,
+                        status = product.Status,
+                    }).ToList();
+                return data;
+            }
+            else
+            {
+                var data = _db.Products
+                    .Include(product => product.Album)//.ThenInclude(album => album.AlbumType)
+                    .Include(product => product.Album.AlbumType)
+                    .Include(product => product.Album.AlbumGenre)
+                    .Include(product => product.Album.MainArtist)
+                    .Where(product => product.Status == true)
+                    .Where(product => product.Album.MainArtist!.ArtistName.Contains(words))
+                    .OrderByDescending(product => product.Album.Released)
+                    .Select(product => new ProductIndexDTO
+                    {
+                        Id = product.Id,
+                        CategoryName = product.ProductCategory.CategoryName,
+                        ProductPrice = product.ProductPrice,
+                        AlbumInfo = product.Album.ToInfoVM(),
+                        productName = product.ProductName,
+                        stock = product.Stock,
+                        status = product.Status,
+                    }).ToList();
+                return data;
+            }
+        }
 
         //[HttpGet]
         //[Route("Artists/{artistGender}")]
-        //public IActionResult GetArtistGenderInfo([FromRoute]bool artistGender)
+        //public IActionResult GetArtistGenderInfo([FromRoute] bool artistGender)
         //{
         //    var album = _db.Albums
         //        .Include(album => album.MainArtist)
-        //        .Where(x=>x.Id == x.MainArtist.Id)
+        //        .Where(x => x.Id == x.MainArtist.Id)
         //        .ToList();
 
         //    return Ok(album);
