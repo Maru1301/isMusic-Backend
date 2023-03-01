@@ -21,12 +21,14 @@ namespace api.iSMusic.Controllers
 
 		private readonly CreatorService _service;
 		//private readonly ISongRepository _songRepository;
+		private readonly IWebHostEnvironment _webHostEnvironment;
 		
 
-		public CreatorsController(ICreatorRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository)
+		public CreatorsController(ICreatorRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository,IWebHostEnvironment webHostEnvironment)
 		{
 			_repository = repository;
 			_service = new CreatorService(_repository, songRepository, albumRepository, playlistRepository);
+			_webHostEnvironment = webHostEnvironment;
 		}	
 
 
@@ -79,14 +81,30 @@ namespace api.iSMusic.Controllers
         }
 
 		[HttpPost]
-		[Route("Creators/")]
-		public IActionResult CreatorUploadSong([FromForm] CreatorUploadSongDTO creatoruploadsongdto)
+		[Route("{creatorId}/song")]
+		public IActionResult CreatorUploadSong(int creatorId,[FromForm] CreatorUploadSongDTO creatoruploadsongdto)
 		{
-			string coverPath = "C:\\Users\\ispan\\Desktop\finalprojectapi\\Uploads\\Covers";
-			string songPath = "C:\\Users\\ispan\\Desktop\finalprojectapi\\Uploads\\Songs";
-			var result = _service.CreatorUploadSong(coverPath, songPath, creatoruploadsongdto);
-
-			return Ok(result.Message);
+			//string coverPath = "C:\\Users\\ispan\\Desktop\finalprojectapi\\Uploads\\Covers";
+			//string songPath = "C:\\Users\\ispan\\Desktop\finalprojectapi\\Uploads\\Songs";
+			//var result = _service.CreatorUploadSong(coverPath, songPath, creatoruploadsongdto);
+			//return Ok(result.Message);
+			var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath).FullName;
+			var uploadmusicpath = parentroot + @"/iSMusic.ServerSide/Uploads/Songs";
+			var uploadcoverpath = parentroot + @"/iSMusic.ServerSide/Uploads/Covers";
+			var musicfileName = 
+			var coverfileName = coverfiles.FileName;
+			using (var stream = System.IO.File.Create(uploadmusicpath + musicfileName))
+				{
+				musicfiles.CopyTo(stream);
+				}
+			using (var stream = System.IO.File.Create(uploadcoverpath + coverfileName))
+			{
+				coverfiles.CopyTo(stream);
+			}
+			
+			
+			
+			return Ok("歌曲已上傳");
 		}
     }
 }

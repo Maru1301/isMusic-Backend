@@ -22,5 +22,7 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 		public string SongPath { get; set; } = null!;
 		public bool Status { get; set; }
 		public int? AlbumId { get; set; }
+		public IFormFile? Song { get; set; }
+		public IFormFile? Cover { get; set; }
 	}
 }
