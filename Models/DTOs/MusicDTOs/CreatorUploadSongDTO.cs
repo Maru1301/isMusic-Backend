@@ -8,7 +8,7 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 	public class CreatorUploadSongDTO
 	{
 		
-		//public int Id { get; set; }
+		public int Id { get; set; }
 		public string SongName { get; set; } = null!;
 		public int GenreId { get; set; }
 		public int Duration { get; set; }

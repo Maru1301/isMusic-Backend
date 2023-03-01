@@ -22,7 +22,8 @@ namespace api.iSMusic.Controllers
 		private readonly CreatorService _service;
 		//private readonly ISongRepository _songRepository;
 		private readonly IWebHostEnvironment _webHostEnvironment;
-		
+		public AppDbContext _appDbContext;
+
 
 		public CreatorsController(ICreatorRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository, IPlaylistRepository playlistRepository,IWebHostEnvironment webHostEnvironment)
 		{
@@ -91,20 +92,56 @@ namespace api.iSMusic.Controllers
 			var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath).FullName;
 			var uploadmusicpath = parentroot + @"/iSMusic.ServerSide/Uploads/Songs";
 			var uploadcoverpath = parentroot + @"/iSMusic.ServerSide/Uploads/Covers";
-			var musicfileName = 
-			var coverfileName = coverfiles.FileName;
+			var musicfileName = GetNewFileName(uploadmusicpath, creatoruploadsongdto.Song.FileName);
+			var coverfileName = GetNewFileName(uploadcoverpath, creatoruploadsongdto.Cover.FileName);
 			using (var stream = System.IO.File.Create(uploadmusicpath + musicfileName))
 				{
-				musicfiles.CopyTo(stream);
+				creatoruploadsongdto.Song.CopyTo(stream);
 				}
 			using (var stream = System.IO.File.Create(uploadcoverpath + coverfileName))
 			{
-				coverfiles.CopyTo(stream);
+				creatoruploadsongdto.Cover.CopyTo(stream);
 			}
-			
-			
-			
+			Song song = new()
+			{
+				Id = creatoruploadsongdto.Id,
+				SongName=creatoruploadsongdto.Song.Name,
+				GenreId=creatoruploadsongdto.GenreId,
+				Duration= creatoruploadsongdto.Duration,
+				IsInstrumental=creatoruploadsongdto.IsInstrumental,
+				Language=creatoruploadsongdto.Language,
+				IsExplicit=creatoruploadsongdto.IsExplicit,
+				Released=creatoruploadsongdto.Released,
+				SongWriter=creatoruploadsongdto.SongWriter,
+				Lyric=creatoruploadsongdto.Lyric,
+				SongCoverPath=creatoruploadsongdto.SongCoverPath,
+				SongPath=creatoruploadsongdto.SongPath,
+				Status=creatoruploadsongdto.Status,
+				AlbumId=creatoruploadsongdto.AlbumId,
+
+			};
+
+			_appDbContext.Add(song);
+			_appDbContext.SaveChanges();
+
+
+
+
 			return Ok("歌曲已上傳");
 		}
-    }
+		private string GetNewFileName(string path, string fileName)
+		{
+			string ext = System.IO.Path.GetExtension(fileName); // 取得副檔名,例如".jpg"
+			string newFileName;
+			string fullPath;
+			// todo use song name + artists name instead of guid, so when uploading the new file it will replace the old one.
+			do
+			{
+				newFileName = Guid.NewGuid().ToString("N") + ext;
+				fullPath = System.IO.Path.Combine(path, newFileName);
+			} while (System.IO.File.Exists(fullPath) == true); // 如果同檔名的檔案已存在,就重新再取一個新檔名
+
+			return newFileName;
+		}
+	}
 }
