@@ -81,6 +81,7 @@ namespace api.iSMusic.Controllers
 			if(dto == null) return NotFound("專輯不存在");
 
 			return Ok(dto.ToDetailVM());
+
 		}
 	}
 }
