@@ -63,5 +63,21 @@ public static class AlbumExts
 			Description= source.Description,
 			Songs = source.Songs,
 		};
+    public static AlbumInfoVM ToInfoVM(this Album source)
+    => new()
+    {
+        Id = source.Id,
+        AlbumName = source.AlbumName,
+        AlbumCoverPath = source.AlbumCoverPath,
+        Released = source.Released,
+        AlbumTypeId = source.AlbumTypeId,
+        AlbumTypeName = source.AlbumType.TypeName,
+        AlbumGenreId = source.AlbumGenreId,
+        AlbumGenreName = source.AlbumGenre.GenreName,
+        AlbumCompany = source.AlbumCompany,
+        AlbumProducer = source.AlbumProducer,
+        MainArtistName = source.MainArtist.ArtistName,
+        Description = source.Description,
+    };
 }
 
