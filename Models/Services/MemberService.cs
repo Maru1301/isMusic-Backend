@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ﻿using api.iSMusic.Models.DTOs.ActivityDTOs;
 ﻿using api.iSMusic.Models.DTOs.MemberDTOs;
 using api.iSMusic.Models.DTOs.MusicDTOs;
@@ -244,7 +243,6 @@ namespace api.iSMusic.Models.Services
 			return playlist != null;
 		}
 
-<<<<<<< HEAD
 		private bool CheckAlbumExistence(int albumId)
 		{
 			var playlist = _albumRepository.GetAlbumByIdForCheck(albumId);
@@ -273,7 +271,6 @@ namespace api.iSMusic.Models.Services
             return activity != null;
         }
 
-=======
         public (bool Success, string Message) UpdateMember(int memberId, MemberDTO memberDTO)
         {
             var member = _memberRepository.GetMemberById(memberId);

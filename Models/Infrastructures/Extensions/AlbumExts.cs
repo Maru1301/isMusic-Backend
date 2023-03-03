@@ -76,7 +76,7 @@ public static class AlbumExts
         AlbumGenreName = source.AlbumGenre.GenreName,
         AlbumCompany = source.AlbumCompany,
         AlbumProducer = source.AlbumProducer,
-        MainArtistName = source.MainArtist.ArtistName,
+        MainArtistName = source.MainArtist!.ArtistName,
         Description = source.Description,
     };
 }

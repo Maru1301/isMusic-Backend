@@ -147,7 +147,7 @@ namespace api.iSMusic.Models.Services
 
 			if (dto.PlaylistCover != null)
 			{
-				var parentPath = Directory.GetParent(_webHostEnvironment.ContentRootPath).FullName;
+				var parentPath = Directory.GetParent(_webHostEnvironment.ContentRootPath)!.FullName;
 				var coverPath = Path.Combine(parentPath, "iSMusic.ServerSide/iSMusic/Uploads/Covers");
 
                 var fileName = Path.GetFileName(dto.PlaylistCover.FileName);

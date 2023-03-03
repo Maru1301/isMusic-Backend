@@ -18,8 +18,6 @@ namespace api.iSMusic.Models.Services
 
         private string _searchSort = string.Empty;
         
-        private int _searchType = 0;
-
         public ActivityService(IActivityRepository activityRepository, IMemberRepository memberRepository, IWebHostEnvironment webHostEnvironment)
         {
             _activityRepository = activityRepository;
@@ -63,7 +61,7 @@ namespace api.iSMusic.Models.Services
             }
             else
             {
-                var parentPath = Directory.GetParent(_webHostEnvironment.ContentRootPath).FullName;
+                var parentPath = Directory.GetParent(_webHostEnvironment.ContentRootPath)!.FullName;
                 var coverPath = Path.Combine(parentPath, "iSMusic.ServerSide/iSMusic/Uploads/Covers");
 
                 var fileName = Path.GetFileName(dto.ActivityImage.FileName);

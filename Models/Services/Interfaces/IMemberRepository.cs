@@ -25,7 +25,6 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void DeleteLikedPlaylist(int memberId, int playlistId);
 
-<<<<<<< HEAD
 		void DeleteLikedAlbum(int memberId, int albumId);
 
 		void UnfollowArtist(int memberId, int artistId);

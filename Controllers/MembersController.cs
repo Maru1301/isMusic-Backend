@@ -41,9 +41,7 @@ namespace api.iSMusic.Controllers
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
 			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository);
-=======
-			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository);
->>>>>>> Member
+			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository);
 		}
 
 
@@ -158,7 +156,6 @@ namespace api.iSMusic.Controllers
 			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
             var result = _memberService.GetMemberSubscriptionPlan(memberId);
 
-			//--------------------------------------------------------------------------
             return result;
 
         }
@@ -173,25 +170,6 @@ namespace api.iSMusic.Controllers
 
 			return result;
 		}
-
-		//[HttpPost]
-		//[Route("{memberId}/Email")]
-		//public IActionResult SendEmail([FromForm] string email)
-		//{
-
-		//}
-
-
-
-
-
-
-
-
-
-
-
-
 
 		[HttpGet]
 		[Route("{memberId}/Playlists")]

@@ -20,7 +20,6 @@ namespace api.iSMusic.Controllers
 	{
 		private readonly ICreatorRepository _repository;
 		private readonly CreatorService _service;
-		private readonly ISongRepository _songRepository;
 		private readonly IWebHostEnvironment _webHostEnvironment;
 		private readonly AppDbContext _appDbContext;
 
@@ -100,11 +99,11 @@ namespace api.iSMusic.Controllers
 		[Route("{creatorId}/song")]//創作者上傳歌曲
 		public IActionResult CreatorUploadSong(int creatorId,[FromForm] CreatorUploadSongDTO creatoruploadsongdto)
 		{
-			var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath).FullName;
+			var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath)!.FullName;
 			var uploadmusicpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Songs/";
 			var uploadcoverpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Covers/";
-			var musicfileName = GetNewFileName(uploadmusicpath, creatoruploadsongdto.Song.FileName);
-			var coverfileName = GetNewFileName(uploadcoverpath, creatoruploadsongdto.Cover.FileName);
+			var musicfileName = GetNewFileName(uploadmusicpath, creatoruploadsongdto.Song!.FileName);
+			var coverfileName = GetNewFileName(uploadcoverpath, creatoruploadsongdto.Cover!.FileName);
 			using (var stream = System.IO.File.Create(uploadmusicpath + musicfileName))
 				{
 				creatoruploadsongdto.Song.CopyTo(stream);
@@ -133,7 +132,7 @@ namespace api.iSMusic.Controllers
 			};
 			_appDbContext.Add(song);
 			_appDbContext.SaveChanges();
-			var songid = _appDbContext.Songs.OrderByDescending(s=>s.Id).FirstOrDefault().Id;
+			var songid = _appDbContext.Songs.OrderByDescending(s=>s.Id).First().Id;
 
 			SongCreatorMetadatum songCreatormetadatum = new()
 			{
@@ -206,9 +205,9 @@ namespace api.iSMusic.Controllers
 				return NotFound();
 			}
 			//上傳專輯封面
-			var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath).FullName;
+			var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath)!.FullName;
 			var uploadcoverpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Songs/";
-			var coverfileName = GetNewFileName(uploadcoverpath, dto.Cover.FileName);
+			var coverfileName = GetNewFileName(uploadcoverpath, dto.Cover!.FileName);
 			using (var stream = System.IO.File.Create(uploadcoverpath + coverfileName))
 			{
 				dto.Cover.CopyTo(stream);
@@ -340,14 +339,14 @@ namespace api.iSMusic.Controllers
 			//抓出歌曲並修改值
 			var song = _appDbContext.Songs.FirstOrDefault(s => s.Id == songId);
 
-			song.SongName = dto.SongName;
+			song!.SongName = dto.SongName!;
 			song.GenreId = dto.GenreId;
 			//song.Duration = dto.Duration;
 			song.IsInstrumental = dto.IsInstrumental;
 			song.Language = dto.Language;
 			song.IsExplicit = dto.IsExplicit;
 			song.Released = dto.Released;
-			song.SongWriter = dto.SongWriter;
+			song.SongWriter = dto.SongWriter!;
 			song.Lyric = dto.Lyric;
 			//song.SongCoverPath = dto.SongCoverPath;
 			//song.SongPath = dto.SongPath;
