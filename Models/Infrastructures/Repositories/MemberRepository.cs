@@ -132,6 +132,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SaveChanges();
 		}
 
+<<<<<<< HEAD
 		public void AddLikedAlbum(int memberId, int albumId)
 		{
 			var data = new LikedAlbum

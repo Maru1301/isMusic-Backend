@@ -41,6 +41,9 @@ namespace api.iSMusic.Controllers
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
 			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository);
+=======
+			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository);
+>>>>>>> Member
 		}
 
 
