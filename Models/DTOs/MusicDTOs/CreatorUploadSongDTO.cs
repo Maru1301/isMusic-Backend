@@ -8,7 +8,7 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 	public class CreatorUploadSongDTO
 	{
 		
-		public int Id { get; set; }
+		//public int Id { get; set; }
 		public string SongName { get; set; } = null!;
 		public int GenreId { get; set; }
 		public int Duration { get; set; }
@@ -18,8 +18,8 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 		public DateTime Released { get; set; }
 		public string SongWriter { get; set; } = null!;
 		public string? Lyric { get; set; }
-		public string SongCoverPath { get; set; } = null!;
-		public string SongPath { get; set; } = null!;
+		public string? SongCoverPath { get; set; } 
+		public string? SongPath { get; set; } 
 		public bool Status { get; set; }
 		public int? AlbumId { get; set; }
 		public IFormFile? Song { get; set; }

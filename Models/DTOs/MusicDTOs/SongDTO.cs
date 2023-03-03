@@ -1,6 +1,6 @@
 ﻿namespace api.iSMusic.Models.DTOs.MusicDTOs
 {
-    internal class SongDTO
+    public class SongDTO
     {
         public int Id { get; set; }
         public string? SongName { get; set; }
