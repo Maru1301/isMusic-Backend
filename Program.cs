@@ -2,7 +2,11 @@ using api.iSMusic.Models;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace api.isMusic
@@ -13,7 +17,17 @@ namespace api.isMusic
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
-			// Add services to the container.
+            // Add services to the container.
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
+            {
+                //未登入時會自動導到這個網址
+                option.LoginPath = new PathString("/Members/MemberLogin");
+            });
+
+			builder.Services.AddMvc(options =>
+			{
+				options.Filters.Add(new AuthorizeFilter());
+			});
 
 			builder.Services.AddControllers();
 
@@ -45,12 +59,10 @@ namespace api.isMusic
 			}
 
 			app.UseHttpsRedirection();
-
-			//app.UseCookiePolicy();
-			
-			//app.UseAuthentication();
-
-			app.UseAuthorization();
+            
+            app.UseCookiePolicy();
+            app.UseAuthentication();
+            app.UseAuthorization();            
 
 			app.MapControllers();
 

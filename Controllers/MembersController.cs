@@ -1,13 +1,22 @@
 ﻿using api.iSMusic.Models;
+using api.iSMusic.Models.DTOs.MemberDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services;
 using api.iSMusic.Models.Services.Interfaces;
+using api.iSMusic.Models.ViewModels.MemberVMs;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using api.iSMusic.Models.ViewModels.QueueVMs;
+using iSMusic.Models.Infrastructures;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace api.iSMusic.Controllers
 {
@@ -23,19 +32,163 @@ namespace api.iSMusic.Controllers
 
 		private readonly IQueueRepository _queueRepository;
 
-		private readonly IAlbumRepository _albumRepository;
-
 		private readonly MemberService _memberService;
 
-		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository, IQueueRepository queueRepository, IActivityRepository activityRepository)
+        public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository, IQueueRepository queueRepository, IActivityRepository activityRepository)
 		{
 			_memberRepository = memberRepo;
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_albumRepository = albumRepository;
 			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository);
 		}
+
+
+        [HttpGet]
+        [Route("{memberId}")]
+        public IActionResult GetMemberInfo([FromRoute] int memberId)
+        {
+            // 取得 memberId
+            var member = _memberService.GetMemberInfo(memberId);
+            if (member == null)
+            {
+                return NotFound("Member not found");
+            }
+
+            return Ok(member);
+        }
+
+        [HttpPut]
+        [Route("{memberId}")]
+        public IActionResult UpdateMember(int memberId, [FromForm] MemberEditVM member)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = _memberService.UpdateMember(memberId, member.ToMemberDTO());
+
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
+        }
+
+        [HttpPost]
+        [Route("Register")]
+        public IActionResult MemberRegister([FromForm] MemberRegisterVM member)
+        {
+            // email驗證網址
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActiveRegister?memberid={0}&confirmCode={1}";
+
+
+            var result = _memberService.MemberRegister(member.ToMemberDTO(), urlTemplate);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
+        }
+
+        [HttpGet]
+        [Route("ActiveRegister")]
+        public IActionResult ActiveRegister(int memberId, string confirmCode)
+        {
+            var result = _memberService.ActiveRegister(memberId, confirmCode);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPost]
+        [Route("MemberLogin")]
+		[AllowAnonymous]
+		public IActionResult MemberLogin([FromForm]MemberLoginVM member)
+        {
+            var result = _memberService.MemberLogin(member.ToLoginDTO());
+
+			if (!result.Success)
+			{
+				return NotFound(result.Message);
+			}
+
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.claimsIdentity));
+            return Ok(result.Message);
+        }
+        
+        [HttpPost("MemberLogOut")]
+        public IActionResult MemberLogOut()
+        {
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+			return Ok("登出成功");
+        }
+
+        [HttpGet]
+        [Route("ForgetPassword")]
+		[AllowAnonymous]
+		public IActionResult ForgetPassword(string email)
+        {
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ResetPassword?memberid={0}&confirmCode={1}";
+
+            var result = _memberService.RequestResetPassword(email, urlTemplate);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPatch]        
+        [Route("ResetPassword")]
+		[AllowAnonymous]
+		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromForm]string password)
+        {
+
+            var result = _memberService.ResetPassword(memberId, confirmCode, password);
+            return Ok(result.Message);
+        }
+
+		[HttpGet]
+		[Authorize]
+		[Route("SubscriptionPlan")]
+		public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan()
+		{			
+			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            var result = _memberService.GetMemberSubscriptionPlan(memberId);
+
+			//--------------------------------------------------------------------------
+            return result;
+
+        }
+
+		[HttpGet]
+		[Route("Orders")]
+		[Authorize]
+		public IEnumerable<OrderDTO> GetMemberOrder()
+		{
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            var result = _memberService.GetMemberOrder(memberId);
+
+			return result;
+		}
+
+		//[HttpPost]
+		//[Route("{memberId}/Email")]
+		//public IActionResult SendEmail([FromForm] string email)
+		//{
+
+		//}
+
+
+
+
+
+
+
+
+
+
+
+
 
 		[HttpGet]
 		[Route("{memberId}/Playlists")]
@@ -50,7 +203,7 @@ namespace api.iSMusic.Controllers
 
 			return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
-
+		
 		public class InputQuery
 		{
 			public InputQuery()
