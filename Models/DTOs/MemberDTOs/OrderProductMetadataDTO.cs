@@ -18,7 +18,7 @@ namespace api.iSMusic.Models.DTOs.MemberDTOs
 
         public int Stock { get; set; }
 
-        public byte Status { get; set; }
+        public bool Status { get; set; }
 
         public int Payments { get; set; }
 

@@ -7,6 +7,8 @@ using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.MemberVMs;
 using BookStore.Site.Models.Infrastructures;
 using iSMusic.Models.Infrastructures;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 using static api.iSMusic.Controllers.MembersController;
 using static api.iSMusic.Controllers.QueuesController;
 
@@ -206,27 +208,32 @@ namespace api.iSMusic.Models.Services
             return (true, "驗證成功");
         }
 
-        public (bool Success, string? Message) MemberLogin(string account, string password)
+        public (bool Success, string? Message, ClaimsIdentity claimsIdentity) MemberLogin(MemberDTO dto)
         {
-            MemberDTO member = _memberRepository.GetByAccount(account);
+            MemberDTO member = _memberRepository.GetByAccount(dto.MemberAccount);
 
             if (member == null)
             {
-                return (false, "帳密有誤");
+                return (false, "帳密有誤", null!);
             }
-            if (member.IsConfirmed == false)
-            {
-                return (false, "會員資格尚未確認");
-            }
-            //if (member.IsConfirmed.HasValue == false || member.IsConfirmed.HasValue && member.IsConfirmed.Value == false)
+            //if (member.IsConfirmed == false)
             //{
-            //	return (false, "會員資格尚未確認");
+            //    return (false, "會員資格尚未確認", null!);
             //}
 
-            string encryptedPwd = HashUtility.ToSHA256(password, MemberRegisterDTO.SALT);
+            string encryptedPwd = HashUtility.ToSHA256(dto.MemberPassword, MemberRegisterDTO.SALT);
 
-            return (String.CompareOrdinal(member.MemberEncryptedPassword, encryptedPwd) == 0)
-                ? (true, "登入成功") : (false, "帳密有誤");
+            if (String.CompareOrdinal(member.MemberEncryptedPassword, encryptedPwd) != 0) return (false, "帳密有誤", null!);
+
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, member.MemberAccount),
+                    new Claim("MemberId", member.Id.ToString()),      
+                    
+                };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            return (true, "登入成功", claimsIdentity);
         }
 
         public (bool Success, string? Message) RequestResetPassword(string email, string urlTemplate)

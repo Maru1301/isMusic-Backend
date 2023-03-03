@@ -220,12 +220,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                 .Select(s => new SubscriptionPlanDTO  // 將取到的值轉成DTO
                 {
                     MemberId = memberId,
-                    MemberNickName = s.Member.MemberNickName,
-                    SubscriptionPlanId = s.SubscriptionPlanId,
+                    MemberNickName = s.Member.MemberNickName,                    
                     SubscribedTime = s.SubscribedTime,
                     PlanName = s.SubscriptionPlan.PlanName,
                     Price = s.SubscriptionPlan.Price,
                     numberOfUsers = s.SubscriptionPlan.NumberOfUsers,
+                    description = s.SubscriptionPlan.Description,
                 })
                 .ToList();
 
@@ -234,27 +234,32 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
         public IEnumerable<OrderDTO> GetMemberOrder(int memberId)
         {
-            var result = _db.Orders
-                .Include(o => o.Member)
-                .Include(o => o.Coupon)
-                .Where(o => o.MemberId== memberId)
+            var result = _db.OrderProductMetadata
+                .Include(o => o.Product)
+                .Include(o => o.Order)
+                .ThenInclude(o => o.Member)
+                .Include(o => o.Order.Coupon)
                 .Select(o => new OrderDTO
                 {
                     MemberId = memberId,
-                    MemberNickName = o.Member.MemberNickName,
-                    CouponText = o.Coupon.CouponText,
-                    StartDate = o.Coupon.StartDate,
-                    ExpiredDate = o.Coupon.ExpiredDate,
-                    Discounts = o.Coupon.Discounts,  
-                    Payments = o.Payments,
-                    OrderStatus = o.OrderStatus,
-                    Paid = o.Paid,
-                    Created = o.Created,
-                    Receiver = o.Receiver,
-                    Address = o.Address,
-                    Cellphone = o.Cellphone
-                })
-                .ToList();
+                    MemberNickName = o.Order.Member.MemberNickName,
+                    CouponText = o.Order.Coupon.CouponText,
+                    StartDate = o.Order.Coupon.StartDate,
+                    ExpiredDate = o.Order.Coupon.ExpiredDate,
+                    Discounts = o.Order.Coupon.Discounts,
+                    Payments = o.Order.Payments,
+                    OrderStatus = o.Order.OrderStatus,
+                    Paid = o.Order.Paid,
+                    Created = o.Order.Created,
+                    Receiver = o.Order.Receiver,
+                    Address = o.Order.Address,
+                    Cellphone = o.Order.Cellphone,
+                    CategoryName = o.Product.ProductCategory.CategoryName,
+                    ProductName = o.ProductName,
+                    Price = o.Price,
+                    Qty = o.Qty,
+                    Status = o.Product.Status,
+                });
             return result;
         }
     }

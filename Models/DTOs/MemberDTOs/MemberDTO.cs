@@ -15,6 +15,8 @@ namespace api.iSMusic.Models.DTOs.MemberDTOs
 
         public string MemberAccount { get; set; } = null!;
 
+        public string MemberPassword { get; set; } = null!;
+
         public string? MemberEncryptedPassword { get; set; }
 
         public string MemberEmail { get; set; } = null!;

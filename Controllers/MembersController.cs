@@ -7,10 +7,16 @@ using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.MemberVMs;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using api.iSMusic.Models.ViewModels.QueueVMs;
+using iSMusic.Models.Infrastructures;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace api.iSMusic.Controllers
 {
@@ -26,9 +32,9 @@ namespace api.iSMusic.Controllers
 
 		private readonly IQueueRepository _queueRepository;
 
-		private readonly MemberService _memberService;
+		private readonly MemberService _memberService;        
 
-		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository, IQueueRepository queueRepository)
+        public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository, IQueueRepository queueRepository)
 		{
 			_memberRepository = memberRepo;
 			_songRepository = songRepository;
@@ -98,17 +104,31 @@ namespace api.iSMusic.Controllers
 
         [HttpPost]
         [Route("MemberLogin")]
-        public IActionResult MemberLogin(string account, string password)
+		[AllowAnonymous]
+		public IActionResult MemberLogin([FromForm]MemberLoginVM member)
         {
-            var result = _memberService.MemberLogin(account, password);
+            var result = _memberService.MemberLogin(member.ToLoginDTO());
 
+			if (!result.Success)
+			{
+				return NotFound(result.Message);
+			}
 
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.claimsIdentity));
             return Ok(result.Message);
+        }
+        
+        [HttpPost("MemberLogOut")]
+        public IActionResult MemberLogOut()
+        {
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+			return Ok("登出成功");
         }
 
         [HttpGet]
         [Route("ForgetPassword")]
-        public IActionResult ForgetPassword(string email)
+		[AllowAnonymous]
+		public IActionResult ForgetPassword(string email)
         {
             string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ResetPassword?memberid={0}&confirmCode={1}";
 
@@ -117,9 +137,10 @@ namespace api.iSMusic.Controllers
             return Ok(result.Message);
         }
 
-        [HttpPatch]
+        [HttpPatch]        
         [Route("ResetPassword")]
-        public IActionResult ResetPassword([FromForm] int memberId, string confirmCode, string password)
+		[AllowAnonymous]
+		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromForm]string password)
         {
 
             var result = _memberService.ResetPassword(memberId, confirmCode, password);
@@ -127,10 +148,12 @@ namespace api.iSMusic.Controllers
         }
 
 		[HttpGet]
-		[Route("{memberId}/SubscriptionPlan")]
-		public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan([FromRoute]int memberId)
-		{
-			var result = _memberService.GetMemberSubscriptionPlan(memberId);
+		[Authorize]
+		[Route("SubscriptionPlan")]
+		public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan()
+		{			
+			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            var result = _memberService.GetMemberSubscriptionPlan(memberId);
 
 			//--------------------------------------------------------------------------
             return result;
@@ -138,16 +161,22 @@ namespace api.iSMusic.Controllers
         }
 
 		[HttpGet]
-		[Route("{memberId}/Orders")]
-		public IEnumerable<OrderDTO> GetMemberOrder([FromRoute] int memberId)
+		[Route("Orders")]
+		[Authorize]
+		public IEnumerable<OrderDTO> GetMemberOrder()
 		{
-			var result = _memberService.GetMemberOrder(memberId);
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            var result = _memberService.GetMemberOrder(memberId);
 
 			return result;
 		}
 
+		//[HttpPost]
+		//[Route("{memberId}/Email")]
+		//public IActionResult SendEmail([FromForm] string email)
+		//{
 
-
+		//}
 
 
 

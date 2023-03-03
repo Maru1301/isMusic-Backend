@@ -23,7 +23,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
                 CalenderPrivacy = source.CalenderPrivacy,
 
 
-        };
+            };
         }
 
         public static MemberRegisterDTO ToMemberDTO(this MemberRegisterVM source)
@@ -32,7 +32,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
             {
                 MemberNickName = source.NickName!,
                 MemberAccount = source.Account!,
-                MemberPassword= source.Password!,
+                MemberPassword = source.Password!,
                 MemberEmail = source.Email!
             };
         }
@@ -43,7 +43,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
             {
                 Id = entity.Id,
                 MemberAccount = entity.MemberAccount,
-                //MemberEncryptedPassword = entity.MemberEncryptedPassword,
+                MemberEncryptedPassword = entity.MemberEncryptedPassword,
                 MemberEmail = entity.MemberEmail,
                 MemberNickName = entity.MemberNickName,
                 MemberCellphone = entity.MemberCellphone,
@@ -58,15 +58,24 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
         {
             return new()
             {
-                MemberNickName = source.MemberNickName!,                
+                MemberNickName = source.MemberNickName!,
                 MemberEmail = source.MemberEmail!,
                 MemberAddress = source.MemberAddress,
                 MemberCellPhone = source.MemberCellphone,
-                MemberDateOfBirth= source.MemberDateOfBirth,
-                MemberReceivedMessage= source.MemberReceivedMessage,
+                MemberDateOfBirth = source.MemberDateOfBirth,
+                MemberReceivedMessage = source.MemberReceivedMessage,
                 MemberSharedData = source.MemberSharedData,
 
             };
         }
+
+        public static MemberDTO ToLoginDTO(this MemberLoginVM source)
+        {
+            return new()
+            {
+                MemberAccount = source.MemberAccount!,
+                MemberPassword = source.MemberPassword!,
+            };
+        } 
     }
 }
