@@ -4,6 +4,7 @@ using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.AlbumVMs;
+using api.iSMusic.Models.ViewModels.SongVMs;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 
@@ -163,5 +164,15 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.Take(takeNumber)
 				.ToList();
 		}
+
+		public IEnumerable<AlbumTypeDTO> GetAlbumTypes()
+		{
+			return _db.AlbumTypes.Select(AlbumType => new AlbumTypeDTO
+			{
+				Id = AlbumType.Id,
+				TypeName = AlbumType.TypeName
+			});
+		}
+
 	}
 }

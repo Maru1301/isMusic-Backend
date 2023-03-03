@@ -21,5 +21,6 @@ namespace api.iSMusic.Models.Services.Interfaces
 		IEnumerable<AlbumIndexDTO> GetLikedAlbums(int memberId, LikedQuery query);
 
 		IEnumerable<AlbumIndexDTO> GetAlbumsByContentId(int content, string mode, int rowNumber);
+		IEnumerable<AlbumTypeDTO> GetAlbumTypes();
 	}
 }

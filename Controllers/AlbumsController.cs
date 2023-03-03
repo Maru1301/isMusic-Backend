@@ -1,4 +1,5 @@
 ﻿using api.iSMusic.Models;
+using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services;
@@ -82,6 +83,14 @@ namespace api.iSMusic.Controllers
 
 			return Ok(dto.ToDetailVM());
 
+		}
+		[HttpGet]
+		[Route("{AlbumTypes}")]
+		public IActionResult GetAlbumTypes()
+		{
+			var albumtypes = _repository.GetAlbumTypes();
+
+			return Ok(albumtypes);
 		}
 	}
 }
