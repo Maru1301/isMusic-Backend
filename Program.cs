@@ -21,7 +21,7 @@ namespace api.isMusic
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
             {
 				option.Cookie.SameSite = SameSiteMode.None;
-                //未登入時會自動導到這個網址
+                //嚙踝蕭嚙緯嚙皚嚙褕會嚙諛動導剁蕭o嚙諉綽蕭}
                 option.LoginPath = null;
             });
 

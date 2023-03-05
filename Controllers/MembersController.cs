@@ -32,7 +32,7 @@ namespace api.iSMusic.Controllers
 
 		private readonly IQueueRepository _queueRepository;
 
-		private readonly MemberService _memberService;
+		private readonly MemberService _memberService;        
 
         public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository, IQueueRepository queueRepository, IActivityRepository activityRepository)
 		{
@@ -40,7 +40,6 @@ namespace api.iSMusic.Controllers
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository);
 			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository);
 		}
 
@@ -171,6 +170,153 @@ namespace api.iSMusic.Controllers
 
 			return result;
 		}
+
+
+        [HttpGet]
+        [Route("{memberId}")]
+        public IActionResult GetMemberInfo([FromRoute] int memberId)
+        {
+            // 取得 memberId
+            var member = _memberService.GetMemberInfo(memberId);
+            if (member == null)
+            {
+                return NotFound("Member not found");
+            }
+
+            return Ok(member);
+        }
+
+        [HttpPut]
+        [Route("{memberId}")]
+        public IActionResult UpdateMember(int memberId, [FromForm] MemberEditVM member)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = _memberService.UpdateMember(memberId, member.ToMemberDTO());
+
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
+        }
+
+        [HttpPost]
+        [Route("Register")]
+        public IActionResult MemberRegister([FromForm] MemberRegisterVM member)
+        {
+            // email驗證網址
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActiveRegister?memberid={0}&confirmCode={1}";
+
+
+            var result = _memberService.MemberRegister(member.ToMemberDTO(), urlTemplate);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
+        }
+
+        [HttpGet]
+        [Route("ActiveRegister")]
+        public IActionResult ActiveRegister(int memberId, string confirmCode)
+        {
+            var result = _memberService.ActiveRegister(memberId, confirmCode);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPost]
+        [Route("MemberLogin")]
+		[AllowAnonymous]
+		public IActionResult MemberLogin([FromForm]MemberLoginVM member)
+        {
+            var result = _memberService.MemberLogin(member.ToLoginDTO());
+
+			if (!result.Success)
+			{
+				return NotFound(result.Message);
+			}
+
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.claimsIdentity));
+            return Ok(result.Message);
+        }
+        
+        [HttpPost("MemberLogOut")]
+        public IActionResult MemberLogOut()
+        {
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+			return Ok("登出成功");
+        }
+
+        [HttpGet]
+        [Route("ForgetPassword")]
+		[AllowAnonymous]
+		public IActionResult ForgetPassword(string email)
+        {
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ResetPassword?memberid={0}&confirmCode={1}";
+
+            var result = _memberService.RequestResetPassword(email, urlTemplate);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPatch]        
+        [Route("ResetPassword")]
+		[AllowAnonymous]
+		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromForm]string password)
+        {
+
+            var result = _memberService.ResetPassword(memberId, confirmCode, password);
+            return Ok(result.Message);
+        }
+
+		[HttpGet]
+		[Authorize]
+		[Route("SubscriptionPlan")]
+		public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan()
+		{			
+			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            var result = _memberService.GetMemberSubscriptionPlan(memberId);
+
+			//--------------------------------------------------------------------------
+            return result;
+
+        }
+
+		[HttpGet]
+		[Route("Orders")]
+		[Authorize]
+		public IEnumerable<OrderDTO> GetMemberOrder()
+		{
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            var result = _memberService.GetMemberOrder(memberId);
+
+			return result;
+		}
+
+		//[HttpPost]
+		//[Route("{memberId}/Email")]
+		//public IActionResult SendEmail([FromForm] string email)
+		//{
+
+		//}
+
+
+
+
+
+
+
+
+
+
+
+
 
 		[HttpGet]
 		[Route("{memberId}/Playlists")]
