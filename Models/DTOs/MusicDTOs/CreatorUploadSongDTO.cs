@@ -11,12 +11,14 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 		//public int Id { get; set; }
 		public string SongName { get; set; } = null!;
 		public int GenreId { get; set; }
+		public string? GenreName { get; set; }
+
 		public int Duration { get; set; }
 		public bool IsInstrumental { get; set; }
 		public string? Language { get; set; }
 		public bool? IsExplicit { get; set; }
 		public DateTime Released { get; set; }
-		public string SongWriter { get; set; } = null!;
+		public string? SongWriter { get; set; } 
 		public string? Lyric { get; set; }
 		public string? SongCoverPath { get; set; } 
 		public string? SongPath { get; set; } 
