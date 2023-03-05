@@ -79,5 +79,24 @@ public static class AlbumExts
         MainArtistName = source.MainArtist.ArtistName,
         Description = source.Description,
     };
+
+    public static AlbumDetailVM ToDetailVM(this Album source)
+    => new()
+    {
+        Id = source.Id,
+        AlbumName = source.AlbumName,
+        AlbumCoverPath = source.AlbumCoverPath,
+        Released = source.Released,
+        MainArtistId = source.MainArtistId,
+        AlbumTypeId = source.AlbumTypeId,
+        AlbumTypeName = source.AlbumType.TypeName,
+        AlbumGenreId = source.AlbumGenreId,
+        AlbumGenreName = source.AlbumGenre.GenreName,
+        AlbumCompany = source.AlbumCompany,
+        AlbumProducer = source.AlbumProducer,
+        MainArtistName = source.MainArtist!.ArtistName,
+        Description = source.Description,
+        Songs = source.Songs.Select(song=>song.ToProductIndexInfoDTO()).OrderBy(dto=>dto.DisplayOrderInAlbum).ToList(),
+    };
 }
 

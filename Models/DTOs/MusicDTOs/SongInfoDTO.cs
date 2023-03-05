@@ -25,5 +25,7 @@
         public bool IsLiked { get; set; }
 
         public bool FromList { get; set; }
+
+        public int? DisplayOrderInAlbum { get; set; }
     }
 }

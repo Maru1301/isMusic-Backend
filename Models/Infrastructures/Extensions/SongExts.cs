@@ -34,6 +34,7 @@ public static class SongExts
 			Status = source.Status,
 			AlbumId = source.AlbumId,
             AlbumName = source.Album != null ? source.Album.AlbumName: string.Empty,
+
 		};
 
 	public static SongIndexVM ToIndexVM(this SongIndexDTO source)
@@ -50,4 +51,13 @@ public static class SongExts
             Artistlist = source.Artistlist,
             Creatorlist = source.Creatorlist,
         };
+
+    public static SongInfoDTO ToProductIndexInfoDTO(this Song source)
+    => new SongInfoDTO
+    {
+        Id = source.Id,
+        SongName = source.SongName,
+        DisplayOrderInAlbum=source.DisplayOrderInAlbum,
+
+    };
 }
