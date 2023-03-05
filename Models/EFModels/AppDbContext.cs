@@ -407,7 +407,7 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SongPlayedRecords_Songs");
         });
-
+        
         modelBuilder.Entity<SubscriptionRecord>(entity =>
         {
             entity.HasOne(d => d.Member).WithMany(p => p.SubscriptionRecords)

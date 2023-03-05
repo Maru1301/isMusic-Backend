@@ -5,6 +5,7 @@ using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.Metrics;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace api.iSMusic.Models.Infrastructures.Repositories
@@ -23,7 +24,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             Member entity = _db.Members.SingleOrDefault(x => x.Id == memberId)!;
             if (entity == null) return null!;
 
-            MemberDTO result = new MemberDTO
+            MemberDTO dto = new MemberDTO
             {
                 Id = entity.Id,
                 MemberAccount = entity.MemberAccount,
@@ -32,7 +33,21 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                 ConfirmCode = entity.ConfirmCode
             };
 
-            return result;
+            return dto;
+        }
+
+        public SubscriptionPlanDTO SubscriptionPlanLoad(int SubscriptionPlanId)
+        {
+            SubscriptionPlan entity = _db.SubscriptionPlans.SingleOrDefault(s => s.Id == SubscriptionPlanId)!;
+            if (entity == null) return null!;
+
+            SubscriptionPlanDTO dto = new SubscriptionPlanDTO
+            {
+                PlanName = entity.PlanName,
+                Price = entity.Price,
+                NumberOfUsers = entity.NumberOfUsers,                
+            };
+            return dto;
         }
 
         public bool SubscriptionRecordExist(int memberId)
@@ -205,17 +220,15 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             // 將 DTO 的值修改到資料庫
             var member = _db.Members.Single(m => m.Id == memberId);
 
-            member.MemberNickName = memberDTO.MemberNickName;
-            member.MemberEmail = memberDTO.MemberEmail;
+            member.MemberNickName = memberDTO.MemberNickName;            
             member.MemberAddress = memberDTO.MemberAddress;
             member.MemberCellphone = memberDTO.MemberCellphone;
             member.MemberDateOfBirth = memberDTO.MemberDateOfBirth;
-            //Avatar = memberDTO.Avatar,
+            member.Avatar = memberDTO.Avatar;
             member.MemberReceivedMessage = memberDTO.MemberReceivedMessage;
             member.MemberSharedData = memberDTO.MemberSharedData;
             member.LibraryPrivacy = memberDTO.LibraryPrivacy;
-            member.CalenderPrivacy = memberDTO.CalenderPrivacy;
-            // 信用卡?
+            member.CalenderPrivacy = memberDTO.CalenderPrivacy;            
 
             _db.SaveChanges();
         }
@@ -258,7 +271,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             _db.SaveChanges();
         }
 
-        public void ActiveRegister(int memberId)
+        public void ActivateRegister(int memberId)
         {
             var member = _db.Members.Find(memberId)!;
             member.IsConfirmed = true;
@@ -292,12 +305,24 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                     SubscribedTime = s.SubscribedTime,
                     PlanName = s.SubscriptionPlan.PlanName,
                     Price = s.SubscriptionPlan.Price,
-                    numberOfUsers = s.SubscriptionPlan.NumberOfUsers,
-                    description = s.SubscriptionPlan.Description,
+                    NumberOfUsers = s.SubscriptionPlan.NumberOfUsers,                    
                 })
                 .ToList();
 
             return result;
+        }
+
+        public void SubscribedPlan(int memberId, SubscriptionPlanDTO dto, IEnumerable<MemberDTO> memberdto, DateTime addDate)
+        {
+            var SubscriptionRecords = new SubscriptionRecord
+            {
+                MemberId = memberId,
+                SubscriptionPlanId = dto.Id,
+                SubscribedTime = DateTime.Now,
+                SubscribedExpireTime= addDate,
+            };
+            _db.SubscriptionRecords.Add(SubscriptionRecords);
+            _db.SaveChanges();
         }
 
         public IEnumerable<OrderDTO> GetMemberOrder(int memberId)
@@ -326,9 +351,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                     ProductName = o.ProductName,
                     Price = o.Price,
                     Qty = o.Qty,
-                    Status = o.Product.Status,
+                    Status = o.Product.Status,                    
                 });
             return result;
-        }
+        }        
     }
 }
