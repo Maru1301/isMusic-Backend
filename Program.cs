@@ -17,11 +17,23 @@ namespace api.isMusic
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
+            //string MyAllowOrigins = "AllowAny";
+            //builder.Services.AddCors(options => {
+            //    options.AddPolicy(
+            //            name: MyAllowOrigins,
+            //            policy => policy.WithOrigins("http://localhost:5173")
+            //               .AllowCredentials()
+            //               .AllowAnyHeader()
+            //               .AllowAnyMethod()
+            //            );
+            //});
+
             // Add services to the container.
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
             {
                 //未登入時會自動導到這個網址
                 option.LoginPath = new PathString("/Members/MemberLogin");
+                option.Cookie.SameSite = SameSiteMode.None;
             });
 
 			builder.Services.AddMvc(options =>

@@ -29,6 +29,8 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         MemberDTO Load(int memberId);
 
+        SubscriptionPlanDTO SubscriptionPlanLoad(int SubscriptionPlanId);
+
         void MemberRegister(MemberRegisterDTO source);
 
         bool IsExist(string account);
@@ -39,11 +41,13 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         bool SubscriptionRecordExist(int memberId);
 
-        void ActiveRegister(int memberId);
+        void ActivateRegister(int memberId);
 
         void UpdatePassword(int memberId, string newEncryptedPassword);
 
         IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId);
+
+        void SubscribedPlan(int memberId, SubscriptionPlanDTO subscriptionPlan, IEnumerable<MemberDTO> memberdto, DateTime addDate);
 
         IEnumerable<OrderDTO> GetMemberOrder(int memberId);
     }

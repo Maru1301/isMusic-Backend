@@ -76,6 +76,6 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
                 MemberAccount = source.MemberAccount!,
                 MemberPassword = source.MemberPassword!,
             };
-        } 
+        }
     }
 }

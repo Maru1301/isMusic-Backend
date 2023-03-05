@@ -197,14 +197,14 @@ namespace api.iSMusic.Models.Services
             return (true, "註冊成功，已發送驗證信");
         }
 
-        public (bool Success, string Message) ActiveRegister(int memberId, string confirmCode)
+        public (bool Success, string Message) ActivateRegister(int memberId, string confirmCode)
         {
             MemberDTO dto = _memberRepository.Load(memberId);
             if (dto == null) return (false, "驗證成功");
 
             if (string.Compare(dto.ConfirmCode, confirmCode) != 0) return (false, "驗證成功");
 
-            _memberRepository.ActiveRegister(memberId);
+            _memberRepository.ActivateRegister(memberId);
             return (true, "驗證成功");
         }
 
@@ -216,10 +216,6 @@ namespace api.iSMusic.Models.Services
             {
                 return (false, "帳密有誤", null!);
             }
-            //if (member.IsConfirmed == false)
-            //{
-            //    return (false, "會員資格尚未確認", null!);
-            //}
 
             string encryptedPwd = HashUtility.ToSHA256(dto.MemberPassword, MemberRegisterDTO.SALT);
 
@@ -298,11 +294,53 @@ namespace api.iSMusic.Models.Services
             //    return ("找不到訂閱紀錄");
             //}
             return _memberRepository.GetMemberSubscriptionPlan(memberId)!;
-        }       
+        }
+
+        public (bool Success, string Message) SubscribedPlan(int memberId, SubscriptionPlanDTO dto, IEnumerable<MemberDTO> memberdto=null)
+        {
+            var member = _memberRepository.Load(memberId);
+            if (member.CreditCardId == null) throw new Exception("請先輸入信用卡資訊");
+            if(memberId == 0) throw new Exception("找不到對應的會員記錄");
+            if (dto.Id == 0) throw new Exception("找不到對應的訂閱記錄");
+            if (dto.SubscribedExpireTime < DateTime.Now) throw new Exception("訂閱已到期");
+
+            if (dto.Id < 5)
+            {
+                var addDate = DateTime.Now.AddMonths(1);
+                _memberRepository.SubscribedPlan(memberId, dto, memberdto, addDate);
+                return (true, "訂閱成功");
+            }
+
+            else
+            {
+                var addDate = DateTime.Now.AddYears(1);
+                _memberRepository.SubscribedPlan(memberId, dto, memberdto, addDate);
+                return (true, "訂閱成功");
+            }
+
+            
+        }        
 
         public IEnumerable<OrderDTO> GetMemberOrder(int memberId)
         {
             return _memberRepository.GetMemberOrder(memberId)!;
+        }
+
+        public(bool Success, string Message) ResendConfirmCode(int memberId, string email, string urlTemplate)
+        {
+            var entity = _memberRepository.GetMemberById(memberId);
+            string confirmCode = Guid.NewGuid().ToString("N");
+            entity.ConfirmCode = confirmCode;
+
+            MemberDTO dto = entity.ToDTO();
+            if (_memberRepository.EmailExist(dto.MemberEmail!))
+            {
+                return (false, "信箱已存在");
+            }
+            string url = string.Format(urlTemplate, memberId, confirmCode);
+            new EmailHelper().SendForgetPasswordEmail(url, entity.MemberAccount, email);
+            return (true, "已重新發送信件");
+
         }
     }
 }

@@ -17,6 +17,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http.HttpResults;
+using BookStore.Site.Models.Infrastructures;
 
 namespace api.iSMusic.Controllers
 {
@@ -45,10 +47,11 @@ namespace api.iSMusic.Controllers
 
 
         [HttpGet]
-        [Route("{memberId}")]
-        public IActionResult GetMemberInfo([FromRoute] int memberId)
+        //[Route("{memberId}")]
+        public IActionResult GetMemberInfo()
         {
             // 取得 memberId
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
             var member = _memberService.GetMemberInfo(memberId);
             if (member == null)
             {
@@ -59,9 +62,10 @@ namespace api.iSMusic.Controllers
         }
 
         [HttpPut]
-        [Route("{memberId}")]
-        public IActionResult UpdateMember(int memberId, [FromForm] MemberEditVM member)
+        //[Route("{memberId}")]
+        public IActionResult UpdateMember([FromForm] MemberEditVM member)
         {
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -94,10 +98,14 @@ namespace api.iSMusic.Controllers
         }
 
         [HttpGet]
-        [Route("ActiveRegister")]
-        public IActionResult ActiveRegister(int memberId, string confirmCode)
-        {
-            var result = _memberService.ActiveRegister(memberId, confirmCode);
+        [Route("ActivateRegister")]
+        public IActionResult ActivateRegister(int memberId, string confirmCode)
+        {            
+            var result = _memberService.ActivateRegister(memberId, confirmCode);
+			if (!result.Success)
+			{
+				return Forbid(result.Message);
+			}
 
             return Ok(result.Message);
         }
@@ -160,6 +168,35 @@ namespace api.iSMusic.Controllers
 
         }
 
+		[HttpPost]
+		[Authorize]
+		[Route("SubscribePlan")]
+		public IActionResult SubscribedPlan([FromForm] int SubscriptionPlanId)
+		{
+			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+			var SubscriptionPlan = _memberRepository.SubscriptionPlanLoad(SubscriptionPlanId);
+			if (SubscriptionPlan.NumberOfUsers == 1)
+			{
+				var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan);
+				return Ok(result);
+			}
+            return Ok();
+
+            //else if (SubscriptionPlan.NumberOfUsers == 2)
+            //{
+            //	var friend = 1;
+            //	var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, friend);
+            //	return Ok(result);
+            //}
+
+            //else
+            //{
+            //	var family = 1;
+            //	var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, family);
+            //	return Ok(result);
+            //};
+        }
+
 		[HttpGet]
 		[Route("Orders")]
 		[Authorize]
@@ -171,12 +208,15 @@ namespace api.iSMusic.Controllers
 			return result;
 		}
 
-		//[HttpPost]
-		//[Route("{memberId}/Email")]
-		//public IActionResult SendEmail([FromForm] string email)
-		//{
-
-		//}
+		[HttpPatch]
+		[Route("ResendConfirmCode")]
+		public IActionResult ResendConfirmCode([FromForm] string email)
+		{
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActiveRegister?memberid={0}&confirmCode={1}";
+            var result = _memberService.ResendConfirmCode(memberId, email, urlTemplate);
+            return Ok(result.Message);
+        }
 
 
 

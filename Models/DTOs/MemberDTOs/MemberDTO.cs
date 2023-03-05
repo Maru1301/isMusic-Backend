@@ -25,9 +25,7 @@ namespace api.iSMusic.Models.DTOs.MemberDTOs
 
         public string? MemberCellphone { get; set; }
 
-        public DateTime? MemberDateOfBirth { get; set; }
-
-        public int? AvatarId { get; set; }
+        public DateTime? MemberDateOfBirth { get; set; }        
 
         public bool MemberReceivedMessage { get; set; }
 
