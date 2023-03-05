@@ -30,9 +30,15 @@ namespace api.iSMusic.Controllers
 		[Route("Popular")]
 		public ActionResult<IEnumerable<SongIndexVM>> GetPopularSongs()
 		{
-			var data = _repository.GetPopularSongs();
+			var dtos = _repository.GetPopularSongs();
 
-			return Ok(data.Select(dto => dto.ToIndexVM()));
+			foreach(var dto in dtos)
+			{
+				dto.SongCoverPath = "https://localhost:44373/Uploads/Covers/" + dto.SongCoverPath;
+            }
+
+
+            return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
 
 		[HttpGet]

@@ -26,7 +26,13 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
         {
             var dtos = _db.Creators
                 .Include(creator => creator.CreatorFollows)
-                .Select(creator => creator.ToIndexDTO())
+                .Select(creator => new CreatorIndexDTO
+				{
+                    Id = creator.Id,
+                    CreatorName = creator.CreatorName,
+                    CreatorPicPath = creator.CreatorPicPath,
+                    TotalFollows = creator.CreatorFollows.Count,
+                })
                 .OrderByDescending(dto => dto.TotalFollows)
                 .Take(takeNumber)
                 .ToList();

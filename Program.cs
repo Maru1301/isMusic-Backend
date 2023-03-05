@@ -20,14 +20,15 @@ namespace api.isMusic
             // Add services to the container.
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
             {
+				option.Cookie.SameSite = SameSiteMode.None;
                 //未登入時會自動導到這個網址
-                option.LoginPath = new PathString("/Members/MemberLogin");
+                option.LoginPath = null;
             });
 
-			builder.Services.AddMvc(options =>
-			{
-				options.Filters.Add(new AuthorizeFilter());
-			});
+			//builder.Services.AddMvc(options =>
+			//{
+			//	options.Filters.Add(new AuthorizeFilter());
+			//});
 
 			builder.Services.AddControllers();
 
@@ -45,8 +46,20 @@ namespace api.isMusic
 
 			builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext")));
 
-			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-			builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAnyOrigin",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:8080")
+								.AllowCredentials()
+                               .AllowAnyHeader()
+                               .AllowAnyMethod();
+                    });
+            });
+
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 
 			var app = builder.Build();
@@ -58,7 +71,9 @@ namespace api.isMusic
 				app.UseSwaggerUI();
 			}
 
-			app.UseHttpsRedirection();
+            app.UseCors("AllowAnyOrigin");
+
+            app.UseHttpsRedirection();
             
             app.UseCookiePolicy();
             app.UseAuthentication();

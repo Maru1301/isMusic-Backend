@@ -16,7 +16,14 @@ namespace api.iSMusic.Models.Services
 
 		public IEnumerable<AlbumIndexDTO> GetRecommended()
 		{
-			return _repository.GetRecommended();
+			var dtos = _repository.GetRecommended();
+			
+			foreach(var dto in dtos)
+			{
+				dto.AlbumCoverPath = "localhost:44373/Uploads/Covers/" + dto.AlbumCoverPath;
+            }
+
+			return dtos;
 		}
 
 		public (bool Success, string Message, IEnumerable<AlbumIndexDTO> Dtos)GetAlbumsByGenreId(int genreId, int rowNumber)
@@ -27,6 +34,11 @@ namespace api.iSMusic.Models.Services
             }
 
             var dtos = _repository.GetAlbumsByGenreId(genreId, rowNumber);
+
+			foreach (var dto in dtos)
+			{
+                dto.AlbumCoverPath = "https://localhost:44373/Uploads/Covers/" + dto.AlbumCoverPath;
+            }
 
             return (true, string.Empty, dtos);
         }

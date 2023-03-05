@@ -106,7 +106,7 @@ namespace api.iSMusic.Controllers
         [HttpPost]
         [Route("MemberLogin")]
 		[AllowAnonymous]
-		public IActionResult MemberLogin([FromForm]MemberLoginVM member)
+		public IActionResult MemberLogin([FromBody]MemberLoginVM member)
         {
             var result = _memberService.MemberLogin(member.ToLoginDTO());
 
@@ -118,7 +118,8 @@ namespace api.iSMusic.Controllers
             HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.claimsIdentity));
             return Ok(result.Message);
         }
-        
+
+		[Authorize]
         [HttpPost("MemberLogOut")]
         public IActionResult MemberLogOut()
         {

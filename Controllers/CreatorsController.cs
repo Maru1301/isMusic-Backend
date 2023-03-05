@@ -360,74 +360,74 @@ namespace api.iSMusic.Controllers
 		}
 
 		
-		[HttpGet]
-		[Route("{creatorId}/albums/{albumId}")]//取得創作者的單一專輯
-		public IActionResult GetAlbumByCreator(int creatorId, int albumId)
-		{
-			// 確認創作者是否存在
-			var creator = _appDbContext.Creators.FirstOrDefault(c => c.Id == creatorId);
-			if (creator == null)
-			{
-				return NotFound();
-			}
+		//[HttpGet]
+		//[Route("{creatorId}/albums/{albumId}")]//取得創作者的單一專輯
+		//public IActionResult GetAlbumByCreator(int creatorId, int albumId)
+		//{
+		//	// 確認創作者是否存在
+		//	var creator = _appDbContext.Creators.FirstOrDefault(c => c.Id == creatorId);
+		//	if (creator == null)
+		//	{
+		//		return NotFound();
+		//	}
 
-			// 確認專輯是否存在
-			var album = _appDbContext.Albums.FirstOrDefault(a => a.Id == albumId && a.MainCreatorId == creatorId);
-			if (album == null)
-			{
-				return NotFound();
-			}
+		//	// 確認專輯是否存在
+		//	var album = _appDbContext.Albums.FirstOrDefault(a => a.Id == albumId && a.MainCreatorId == creatorId);
+		//	if (album == null)
+		//	{
+		//		return NotFound();
+		//	}
 
-			// 取得專輯的所有歌曲
-			var songs = _appDbContext.Songs.Where(s => s.AlbumId == albumId);
+		//	// 取得專輯的所有歌曲
+		//	var songs = _appDbContext.Songs.Where(s => s.AlbumId == albumId);
 
-			// 將歌曲轉換成ViewModel
-			var songViewModels = songs.Select(s => new SongViewModel
-			{
-				Id = s.Id,
-				Name = s.SongName,
-				GenreId = s.GenreId,
-				Duration = s.Duration,
-				IsInstrumental = s.IsInstrumental,
-				Language = s.Language,
-				IsExplicit = s.IsExplicit,
-				Released = s.Released,
-				SongWriter = s.SongWriter,
-				Lyric = s.Lyric,
-				SongCoverPath = s.SongCoverPath,
-				SongPath = s.SongPath,
-				Status = s.Status,
-				AlbumId = s.AlbumId
-			}).ToList();
+		//	// 將歌曲轉換成ViewModel
+		//	var songViewModels = songs.Select(s => new SongViewModel
+		//	{
+		//		Id = s.Id,
+		//		Name = s.SongName,
+		//		GenreId = s.GenreId,
+		//		Duration = s.Duration,
+		//		IsInstrumental = s.IsInstrumental,
+		//		Language = s.Language,
+		//		IsExplicit = s.IsExplicit,
+		//		Released = s.Released,
+		//		SongWriter = s.SongWriter,
+		//		Lyric = s.Lyric,
+		//		SongCoverPath = s.SongCoverPath,
+		//		SongPath = s.SongPath,
+		//		Status = s.Status,
+		//		AlbumId = s.AlbumId
+		//	}).ToList();
 
-			// 將創作者和專輯的資訊轉換成ViewModel
-			var albumViewModel = new AlbumViewModel
-			{
-				Id = album.Id,
-				Name = album.AlbumName,
-				CoverPath = album.AlbumCoverPath,
-				AlbumTypeId = album.AlbumTypeId,
-				AlbumGenreId = album.AlbumGenreId,
-				Released = album.Released,
-				Description = album.Description,
-				MainArtistId = album.MainArtistId,
-				MainCreatorId = album.MainCreatorId,
-				AlbumProducer = album.AlbumProducer,
-				AlbumCompany = album.AlbumCompany,
-				Creator = new CreatorViewModel
-				{
-					Id = creator.Id,
-					Name = creator.CreatorName,
-					Gender = creator.CreatorGender,
-					About = creator.CreatorAbout,
-					PicPath = creator.CreatorPicPath,
-					CoverPath = creator.CreatorCoverPath
-				},
-				Songs = songViewModels
-			};
+		//	// 將創作者和專輯的資訊轉換成ViewModel
+		//	var albumViewModel = new AlbumViewModel
+		//	{
+		//		Id = album.Id,
+		//		Name = album.AlbumName,
+		//		CoverPath = album.AlbumCoverPath,
+		//		AlbumTypeId = album.AlbumTypeId,
+		//		AlbumGenreId = album.AlbumGenreId,
+		//		Released = album.Released,
+		//		Description = album.Description,
+		//		MainArtistId = album.MainArtistId,
+		//		MainCreatorId = album.MainCreatorId,
+		//		AlbumProducer = album.AlbumProducer,
+		//		AlbumCompany = album.AlbumCompany,
+		//		Creator = new CreatorViewModel
+		//		{
+		//			Id = creator.Id,
+		//			Name = creator.CreatorName,
+		//			Gender = creator.CreatorGender,
+		//			About = creator.CreatorAbout,
+		//			PicPath = creator.CreatorPicPath,
+		//			CoverPath = creator.CreatorCoverPath
+		//		},
+		//		Songs = songViewModels
+		//	};
 
-			return Ok(albumViewModel);
-		}
+		//	return Ok(albumViewModel);
+		//}
 
 		//修改創作者的單一專輯 TODO
 	}

@@ -27,8 +27,26 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		{
 			return _db.Albums
 				.Where(album => album.AlbumName.Contains(albumName) && album.Released <= DateTime.Now)
-				.Select(album => album.ToIndexDTO())
-				.OrderBy(dto => dto.TotalLikes)
+                .Select(album => new AlbumIndexDTO
+                {
+                    Id = album.Id,
+                    AlbumCoverPath = album.AlbumCoverPath,
+                    AlbumName = album.AlbumName,
+                    AlbumGenreId = album.AlbumGenreId,
+                    AlbumGenreName = album.AlbumGenre.GenreName,
+                    AlbumTypeId = album.AlbumTypeId,
+                    AlbumTypeName = album.AlbumType.TypeName,
+                    Released = album.Released,
+                    MainArtistId = album.MainArtistId,
+                    MainArtistName = album.MainArtist != null ?
+                        album.MainArtist.ArtistName :
+                        string.Empty,
+                    MainCreatorId = album.MainCreatorId,
+                    MainCreatorName = album.MainCreator != null ? album.MainCreator.CreatorName :
+                        string.Empty,
+                    TotalLikes = album.LikedAlbums.Count,
+                })
+                .OrderBy(dto => dto.TotalLikes)
 				.Skip(rowNumber != 2 ? (rowNumber - 1) * skipNumber : 0)
 				.Take(rowNumber != 2 ? takeNumber : takeNumber * 2)
 				.ToList();
@@ -38,8 +56,26 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		{
 			return _db.Albums
 				.Where(album => album.AlbumGenreId== genreId)
-				.Select(album => album.ToIndexDTO())
-				.OrderBy(dto => dto.TotalLikes)
+                .Select(album => new AlbumIndexDTO
+                {
+                    Id = album.Id,
+                    AlbumCoverPath = album.AlbumCoverPath,
+                    AlbumName = album.AlbumName,
+                    AlbumGenreId = album.AlbumGenreId,
+                    AlbumGenreName = album.AlbumGenre.GenreName,
+                    AlbumTypeId = album.AlbumTypeId,
+                    AlbumTypeName = album.AlbumType.TypeName,
+                    Released = album.Released,
+                    MainArtistId = album.MainArtistId,
+                    MainArtistName = album.MainArtist != null ?
+                        album.MainArtist.ArtistName :
+                        string.Empty,
+                    MainCreatorId = album.MainCreatorId,
+                    MainCreatorName = album.MainCreator != null ? album.MainCreator.CreatorName :
+                        string.Empty,
+                    TotalLikes = album.LikedAlbums.Count,
+                })
+                .OrderBy(dto => dto.TotalLikes)
 				.Skip(rowNumber != 2 ? (rowNumber - 1) * skipNumber : 0)
 				.Take(rowNumber != 2 ? takeNumber : takeNumber * 2)
 				.ToList();
@@ -49,7 +85,25 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		{
 			var recommendedAlbums = _db.Albums
 				.Include(album => album.LikedAlbums)
-				.Select(album => album.ToIndexDTO())
+				.Select(album => new AlbumIndexDTO
+				{
+                    Id = album.Id,
+                    AlbumCoverPath = album.AlbumCoverPath,
+                    AlbumName = album.AlbumName,
+                    AlbumGenreId = album.AlbumGenreId,
+                    AlbumGenreName = album.AlbumGenre.GenreName,
+                    AlbumTypeId = album.AlbumTypeId,
+                    AlbumTypeName = album.AlbumType.TypeName,
+                    Released = album.Released,
+                    MainArtistId = album.MainArtistId,
+                    MainArtistName = album.MainArtist != null ?
+                        album.MainArtist.ArtistName :
+                        string.Empty,
+                    MainCreatorId = album.MainCreatorId,
+                    MainCreatorName = album.MainCreator != null ? album.MainCreator.CreatorName :
+                        string.Empty,
+                    TotalLikes = album.LikedAlbums.Count,
+                })
 				.OrderByDescending(x => x.TotalLikes)
 				.Take(takeNumber)
 				.ToList();
