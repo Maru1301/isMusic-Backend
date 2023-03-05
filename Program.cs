@@ -17,6 +17,17 @@ namespace api.isMusic
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
+            //string MyAllowOrigins = "AllowAny";
+            //builder.Services.AddCors(options => {
+            //    options.AddPolicy(
+            //            name: MyAllowOrigins,
+            //            policy => policy.WithOrigins("http://localhost:5173")
+            //               .AllowCredentials()
+            //               .AllowAnyHeader()
+            //               .AllowAnyMethod()
+            //            );
+            //});
+
             // Add services to the container.
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
             {

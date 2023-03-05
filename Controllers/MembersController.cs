@@ -17,6 +17,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http.HttpResults;
+using BookStore.Site.Models.Infrastructures;
 
 namespace api.iSMusic.Controllers
 {
@@ -93,15 +95,6 @@ namespace api.iSMusic.Controllers
             return Ok(result.Message);
         }
 
-        [HttpGet]
-        [Route("ActiveRegister")]
-        public IActionResult ActiveRegister(int memberId, string confirmCode)
-        {
-            var result = _memberService.ActiveRegister(memberId, confirmCode);
-
-            return Ok(result.Message);
-        }
-
         [HttpPost]
         [Route("MemberLogin")]
 		[AllowAnonymous]
@@ -173,10 +166,11 @@ namespace api.iSMusic.Controllers
 
 
         [HttpGet]
-        [Route("{memberId}")]
-        public IActionResult GetMemberInfo([FromRoute] int memberId)
+        //[Route("{memberId}")]
+        public IActionResult GetMemberInfo()
         {
             // 取得 memberId
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
             var member = _memberService.GetMemberInfo(memberId);
             if (member == null)
             {
@@ -187,9 +181,10 @@ namespace api.iSMusic.Controllers
         }
 
         [HttpPut]
-        [Route("{memberId}")]
-        public IActionResult UpdateMember(int memberId, [FromForm] MemberEditVM member)
+        //[Route("{memberId}")]
+        public IActionResult UpdateMember([FromForm] MemberEditVM member)
         {
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -204,107 +199,57 @@ namespace api.iSMusic.Controllers
             return Ok(result.Message);
         }
 
-        [HttpPost]
-        [Route("Register")]
-        public IActionResult MemberRegister([FromForm] MemberRegisterVM member)
-        {
-            // email驗證網址
-            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActiveRegister?memberid={0}&confirmCode={1}";
-
-
-            var result = _memberService.MemberRegister(member.ToMemberDTO(), urlTemplate);
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
-
-            return Ok(result.Message);
-        }
-
         [HttpGet]
-        [Route("ActiveRegister")]
-        public IActionResult ActiveRegister(int memberId, string confirmCode)
-        {
-            var result = _memberService.ActiveRegister(memberId, confirmCode);
-
-            return Ok(result.Message);
-        }
-
-        [HttpPost]
-        [Route("MemberLogin")]
-		[AllowAnonymous]
-		public IActionResult MemberLogin([FromForm]MemberLoginVM member)
-        {
-            var result = _memberService.MemberLogin(member.ToLoginDTO());
-
+        [Route("ActivateRegister")]
+        public IActionResult ActivateRegister(int memberId, string confirmCode)
+        {            
+            var result = _memberService.ActivateRegister(memberId, confirmCode);
 			if (!result.Success)
 			{
-				return NotFound(result.Message);
+				return Forbid(result.Message);
 			}
 
-            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.claimsIdentity));
-            return Ok(result.Message);
-        }
-        
-        [HttpPost("MemberLogOut")]
-        public IActionResult MemberLogOut()
-        {
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-			return Ok("登出成功");
-        }
-
-        [HttpGet]
-        [Route("ForgetPassword")]
-		[AllowAnonymous]
-		public IActionResult ForgetPassword(string email)
-        {
-            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ResetPassword?memberid={0}&confirmCode={1}";
-
-            var result = _memberService.RequestResetPassword(email, urlTemplate);
-
             return Ok(result.Message);
         }
 
-        [HttpPatch]        
-        [Route("ResetPassword")]
-		[AllowAnonymous]
-		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromForm]string password)
-        {
-
-            var result = _memberService.ResetPassword(memberId, confirmCode, password);
-            return Ok(result.Message);
-        }
-
-		[HttpGet]
+		[HttpPost]
 		[Authorize]
-		[Route("SubscriptionPlan")]
-		public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan()
-		{			
+		[Route("SubscribePlan")]
+		public IActionResult SubscribedPlan([FromForm] int SubscriptionPlanId)
+		{
 			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
-            var result = _memberService.GetMemberSubscriptionPlan(memberId);
+			var SubscriptionPlan = _memberRepository.SubscriptionPlanLoad(SubscriptionPlanId);
+			if (SubscriptionPlan.NumberOfUsers == 1)
+			{
+				var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan);
+				return Ok(result);
+			}
+            return Ok();
 
-			//--------------------------------------------------------------------------
-            return result;
+            //else if (SubscriptionPlan.NumberOfUsers == 2)
+            //{
+            //	var friend = 1;
+            //	var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, friend);
+            //	return Ok(result);
+            //}
 
+            //else
+            //{
+            //	var family = 1;
+            //	var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, family);
+            //	return Ok(result);
+            //};
         }
 
-		[HttpGet]
-		[Route("Orders")]
-		[Authorize]
-		public IEnumerable<OrderDTO> GetMemberOrder()
+		[HttpPatch]
+		[Route("ResendConfirmCode")]
+		public IActionResult ResendConfirmCode([FromForm] string email)
 		{
             var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
-            var result = _memberService.GetMemberOrder(memberId);
-
-			return result;
-		}
-
-		//[HttpPost]
-		//[Route("{memberId}/Email")]
-		//public IActionResult SendEmail([FromForm] string email)
-		//{
-
-		//}
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActiveRegister?memberid={0}&confirmCode={1}";
+            var result = _memberService.ResendConfirmCode(memberId, email, urlTemplate);
+            return Ok(result.Message);
+        }
 
 
 

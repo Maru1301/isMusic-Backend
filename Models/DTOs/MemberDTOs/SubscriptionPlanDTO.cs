@@ -10,13 +10,9 @@ namespace api.iSMusic.Models.DTOs.MemberDTOs
 
         public int MemberId { get; set; }
 
-        //public int SubscriptionPlanId { get; set; }
-
         public DateTime SubscribedTime { get; set; }
 
-        //public virtual Member Member { get; set; } = null!;
-
-        //public virtual SubscriptionPlan SubscriptionPlan { get; set; } = null!;
+        public DateTime SubscribedExpireTime { get; set; }
 
         public string? MemberNickName { get; set; }
 
@@ -24,8 +20,10 @@ namespace api.iSMusic.Models.DTOs.MemberDTOs
 
         public decimal? Price { get; set; }
 
-        public byte? numberOfUsers { get; set; }
+        // 所有訂閱的人 名字 email
+        public byte? NumberOfUsers { get; set; }
 
-        public string? description { get; set; }
+        public IEnumerable<Member>? Member { get; set; }
+        
     }
 }
