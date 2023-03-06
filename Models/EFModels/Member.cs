@@ -51,11 +51,11 @@ public partial class Member
 
     [Required]
     [Column("libraryPrivacy")]
-    public bool LibraryPrivacy { get; set; }
+    public bool? LibraryPrivacy { get; set; }
 
     [Required]
     [Column("calenderPrivacy")]
-    public bool CalenderPrivacy { get; set; }
+    public bool? CalenderPrivacy { get; set; }
 
     [Column("creditCardId")]
     public int? CreditCardId { get; set; }

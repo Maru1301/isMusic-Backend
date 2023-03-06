@@ -42,7 +42,7 @@ namespace api.iSMusic.Controllers
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository);
+			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository, queueRepository);
 		}
 
 
@@ -83,7 +83,7 @@ namespace api.iSMusic.Controllers
         public IActionResult MemberRegister([FromForm] MemberRegisterVM member)
         {
             // email驗證網址
-            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActiveRegister?memberid={0}&confirmCode={1}";
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActivateRegister?memberid={0}&confirmCode={1}";
 
 
             var result = _memberService.MemberRegister(member.ToMemberDTO(), urlTemplate);
@@ -164,7 +164,6 @@ namespace api.iSMusic.Controllers
 			return result;
 		}
 
-
         [HttpGet]
         //[Route("{memberId}")]
         public IActionResult GetMemberInfo()
@@ -243,11 +242,12 @@ namespace api.iSMusic.Controllers
 
 		[HttpPatch]
 		[Route("ResendConfirmCode")]
-		public IActionResult ResendConfirmCode([FromForm] string email)
+		public IActionResult ResendConfirmCode([FromForm] string newEmail)
 		{
             var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
-            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActiveRegister?memberid={0}&confirmCode={1}";
-            var result = _memberService.ResendConfirmCode(memberId, email, urlTemplate);
+
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActivateRegister?memberid={0}&confirmCode={1}";
+            var result = _memberService.ResendConfirmCode(memberId, newEmail, urlTemplate);
             return Ok(result.Message);
         }
 

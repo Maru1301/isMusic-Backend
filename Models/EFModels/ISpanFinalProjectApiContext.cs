@@ -89,6 +89,8 @@ public partial class ISpanFinalProjectApiContext : DbContext
 
     public virtual DbSet<SubscriptionRecord> SubscriptionRecords { get; set; }
 
+    public virtual DbSet<SubscriptionRecordDetail> SubscriptionRecordDetails { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Activity>(entity =>

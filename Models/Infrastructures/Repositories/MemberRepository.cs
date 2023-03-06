@@ -76,9 +76,10 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			return _db.Members.SingleOrDefault(m => m.Id == memberId);
 		}
 
-        public Member? GetByEmail(string email)
+        public MemberDTO? GetByEmail(string email)
         {
-            return _db.Members.SingleOrDefault(m => m.MemberEmail == email);
+            var data = _db.Members.SingleOrDefault(m => m.MemberEmail == email);
+            return data.ToDTO();
         }
 
         public MemberDTO GetByAccount(string Account)
@@ -215,10 +216,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             _db.CreatorFollows.Remove(data);
             _db.SaveChanges();
         }
-        public void UpdateMember(int memberId, MemberDTO memberDTO)
+
+        public void UpdateMember(MemberDTO memberDTO)
         {
             // 將 DTO 的值修改到資料庫
-            var member = _db.Members.Single(m => m.Id == memberId);
+            var member = _db.Members.Single(m => m.Id == memberDTO.Id);
 
             member.MemberNickName = memberDTO.MemberNickName;            
             member.MemberAddress = memberDTO.MemberAddress;
@@ -228,7 +230,17 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             member.MemberReceivedMessage = memberDTO.MemberReceivedMessage;
             member.MemberSharedData = memberDTO.MemberSharedData;
             member.LibraryPrivacy = memberDTO.LibraryPrivacy;
-            member.CalenderPrivacy = memberDTO.CalenderPrivacy;            
+            member.CalenderPrivacy = memberDTO.CalenderPrivacy;
+            member.MemberEmail = memberDTO.MemberEmail;
+
+            _db.SaveChanges();
+        }
+
+        public void UpdateEmail(MemberDTO dto, string email)
+        {
+            var member = _db.Members.Single(m => m.Id == dto.Id);
+            member.ConfirmCode = dto.ConfirmCode;
+            member.MemberEmail = email;
 
             _db.SaveChanges();
         }

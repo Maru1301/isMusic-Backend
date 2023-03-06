@@ -31,7 +31,9 @@ namespace api.iSMusic.Models.Services
 
 		private readonly IActivityRepository _activityRepository;
 
-		public MemberService(IMemberRepository repo, IPlaylistRepository playlistRepository, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IAlbumRepository albumRepository, IActivityRepository activityRepository)
+        private readonly IQueueRepository _queueRepository;
+
+        public MemberService(IMemberRepository repo, IPlaylistRepository playlistRepository, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IAlbumRepository albumRepository, IActivityRepository activityRepository, IQueueRepository queueRepository)
 		{
 			_memberRepository = repo;
 			_playlistRepository = playlistRepository;
@@ -40,7 +42,9 @@ namespace api.iSMusic.Models.Services
 			_creatorRepository = creatorRepository;
 			_albumRepository = albumRepository;
 			_activityRepository = activityRepository;
-		}
+            _queueRepository = queueRepository;
+
+        }
 
 		public IEnumerable<PlaylistIndexDTO> GetMemberPlaylists(int memberId, InputQuery query)
 		{
@@ -277,7 +281,7 @@ namespace api.iSMusic.Models.Services
             if (member == null) return (false, "此帳號不存在");
             // TODO 驗證修改的資料(暱稱是否存在...)
 
-            _memberRepository.UpdateMember(memberId, memberDTO);
+            _memberRepository.UpdateMember(memberDTO);
             return (true, "更新成功");
         }
 
@@ -313,6 +317,9 @@ namespace api.iSMusic.Models.Services
             string url = string.Format(urlTemplate, entity.Id, dto.ConfirmCode);
 
             new EmailHelper().SendConfirmRegisterEmail(url, dto.MemberNickName!, dto.MemberEmail!);
+
+            // 創建播放佇列
+            _queueRepository.CreateQueue(entity.Id);
 
             return (true, "註冊成功，已發送驗證信");
         }
@@ -354,33 +361,33 @@ namespace api.iSMusic.Models.Services
 
         public (bool Success, string? Message) RequestResetPassword(string email, string urlTemplate)
         {
-            var entity = _memberRepository.GetByEmail(email);
+            var dto = _memberRepository.GetByEmail(email);
 
-            if (entity == null)
+            if (dto == null)
             {
                 throw new Exception("帳號或 Email 錯誤");
             }
 
-            if (string.Compare(email, entity!.MemberEmail) != 0)
+            if (string.Compare(email, dto.MemberEmail) != 0)
             {
                 return (false, "帳號或 Email 錯誤");
             }
 
             //檢查 IsConfirmed必需是true
-            if (entity.IsConfirmed == false)
+            if (dto.IsConfirmed == false)
             {
                 return (false, "您還沒有啟用本帳號, 請先完成才能重設密碼");
             }
 
             // 更新記錄, 填入 confirmCode
             string confirmCode = Guid.NewGuid().ToString("N");
-            entity.ConfirmCode = confirmCode;
-            _memberRepository.UpdateMember(entity.Id, entity.ToDTO());
+            dto.ConfirmCode = confirmCode;
+            _memberRepository.UpdateMember(dto);
 
             // 發email
-            string url = string.Format(urlTemplate, entity.Id, confirmCode);
+            string url = string.Format(urlTemplate, dto.Id, confirmCode);
 
-            new EmailHelper().SendForgetPasswordEmail(url, entity.MemberAccount, email);
+            new EmailHelper().SendForgetPasswordEmail(url, dto.MemberAccount, email);
             return (true, "已重新發送信件");
         }
 
@@ -424,21 +431,9 @@ namespace api.iSMusic.Models.Services
             if (dto.Id == 0) throw new Exception("找不到對應的訂閱記錄");
             if (dto.SubscribedExpireTime < DateTime.Now) throw new Exception("訂閱已到期");
 
-            if (dto.Id < 5)
-            {
-                var addDate = DateTime.Now.AddMonths(1);
-                _memberRepository.SubscribedPlan(memberId, dto, memberdto, addDate);
-                return (true, "訂閱成功");
-            }
+            return (true, "訂閱成功");
 
-            else
-            {
-                var addDate = DateTime.Now.AddYears(1);
-                _memberRepository.SubscribedPlan(memberId, dto, memberdto, addDate);
-                return (true, "訂閱成功");
-            }
 
-            
         }        
 
         public IEnumerable<OrderDTO> GetMemberOrder(int memberId)
@@ -446,19 +441,19 @@ namespace api.iSMusic.Models.Services
             return _memberRepository.GetMemberOrder(memberId)!;
         }
 
-        public(bool Success, string Message) ResendConfirmCode(int memberId, string email, string urlTemplate)
+        public(bool Success, string Message) ResendConfirmCode(int memberId, string newEmail, string urlTemplate)
         {
-            var entity = _memberRepository.GetMemberById(memberId);
+            var dto = _memberRepository.GetMemberById(memberId)!.ToDTO();
             string confirmCode = Guid.NewGuid().ToString("N");
-            entity.ConfirmCode = confirmCode;
-
-            MemberDTO dto = entity.ToDTO();
-            if (_memberRepository.EmailExist(dto.MemberEmail!))
+            dto!.ConfirmCode = confirmCode;
+            
+            if (_memberRepository.EmailExist(newEmail))
             {
                 return (false, "信箱已存在");
             }
+            _memberRepository.UpdateEmail(dto, newEmail);
             string url = string.Format(urlTemplate, memberId, confirmCode);
-            new EmailHelper().SendForgetPasswordEmail(url, entity.MemberAccount, email);
+            new EmailHelper().SendForgetPasswordEmail(url, dto.MemberAccount, newEmail);
             return (true, "已重新發送信件");
 
         }
