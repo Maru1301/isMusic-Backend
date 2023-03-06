@@ -79,7 +79,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
         public MemberDTO? GetByEmail(string email)
         {
             var data = _db.Members.SingleOrDefault(m => m.MemberEmail == email);
-            return data.ToDTO();
+            return data!.ToDTO();
         }
 
         public MemberDTO GetByAccount(string Account)
@@ -226,12 +226,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             member.MemberAddress = memberDTO.MemberAddress;
             member.MemberCellphone = memberDTO.MemberCellphone;
             member.MemberDateOfBirth = memberDTO.MemberDateOfBirth;
-            member.Avatar = memberDTO.Avatar;
+            member.AvatarId = memberDTO.AvatarId;
             member.MemberReceivedMessage = memberDTO.MemberReceivedMessage;
             member.MemberSharedData = memberDTO.MemberSharedData;
             member.LibraryPrivacy = memberDTO.LibraryPrivacy;
             member.CalenderPrivacy = memberDTO.CalenderPrivacy;
-            member.MemberEmail = memberDTO.MemberEmail;
+            member.ConfirmCode = memberDTO.ConfirmCode;
 
             _db.SaveChanges();
         }
@@ -246,7 +246,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
         }
 
         public MemberDTO? GetMemberInfo(int memberId)
-        {
+        {            
             // 得到的 memberId 跟資料庫做比較，如果符合取出那筆資料的值
             var result = _db.Members.Where(m => m.Id == memberId).Include(m => m.Avatar)
                 .Select(member => new MemberDTO  // 將取到的值轉成DTO
@@ -262,7 +262,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                     MemberSharedData = member.MemberSharedData,
                     LibraryPrivacy = member.LibraryPrivacy,
                     CalenderPrivacy = member.CalenderPrivacy,
-                    Avatar = member.Avatar,
+                    IsConfirmed= member.IsConfirmed,
+                    AvatarId = member.Avatar.Id,
                 }).SingleOrDefault();
 
             return result;

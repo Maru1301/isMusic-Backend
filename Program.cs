@@ -32,14 +32,13 @@ namespace api.isMusic
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
             {
 				option.Cookie.SameSite = SameSiteMode.None;
-                //���n�J�ɷ|�۰ʾɨ�o�Ӻ�}
                 option.LoginPath = null;
             });
 
-			//builder.Services.AddMvc(options =>
-			//{
-			//	options.Filters.Add(new AuthorizeFilter());
-			//});
+			builder.Services.AddMvc(options =>
+			{
+				options.Filters.Add(new AuthorizeFilter());
+			});
 
 			builder.Services.AddControllers();
 

@@ -275,13 +275,13 @@ namespace api.iSMusic.Models.Services
             return activity != null;
         }
 
-        public (bool Success, string Message) UpdateMember(int memberId, MemberDTO memberDTO)
+        public (bool Success, string Message) UpdateMember(int memberId, MemberDTO member)
         {
-            var member = _memberRepository.GetMemberById(memberId);
-            if (member == null) return (false, "此帳號不存在");
+            var dto = _memberRepository.GetMemberById(memberId).ToDTO();
+            if (dto == null) return (false, "此帳號不存在");
             // TODO 驗證修改的資料(暱稱是否存在...)
-
-            _memberRepository.UpdateMember(memberDTO);
+            member.Id= dto.Id;
+            _memberRepository.UpdateMember(member);
             return (true, "更新成功");
         }
 

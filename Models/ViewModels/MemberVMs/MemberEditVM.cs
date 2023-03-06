@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using api.iSMusic.Models.EFModels;
+using System.ComponentModel.DataAnnotations;
 
 namespace api.iSMusic.Models.ViewModels.MemberVMs
 {
@@ -18,7 +19,7 @@ namespace api.iSMusic.Models.ViewModels.MemberVMs
         public DateTime? MemberDateOfBirth { get; set; }
 
         [Required]
-        public int Avatar { get; set; }
+        public int AvatarId { get; set; }
 
         [Required]
         public bool MemberReceivedMessage { get; set; }
@@ -31,7 +32,6 @@ namespace api.iSMusic.Models.ViewModels.MemberVMs
 
         [Required]
         public bool CalenderPrivacy { get; set;}
-
-        public int? CreditCardId { get; set;}
+        
     }
 }

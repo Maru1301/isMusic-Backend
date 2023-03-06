@@ -12,7 +12,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
 			{
 				Id= source.Id,
 				CreatorName= source.CreatorName,
-				CreatorPicPath= source.CreatorPicPath,
+				CreatorPicPath = source.CreatorPicPath,
 				TotalFollows = source.CreatorFollows.Count,
 			};
 
