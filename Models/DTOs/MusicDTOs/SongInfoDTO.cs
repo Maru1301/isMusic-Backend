@@ -1,4 +1,8 @@
-﻿namespace api.iSMusic.Models.DTOs.MusicDTOs
+﻿using api.iSMusic.Models.ViewModels.ArtistVMs;
+using api.iSMusic.Models.ViewModels.CreatorVMs;
+using Microsoft.EntityFrameworkCore.Metadata;
+
+namespace api.iSMusic.Models.DTOs.MusicDTOs
 {
     public class SongInfoDTO
     {
@@ -25,5 +29,9 @@
         public bool IsLiked { get; set; }
 
         public bool FromList { get; set; }
+
+        public List<ArtistInfoVM> Artists { get; set; } = null!;
+
+        public List<CreatorInfoVM> Creators { get; set; } = null!;
     }
 }

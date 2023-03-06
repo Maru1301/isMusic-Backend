@@ -57,7 +57,7 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{albumName}")]
+		[Route("Search/{albumName}")]
 		public IActionResult GetAlbumByName(string albumName, [FromQuery]int rowNumber = 2)
 		{
             var result = _service.GetAlbumsByName(albumName, rowNumber);
@@ -85,7 +85,7 @@ namespace api.iSMusic.Controllers
 
 		}
 		[HttpGet]
-		[Route("{AlbumTypes}")]
+		[Route("AlbumTypes")]
 		public IActionResult GetAlbumTypes()
 		{
 			var albumtypes = _repository.GetAlbumTypes();

@@ -22,8 +22,8 @@ public static class SongExts
         };
 
 	public static SongInfoDTO ToInfoDTO(this Song source)
-		=> new SongInfoDTO
-		{
+		=> new()
+        {
 			Id = source.Id,
 			SongName = source.SongName,
 			Duration = source.Duration,
@@ -34,6 +34,8 @@ public static class SongExts
 			Status = source.Status,
 			AlbumId = source.AlbumId,
             AlbumName = source.Album != null ? source.Album.AlbumName: string.Empty,
+            Artists = source.SongArtistMetadata.Select(metadata => metadata.Artist.ToInfoVM()).ToList(),
+            Creators = source.SongCreatorMetadata.Select(metadata => metadata.Creator.ToInfoVM()).ToList(),
 		};
 
 	public static SongIndexVM ToIndexVM(this SongIndexDTO source)

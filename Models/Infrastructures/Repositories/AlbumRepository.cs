@@ -119,6 +119,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		public AlbumDetailDTO? GetAlbumById(int albumId)
 		{
 			return _db.Albums
+				.Include(album => album.Songs)
+				.ThenInclude(song => song.SongArtistMetadata)
+				.ThenInclude(metadata => metadata.Artist)
+				.Include(album => album.Songs)
+				.ThenInclude(song => song.SongCreatorMetadata)
+				.ThenInclude(metadata => metadata.Creator)
 				.Select(album => new AlbumDetailDTO
 				{
 					Id = album.Id,

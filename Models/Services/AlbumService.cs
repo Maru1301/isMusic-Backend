@@ -20,7 +20,7 @@ namespace api.iSMusic.Models.Services
 			
 			foreach(var dto in dtos)
 			{
-				dto.AlbumCoverPath = "localhost:44373/Uploads/Covers/" + dto.AlbumCoverPath;
+				dto.AlbumCoverPath = "https://localhost:44373/Uploads/Covers/" + dto.AlbumCoverPath;
             }
 
 			return dtos;
