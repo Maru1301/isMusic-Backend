@@ -52,4 +52,13 @@ public static class SongExts
             Artistlist = source.Artistlist,
             Creatorlist = source.Creatorlist,
         };
+
+    public static SongInfoDTO ToProductIndexInfoDTO(this Song source)
+    => new SongInfoDTO
+    {
+        Id = source.Id,
+        SongName = source.SongName,
+        DisplayOrderInAlbum=source.DisplayOrderInAlbum,
+
+    };
 }

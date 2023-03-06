@@ -79,63 +79,9 @@ namespace api.iSMusic.Controllers
                 .Take(5)
                 .ToList();
 
-            //==================================================================
-            //var data = _db.OrderProductMetadata.GroupBy(x => x.ProductId).Select(x => new { key = x.Key, counts = x.Count() }).OrderByDescending(x=>x.counts).Take(2).ToList();
-
-            //int[] data2 =new int[2] ;
-            //for(int i = 0; i <=1; i++) {
-            //    data2[i] = data[i].key;
-            //}
-
-            //// key => productId -> 連結
-
-            //List<ProductIndexDTO> data3 = new List<ProductIndexDTO>();
-            //foreach (var item in data2)
-            //{
-            //    var product = _db.Products
-            //    .Include(product => product.Album).ThenInclude(x => x.AlbumType)
-            //    .Include(product => product.ProductCategory)
-            //    //.Include(product=>product.Album.AlbumType)
-            //    .Include(product => product.Album.AlbumGenre)
-            //    .Include(product => product.Album.MainArtist)
-            //    .FirstOrDefault(x => x.Id == item);
-            //    ProductIndexDTO dto = new ProductIndexDTO()
-            //    {
-            //        Id = product.Id,
-            //        CategoryName = product.ProductCategory.CategoryName,
-            //        ProductPrice = product.ProductPrice,
-            //        Album = product.Album.ToInfoVM(),
-
-            //        productName = product.ProductName,
-            //        stock = product.Stock,
-            //        status = product.Status,
-            //    };
-            //    data3.Add(dto);
-            //    //.Select(product => new ProductIndexDTO
-            //    //{
-            //    //    Id = product.Id,
-            //    //    CategoryName = product.ProductCategory.CategoryName,
-            //    //    ProductPrice = product.ProductPrice,
-            //    //    Album = product.Album.ToInfoVM(),
-
-            //    //    productName = product.ProductName,
-            //    //    stock = product.Stock,
-            //    //    status = product.Status,
-            //    //}).ToList();
-            //}
-
             return data;
 
         }
-
-        //[HttpGet]
-        //[Route("ProductCategories")]
-        //public IActionResult GetProductCategoriesInfo()
-        //{
-        //    var productCategories = _db.ProductCategories.ToList();
-
-        //    return Ok(productCategories);
-        //}
 
         [HttpGet]
         [Route("SongGenre/{genreName}")]
@@ -165,9 +111,9 @@ namespace api.iSMusic.Controllers
 
         [HttpGet]
         [Route("ProductSearch/{words}")]
-        public IEnumerable<ProductIndexDTO> GetProductSearch([FromRoute] string words , string AAA)
+        public IEnumerable<ProductIndexDTO> GetProductSearch([FromRoute] string words , [FromQuery] string Sort)
         {
-            if (AAA == "artist")
+            if (Sort == "artist")
             {
 
                 var data = _db.Products
@@ -198,7 +144,7 @@ namespace api.iSMusic.Controllers
                     .Include(product => product.Album.AlbumGenre)
                     .Include(product => product.Album.MainArtist)
                     .Where(product => product.Status == true)
-                    .Where(product => product.Album.MainArtist!.ArtistName.Contains(words))
+                    .Where(product => product.Album.AlbumName.Contains(words))
                     .OrderByDescending(product => product.Album.Released)
                     .Select(product => new ProductIndexDTO
                     {
@@ -214,16 +160,31 @@ namespace api.iSMusic.Controllers
             }
         }
 
-        //[HttpGet]
-        //[Route("Artists/{artistGender}")]
-        //public IActionResult GetArtistGenderInfo([FromRoute] bool artistGender)
-        //{
-        //    var album = _db.Albums
-        //        .Include(album => album.MainArtist)
-        //        .Where(x => x.Id == x.MainArtist.Id)
-        //        .ToList();
 
-        //    return Ok(album);
-        //}
+        [HttpGet]
+        [Route("{productId}/Detail")]
+        public IEnumerable<ProductDetailDTO> GetProductsDetail(int productId)
+        {
+
+            var data = _db.Products
+                .Include(product => product.Album)//.ThenInclude(album => album.AlbumType)
+                .Include(product => product.Album.AlbumType)
+                .Include(product => product.Album.AlbumGenre)
+                .Include(product => product.Album.MainArtist)
+                .Include(product => product.Album.Songs)
+                .Where(product => product.Status == true && product.Id == productId)
+                .OrderByDescending(product => product.Album.Released)
+                .Select(product => new ProductDetailDTO
+                {
+                    Id = productId,
+                    ProductCategoryName = product.ProductCategory.CategoryName,
+                    ProductPrice = product.ProductPrice,
+                    ProductName = product.ProductName,
+                    Stock = product.Stock,
+                    AlbumDetail = product.Album.ToDetailVM(), 
+
+                }).ToList();
+            return data;
+        }
     }
 }
