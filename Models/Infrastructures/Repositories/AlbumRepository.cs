@@ -118,13 +118,18 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		public AlbumDetailDTO? GetAlbumById(int albumId)
 		{
-			return _db.Albums
+            return _db.Albums
+				.Where(album => album.Id == albumId)
+				.Include(album => album.AlbumGenre)
+				.Include(album => album.AlbumType)
+				.Include(album => album.MainArtist)
+				.Include(album => album.MainCreator)
 				.Include(album => album.Songs)
-				.ThenInclude(song => song.SongArtistMetadata)
-				.ThenInclude(metadata => metadata.Artist)
+					.ThenInclude(song => song.SongArtistMetadata)
+					.ThenInclude(metadata => metadata.Artist)
 				.Include(album => album.Songs)
-				.ThenInclude(song => song.SongCreatorMetadata)
-				.ThenInclude(metadata => metadata.Creator)
+					.ThenInclude(song => song.SongCreatorMetadata)
+					.ThenInclude(metadata => metadata.Creator)
 				.Select(album => new AlbumDetailDTO
 				{
 					Id = album.Id,
@@ -132,23 +137,20 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					AlbumCoverPath = album.AlbumCoverPath,
 					AlbumGenreId = album.AlbumGenreId,
 					AlbumGenreName = album.AlbumGenre.GenreName,
-                    AlbumTypeId = album.AlbumTypeId,
-                    AlbumTypeName = album.AlbumType.TypeName,
-                    Released = album.Released,
+					AlbumTypeId = album.AlbumTypeId,
+					AlbumTypeName = album.AlbumType.TypeName,
+					Released = album.Released,
 					MainArtistId = album.MainArtistId,
-					MainArtistName = album.MainArtist != null ?
-						album.MainArtist.ArtistName:
-						string.Empty,
-					MainCreatorId= album.MainCreatorId,
-					MainCreatorName = album.MainCreator != null ?					album.MainCreator.CreatorName: 
-						string.Empty,
+					MainArtistName = album.MainArtist != null ? album.MainArtist.ArtistName : string.Empty,
+					MainCreatorId = album.MainCreatorId,
+					MainCreatorName = album.MainCreator != null ? album.MainCreator.CreatorName : string.Empty,
 					Description = album.Description,
 					AlbumProducer = album.AlbumProducer,
-					AlbumCompany= album.AlbumCompany,
+					AlbumCompany = album.AlbumCompany,
 					Songs = album.Songs.Select(song => song.ToInfoDTO()).ToList(),
 				})
-				.SingleOrDefault(dto => dto.Id == albumId);
-		}
+				.SingleOrDefault();
+        }
 
 		public IEnumerable<AlbumIndexDTO> GetLikedAlbums(int memberId, MembersController.LikedQuery query)
 		{

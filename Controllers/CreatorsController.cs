@@ -95,7 +95,77 @@ namespace api.iSMusic.Controllers
             return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
         }
 
-		[HttpPost]
+        [HttpGet]
+        [Route("{creatorId}/songs")]//取得創作者的所有歌曲
+        public IActionResult GetSongsByCreator(int creatorId)
+        {
+            var songs = _appDbContext.Songs
+                .Where(s => s.SongCreatorMetadata.Any(sm => sm.CreatorId == creatorId))
+                .Select(s => new SongDTO
+                {
+                    Id = s.Id,
+                    SongName = s.SongName,
+                    GenreId = s.GenreId,
+                    Duration = s.Duration,
+                    IsInstrumental = s.IsInstrumental,
+                    Language = s.Language,
+                    IsExplicit = s.IsExplicit,
+                    Released = s.Released,
+                    SongWriter = s.SongWriter,
+                    Lyric = s.Lyric,
+                    SongCoverPath = s.SongCoverPath,
+                    SongPath = s.SongPath,
+                    Status = s.Status,
+                    AlbumId = s.AlbumId
+                }).ToList();
+
+            if (songs == null || songs.Count == 0)
+            {
+                return NotFound("您目前尚未擁有作品");
+            }
+
+            return Ok(songs);
+        }
+
+        [HttpGet]
+        [Route("{creatorId}/albums")]//取得創作者的所有專輯
+        public IActionResult GetAlbumsByCreator(int creatorId)
+        {
+            var albums = _appDbContext.Albums
+                .Where(a => a.MainCreatorId == creatorId)
+                .ToList();
+
+            if (albums.Count == 0)
+            {
+                return NotFound();
+            }
+
+            var albumDTOs = new List<AlbumDTO>();
+
+            foreach (var album in albums)
+            {
+                var albumDTO = new AlbumDTO
+                {
+                    Id = album.Id,
+                    AlbumName = album.AlbumName,
+                    AlbumCoverPath = album.AlbumCoverPath,
+                    AlbumTypeId = album.AlbumTypeId,
+                    AlbumGenreId = album.AlbumGenreId,
+                    Released = album.Released,
+                    Description = album.Description,
+                    MainArtistId = album.MainArtistId,
+                    MainCreatorId = album.MainCreatorId,
+                    AlbumProducer = album.AlbumProducer,
+                    AlbumCompany = album.AlbumCompany,
+                };
+
+                albumDTOs.Add(albumDTO);
+            }
+
+            return Ok(albumDTOs);
+        }
+
+        [HttpPost]
 		[Route("{creatorId}/song")]//創作者上傳歌曲
 		public IActionResult CreatorUploadSong(int creatorId,[FromForm] CreatorUploadSongDTO creatoruploadsongdto)
 		{
@@ -160,40 +230,6 @@ namespace api.iSMusic.Controllers
 			return newFileName;
 		}
 
-		
-		[HttpGet]
-		[Route("{creatorId}/songs")]//取得創作者的所有歌曲
-		public IActionResult GetSongsByCreator(int creatorId)
-		{
-			var songs = _appDbContext.Songs
-				.Where(s => s.SongCreatorMetadata.Any(sm => sm.CreatorId == creatorId))
-				.Select(s => new SongDTO
-				{
-					Id = s.Id,
-					SongName = s.SongName,
-					GenreId = s.GenreId,
-					Duration = s.Duration,
-					IsInstrumental = s.IsInstrumental,
-					Language = s.Language,
-					IsExplicit = s.IsExplicit,
-					Released = s.Released,
-					SongWriter = s.SongWriter,
-					Lyric = s.Lyric,
-					SongCoverPath = s.SongCoverPath,
-					SongPath = s.SongPath,
-					Status = s.Status,
-					AlbumId = s.AlbumId
-				}).ToList();
-
-			if (songs == null || songs.Count == 0)
-			{
-				return NotFound("您目前尚未擁有作品");
-			}
-
-			return Ok(songs);
-		}
-
-
 		[HttpPost]
 		[Route("{creatorId}/albums")]//創作者新增專輯
 		public IActionResult CreateAlbumbyCreator(int creatorId, [FromForm] CreateAlbumbyCreatorDTO dto)
@@ -235,45 +271,41 @@ namespace api.iSMusic.Controllers
 			return Ok("專輯已建立");
 		}
 
-		[HttpGet]
-		[Route("{creatorId}/albums")]//取得創作者的所有專輯
-		public IActionResult GetAlbumsByCreator(int creatorId)
-		{
-			var albums = _appDbContext.Albums
-				.Where(a => a.MainCreatorId == creatorId)
-				.ToList();
+        [HttpPut]
+        [Route("{creatorId}/songs/{songId}")]//修改創作者的單一歌曲
+        public IActionResult EditSongByCreator(int creatorId, int songId, [FromBody] SongDTO dto)
+        {
 
-			if (albums.Count == 0)
-			{
-				return NotFound();
-			}
+            //確認歌曲是否屬於該創作者
+            var creatorSong = _appDbContext.SongCreatorMetadata.FirstOrDefault(sc => sc.CreatorId == creatorId && sc.SongId == songId);
+            if (creatorSong == null)
+            {
+                return NotFound();
+            }
+            //抓出歌曲並修改值
+            var song = _appDbContext.Songs.FirstOrDefault(s => s.Id == songId);
 
-			var albumDTOs = new List<AlbumDTO>();
+            song!.SongName = dto.SongName!;
+            song.GenreId = dto.GenreId;
+            //song.Duration = dto.Duration;
+            song.IsInstrumental = dto.IsInstrumental;
+            song.Language = dto.Language;
+            song.IsExplicit = dto.IsExplicit;
+            song.Released = dto.Released;
+            song.SongWriter = dto.SongWriter!;
+            song.Lyric = dto.Lyric;
+            //song.SongCoverPath = dto.SongCoverPath;
+            //song.SongPath = dto.SongPath;
+            song.Status = dto.Status;
+            song.AlbumId = dto.AlbumId == 0 ? null : dto.AlbumId;
 
-			foreach (var album in albums)
-			{
-				var albumDTO = new AlbumDTO
-				{
-					Id = album.Id,
-					AlbumName = album.AlbumName,
-					AlbumCoverPath = album.AlbumCoverPath,
-					AlbumTypeId = album.AlbumTypeId,
-					AlbumGenreId = album.AlbumGenreId,
-					Released = album.Released,
-					Description = album.Description,
-					MainArtistId= album.MainArtistId,
-					MainCreatorId= album.MainCreatorId,
-					AlbumProducer= album.AlbumProducer,
-					AlbumCompany= album.AlbumCompany,
-				};
+            //存檔
+            _appDbContext.SaveChanges();
+            return NoContent();
 
-				albumDTOs.Add(albumDTO);
-			}
+        }
 
-			return Ok(albumDTOs);
-		}
-
-		[HttpDelete]
+        [HttpDelete]
 		[Route("{creatorId}/album/{albumId}")]//刪除創作者的單一專輯
 		public IActionResult DeleteAlbumByCreator(int creatorId, int albumId)
 		{
@@ -325,41 +357,6 @@ namespace api.iSMusic.Controllers
 			return NoContent();
 		}
 
-		[HttpPut]
-		[Route("{creatorId}/songs/{songId}")]//修改創作者的單一歌曲
-		public IActionResult EditSongByCreator(int creatorId,int songId, [FromBody]SongDTO dto)
-		{
-			
-			//確認歌曲是否屬於該創作者
-			var creatorSong = _appDbContext.SongCreatorMetadata.FirstOrDefault(sc => sc.CreatorId == creatorId && sc.SongId == songId);
-			if (creatorSong == null)
-			{
-				return NotFound();
-			}
-			//抓出歌曲並修改值
-			var song = _appDbContext.Songs.FirstOrDefault(s => s.Id == songId);
-
-			song!.SongName = dto.SongName!;
-			song.GenreId = dto.GenreId;
-			//song.Duration = dto.Duration;
-			song.IsInstrumental = dto.IsInstrumental;
-			song.Language = dto.Language;
-			song.IsExplicit = dto.IsExplicit;
-			song.Released = dto.Released;
-			song.SongWriter = dto.SongWriter!;
-			song.Lyric = dto.Lyric;
-			//song.SongCoverPath = dto.SongCoverPath;
-			//song.SongPath = dto.SongPath;
-			song.Status = dto.Status;
-			song.AlbumId = dto.AlbumId ==0?null:dto.AlbumId;
-
-			//存檔
-			_appDbContext.SaveChanges();
-			return NoContent();
-
-		}
-
-		
 		//[HttpGet]
 		//[Route("{creatorId}/albums/{albumId}")]//取得創作者的單一專輯
 		//public IActionResult GetAlbumByCreator(int creatorId, int albumId)
