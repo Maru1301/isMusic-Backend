@@ -11,8 +11,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
             return new()
             {
                 //Id = source.Id,
-                MemberNickName = source.MemberNickName!,
-                MemberEmail = source.MemberEmail!,
+                MemberNickName = source.MemberNickName!,                
                 MemberAddress = source.MemberAddress,
                 MemberCellphone = source.MemberCellPhone,
                 MemberDateOfBirth = source.MemberDateOfBirth,
@@ -51,6 +50,12 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
                 ConfirmCode = entity.ConfirmCode,
                 MemberAddress = entity.MemberAddress,
                 MemberDateOfBirth = entity.MemberDateOfBirth,
+                Avatar = entity.Avatar,
+                MemberReceivedMessage = entity.MemberReceivedMessage,
+                MemberSharedData = entity.MemberSharedData,
+                LibraryPrivacy = entity.LibraryPrivacy,
+                CalenderPrivacy = entity.CalenderPrivacy,
+                CreditCardId= entity.CreditCardId,
             };
         }
 
@@ -58,8 +63,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
         {
             return new()
             {
-                MemberNickName = source.MemberNickName!,
-                MemberEmail = source.MemberEmail!,
+                MemberNickName = source.MemberNickName!,                
                 MemberAddress = source.MemberAddress,
                 MemberCellPhone = source.MemberCellphone,
                 MemberDateOfBirth = source.MemberDateOfBirth,

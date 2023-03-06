@@ -9,11 +9,6 @@ namespace api.iSMusic.Models.ViewModels.MemberVMs
         [StringLength(50)]
         public string? MemberNickName { get; set; }
 
-        [Required]
-        [DataType(DataType.EmailAddress)]
-        [StringLength(50)]
-        public string? MemberEmail { get; set; }
-
         [StringLength(100)]
         public string? MemberAddress { get; set; }
 

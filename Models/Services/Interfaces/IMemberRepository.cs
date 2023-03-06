@@ -31,11 +31,11 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void UnfollowCreator(int memberId, int creatorId);
 
-        Member? GetByEmail(string email);
+        MemberDTO? GetByEmail(string email);
 
         MemberDTO GetByAccount(string Account);
 
-        void UpdateMember(int memberId, MemberDTO memberDTO);
+        void UpdateMember(MemberDTO memberDTO);
 
         MemberDTO? GetMemberInfo(int memberId);
 
@@ -62,5 +62,7 @@ namespace api.iSMusic.Models.Services.Interfaces
         void SubscribedPlan(int memberId, SubscriptionPlanDTO subscriptionPlan, IEnumerable<MemberDTO> memberdto, DateTime addDate);
 
         IEnumerable<OrderDTO> GetMemberOrder(int memberId);
+
+        void UpdateEmail(MemberDTO dto, string email);
     }
 }
