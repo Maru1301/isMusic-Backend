@@ -146,7 +146,7 @@ namespace api.iSMusic.Controllers
                     SongPath = s.SongPath,
                     Status = s.Status,
                     //AlbumId = s.AlbumId,
-                    AlbumName = s.Album.AlbumName
+                    AlbumName = s.Album!.AlbumName
                 }).ToList();
 
             if (songs == null || songs.Count == 0)
@@ -188,13 +188,13 @@ namespace api.iSMusic.Controllers
                 GenredName = s.Genre.GenreName,
                 Duration = s.Duration,
                 IsInstrumental = s.IsInstrumental,
-                Language = s.Language,
+                Language = s.Language!,
                 IsExplicit = s.IsExplicit,
                 Released = s.Released,
                 SongWriter = s.SongWriter,
-                Lyric = s.Lyric,
+                Lyric = s.Lyric!,
                 Status = s.Status,
-                AlbumName = s.Album.AlbumName,
+                AlbumName = s.Album!.AlbumName,
             }).ToList();
 
             //將創作者和專輯的資訊轉換成ViewModel
@@ -247,7 +247,7 @@ namespace api.iSMusic.Controllers
                     Description = album.Description,
                     MainArtistId = album.MainArtistId,
                     MainCreatorId = album.MainCreatorId,
-                    MainCreatorName = album.MainCreator.CreatorName,
+                    MainCreatorName = album.MainCreator!.CreatorName,
                     AlbumProducer = album.AlbumProducer,
                     AlbumCompany = album.AlbumCompany,
                 };
@@ -295,7 +295,7 @@ namespace api.iSMusic.Controllers
 			};
 			_appDbContext.Add(song);
 			_appDbContext.SaveChanges();
-			var songid = _appDbContext.Songs.OrderByDescending(s => s.Id).FirstOrDefault().Id;
+			var songid = _appDbContext.Songs.OrderByDescending(s => s.Id).First().Id;
 
 			SongCreatorMetadatum songCreatormetadatum = new()
 			{
@@ -370,7 +370,7 @@ namespace api.iSMusic.Controllers
         public IActionResult CreatorUpdateProfile(int creatorId, [FromForm] CreatorUpdateProfileDTO dto)
         {
             //todo 上傳圖片功能
-            var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath).FullName;
+            var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath)!.FullName;
             var uploadpicpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Pics/";
             var uploadcoverpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Covers/";
             var picfileName = GetNewFileName(uploadpicpath, dto.Pic.FileName);
@@ -411,14 +411,19 @@ namespace api.iSMusic.Controllers
             //抓出歌曲並修改值
             var song = _appDbContext.Songs.FirstOrDefault(s => s.Id == songId);
 
-            song.SongName = dto.SongName;
+            if(song == null)
+            {
+                return NotFound("歌曲不存在");
+            }
+
+            song.SongName = dto.SongName!;
             song.GenreId = dto.GenreId;
             //song.Duration = dto.Duration;
             song.IsInstrumental = dto.IsInstrumental;
             song.Language = dto.Language;
             song.IsExplicit = dto.IsExplicit;
             song.Released = dto.Released;
-            song.SongWriter = dto.SongWriter;
+            song.SongWriter = dto.SongWriter!;
             song.Lyric = dto.Lyric;
             song.Status = dto.Status;
             song.AlbumId = dto.AlbumId == 0 ? null : dto.AlbumId;

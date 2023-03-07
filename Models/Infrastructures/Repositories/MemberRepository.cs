@@ -263,7 +263,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                     LibraryPrivacy = member.LibraryPrivacy,
                     CalenderPrivacy = member.CalenderPrivacy,
                     IsConfirmed= member.IsConfirmed,
-                    AvatarId = member.Avatar.Id,
+                    AvatarId = member.Avatar!.Id,
                 }).SingleOrDefault();
 
             return result;
@@ -343,7 +343,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             var RecordDetail = new SubscriptionRecordDetail
             {
                 SubscriptionRecordId = subscriptionRecordId,
-                MemnerId = memberForSubscrptionPlanId,
+                MemberId = memberForSubscrptionPlanId,
             };
             //_db.SubscriptionRecordDetail.Add(RecordDetail);            
             _db.SaveChanges();

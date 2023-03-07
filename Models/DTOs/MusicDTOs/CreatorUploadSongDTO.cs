@@ -18,7 +18,7 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 		public string? Language { get; set; }
 		public bool? IsExplicit { get; set; }
 		public DateTime Released { get; set; }
-		public string? SongWriter { get; set; } 
+		public string SongWriter { get; set; } = null!;
 		public string? Lyric { get; set; }
 		public string? SongCoverPath { get; set; } 
 		public string? SongPath { get; set; } 

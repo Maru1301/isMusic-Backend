@@ -53,7 +53,7 @@ namespace api.iSMusic.Models.Services
 			{
 				Id = creatorId,
 				CreatorName = creator.CreatorName,
-				CreatorPicPath = creator.CreatorPicPath,
+				CreatorPicPath = creator.CreatorPicPath!,
 				PopularSongs = popularSongs.ToList(),
 				PopularAlbums = popularAlbums.ToList(),
 				IncludedPlaylists = includedPlaylists.ToList(),
