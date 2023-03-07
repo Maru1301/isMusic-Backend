@@ -23,7 +23,7 @@ namespace api.iSMusic.Models.DTOs.MemberDTOs
         // 所有訂閱的人 名字 email
         public byte? NumberOfUsers { get; set; }
 
-        public IEnumerable<Member>? Member { get; set; }
+        public IEnumerable<MemberDTO>? Member { get; set; }
         
     }
 }

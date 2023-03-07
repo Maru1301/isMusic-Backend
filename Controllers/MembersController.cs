@@ -45,39 +45,6 @@ namespace api.iSMusic.Controllers
 			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository, queueRepository);
 		}
 
-
-        [HttpGet]
-        [Route("{memberId}")]
-        public IActionResult GetMemberInfo([FromRoute] int memberId)
-        {
-            // 取得 memberId
-            var member = _memberService.GetMemberInfo(memberId);
-            if (member == null)
-            {
-                return NotFound("Member not found");
-            }
-
-            return Ok(member);
-        }
-
-        [HttpPut]
-        [Route("{memberId}")]
-        public IActionResult UpdateMember(int memberId, [FromForm] MemberEditVM member)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var result = _memberService.UpdateMember(memberId, member.ToMemberDTO());
-
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
-
-            return Ok(result.Message);
-        }
-
         [HttpPost]
         [Route("Register")]
         public IActionResult MemberRegister([FromForm] MemberRegisterVM member)
@@ -98,7 +65,7 @@ namespace api.iSMusic.Controllers
         [HttpPost]
         [Route("MemberLogin")]
 		[AllowAnonymous]
-		public IActionResult MemberLogin([FromBody]MemberLoginVM member)
+		public IActionResult MemberLogin([FromForm]MemberLoginVM member)
         {
             var result = _memberService.MemberLogin(member.ToLoginDTO());
 
@@ -111,7 +78,6 @@ namespace api.iSMusic.Controllers
             return Ok(result.Message);
         }
 
-		[Authorize]
         [HttpPost("MemberLogOut")]
         public IActionResult MemberLogOut()
         {
@@ -142,7 +108,6 @@ namespace api.iSMusic.Controllers
         }
 
 		[HttpGet]
-		[Authorize]
 		[Route("SubscriptionPlan")]
 		public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan()
 		{			
@@ -155,7 +120,6 @@ namespace api.iSMusic.Controllers
 
 		[HttpGet]
 		[Route("Orders")]
-		[Authorize]
 		public IEnumerable<OrderDTO> GetMemberOrder()
 		{
             var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
@@ -200,6 +164,7 @@ namespace api.iSMusic.Controllers
 
         [HttpGet]
         [Route("ActivateRegister")]
+        [AllowAnonymous]
         public IActionResult ActivateRegister(int memberId, string confirmCode)
         {            
             var result = _memberService.ActivateRegister(memberId, confirmCode);
@@ -212,32 +177,14 @@ namespace api.iSMusic.Controllers
         }
 
 		[HttpPost]
-		[Authorize]
 		[Route("SubscribePlan")]
-		public IActionResult SubscribedPlan([FromForm] int SubscriptionPlanId)
+		public IActionResult SubscribedPlan([FromForm] int SubscriptionPlanId,[FromForm] IEnumerable<string>emails)
 		{
 			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
 			var SubscriptionPlan = _memberRepository.SubscriptionPlanLoad(SubscriptionPlanId);
-			if (SubscriptionPlan.NumberOfUsers == 1)
-			{
-				var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan);
-				return Ok(result);
-			}
-            return Ok();
 
-            //else if (SubscriptionPlan.NumberOfUsers == 2)
-            //{
-            //	var friend = 1;
-            //	var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, friend);
-            //	return Ok(result);
-            //}
-
-            //else
-            //{
-            //	var family = 1;
-            //	var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, family);
-            //	return Ok(result);
-            //};
+			var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, emails);
+			return Ok(result);         
         }
 
 		[HttpPatch]

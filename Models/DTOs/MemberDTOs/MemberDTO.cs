@@ -40,7 +40,9 @@ namespace api.iSMusic.Models.DTOs.MemberDTOs
         public bool IsConfirmed { get; set; }
 
         public string? ConfirmCode { get; set; }
+        
+       public int AvatarId { get; set; }
 
-        public virtual Avatar? Avatar { get; set; }
+        public IEnumerable<CreditCardDTO>? CreditCard { get; set; }
     }
 }

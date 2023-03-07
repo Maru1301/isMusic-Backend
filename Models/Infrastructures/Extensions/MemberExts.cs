@@ -10,17 +10,16 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
         {
             return new()
             {
-                //Id = source.Id,
+                //Id = source.id,
                 MemberNickName = source.MemberNickName!,                
                 MemberAddress = source.MemberAddress,
                 MemberCellphone = source.MemberCellPhone,
                 MemberDateOfBirth = source.MemberDateOfBirth,
-                //Avatar = source.Avatar,
+                AvatarId = source.AvatarId,
                 MemberReceivedMessage = source.MemberReceivedMessage,
                 MemberSharedData = source.MemberSharedData,
                 LibraryPrivacy = source.LibraryPrivacy,
-                CalenderPrivacy = source.CalenderPrivacy,
-
+                CalenderPrivacy = source.CalenderPrivacy,                
 
             };
         }
@@ -50,7 +49,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
                 ConfirmCode = entity.ConfirmCode,
                 MemberAddress = entity.MemberAddress,
                 MemberDateOfBirth = entity.MemberDateOfBirth,
-                Avatar = entity.Avatar,
+                AvatarId = entity.AvatarId,
                 MemberReceivedMessage = entity.MemberReceivedMessage,
                 MemberSharedData = entity.MemberSharedData,
                 LibraryPrivacy = entity.LibraryPrivacy,

@@ -36,10 +36,10 @@ namespace api.isMusic
                 option.LoginPath = null;
             });
 
-			//builder.Services.AddMvc(options =>
-			//{
-			//	options.Filters.Add(new AuthorizeFilter());
-			//});
+			builder.Services.AddMvc(options =>
+			{
+				options.Filters.Add(new AuthorizeFilter());
+			});
 
 			builder.Services.AddControllers();
 
