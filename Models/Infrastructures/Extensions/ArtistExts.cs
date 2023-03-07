@@ -6,6 +6,8 @@ namespace api.iSMusic.Models.Infrastructures.Extensions;
 
 public static class ArtistExts
 {
+	private static readonly string webUrl = "https://localhost:44373/Uploads/Covers/";
+
 	public static ArtistInfoVM ToInfoVM(this Artist source)
 		=> new()
         {
@@ -27,15 +29,7 @@ public static class ArtistExts
         {
 			Id = source.Id,
 			ArtistName = source.ArtistName,
-			ArtistPicPath = source.ArtistPicPath,
-		};
-
-	public static ArtistDetailVM ToDetailVM(this Artist source)
-		=> new()
-        {
-			Id = source.Id,
-			ArtistName = source.ArtistName,
-			ArtistPicPath = source.ArtistPicPath,
+			ArtistPicPath = webUrl + source.ArtistPicPath,
 		};
 
 	public static ArtistDetailVM ToDetailVM(this ArtistDetailDTO source)
@@ -43,10 +37,10 @@ public static class ArtistExts
         {
 			Id = source.Id,
 			ArtistName = source.ArtistName,
-			ArtistPicPath = source.ArtistPicPath,
-			PopularSongs = source.PopularSongs,
-			PopularAlbums = source.PopularAlbums,
-			IncludedPlaylists = source.IncludedPlaylists,
+			ArtistPicPath = webUrl + source.ArtistPicPath,
+			PopularSongs = source.PopularSongs.Select(dto => dto.ToIndexVM()).ToList(),
+			PopularAlbums = source.PopularAlbums.Select(dto => dto.ToIndexVM()).ToList(),
+			IncludedPlaylists = source.IncludedPlaylists.Select(dto => dto.ToIndexVM()).ToList(),
 		};
 
 	public static ArtistAboutVM ToAboutVM(this ArtistAboutDTO source)

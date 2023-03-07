@@ -32,12 +32,6 @@ namespace api.iSMusic.Controllers
 		{
 			var dtos = _repository.GetPopularSongs();
 
-			foreach(var dto in dtos)
-			{
-				dto.SongCoverPath = "https://localhost:44373/Uploads/Covers/" + dto.SongCoverPath;
-            }
-
-
             return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
 

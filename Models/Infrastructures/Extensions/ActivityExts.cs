@@ -4,6 +4,8 @@ using api.iSMusic.Models.ViewModels.ActivityVMs;
 
 public static class ActivityExts
 {
+    private static readonly string webPicUrl = "https://localhost:44373/Uploads/Covers/";
+
     public static ActivityIndexDTO ToIndexDTO(this Activity source)
         => new()
         {
@@ -30,7 +32,7 @@ public static class ActivityExts
             ActivityLocation = source.ActivityLocation,
             ActivityTypeId = source.ActivityTypeId,
             ActivityInfo = source.ActivityInfo,
-            ActivityImagePath = source.ActivityImagePath,
+            ActivityImagePath = webPicUrl + source.ActivityImagePath,
             ActivityOrganizerId = source.ActivityOrganizerId,
             Updated = source.Updated,
             TotalFollows = source.TotalFollows,

@@ -1,4 +1,7 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.ViewModels.AlbumVMs;
+using api.iSMusic.Models.ViewModels.PlaylistVMs;
+using api.iSMusic.Models.ViewModels.SongVMs;
 
 namespace api.iSMusic.Models.ViewModels.CreatorVMs
 {
@@ -10,10 +13,10 @@ namespace api.iSMusic.Models.ViewModels.CreatorVMs
 
 		public string CreatorPicPath { get; set; } = null!;
 
-		public List<SongIndexDTO> PopularSongs { get; set; } = null!;
+		public List<SongIndexVM> PopularSongs { get; set; } = null!;
 
-		public List<AlbumIndexDTO> PopularAlbums { get; set; } = null!;
+		public List<AlbumIndexVM> PopularAlbums { get; set; } = null!;
 
-		public List<PlaylistIndexDTO> IncludedPlaylists { get; set; } = null!;
+		public List<PlaylistIndexVM> IncludedPlaylists { get; set; } = null!;
 	}
 }

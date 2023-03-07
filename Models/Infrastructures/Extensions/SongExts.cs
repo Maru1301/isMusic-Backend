@@ -6,16 +6,20 @@ namespace api.iSMusic.Models.Infrastructures.Extensions;
 
 public static class SongExts
 {
+    private static readonly string webPicUrl = "https://localhost:44373/Uploads/Covers/";
+
+    private static readonly string webSongUrl = "https://localhost:44373/Uploads/Songs/";
+
     public static SongInfoVM ToInfoVM(this SongInfoDTO source)
-        => new SongInfoVM
+        => new()
         {
             Id = source.Id,
             SongName = source.SongName,
             Duration = source.Duration,
             IsExplicit = source.IsExplicit,
             Released = source.Released,
-            SongCoverPath = source.SongCoverPath,
-            SongPath = source.SongPath,
+            SongCoverPath = webPicUrl + source.SongCoverPath,
+            SongPath = webSongUrl + source.SongPath,
             Status = source.Status,
             AlbumId = source.AlbumId,
             AlbumName = source.AlbumName,
@@ -45,8 +49,8 @@ public static class SongExts
             SongName = source.SongName,
             GenreName = source.GenreName,
             IsExplicit = source.IsExplicit,
-            SongCoverPath = source.SongCoverPath,
-            SongPath = source.SongPath,
+            SongCoverPath = webPicUrl + source.SongCoverPath,
+            SongPath = webSongUrl + source.SongPath,
             AlbumId = source.AlbumId,
             PlayedTimes = source.PlayedTimes,
             Artistlist = source.Artistlist,
@@ -54,11 +58,10 @@ public static class SongExts
         };
 
     public static SongInfoDTO ToProductIndexInfoDTO(this Song source)
-    => new SongInfoDTO
-    {
-        Id = source.Id,
-        SongName = source.SongName,
-        DisplayOrderInAlbum=source.DisplayOrderInAlbum,
-
-    };
+        => new()
+        {
+            Id = source.Id,
+            SongName = source.SongName,
+            DisplayOrderInAlbum=source.DisplayOrderInAlbum,
+        };
 }

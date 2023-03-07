@@ -6,14 +6,16 @@ namespace api.iSMusic.Models.Infrastructures.Extensions;
 
 public static class AlbumExts
 {
-	public static AlbumIndexVM ToIndexVM(this AlbumIndexDTO source)
+    private static readonly string webPicUrl = "https://localhost:44373/Uploads/Covers/";
+
+    public static AlbumIndexVM ToIndexVM(this AlbumIndexDTO source)
 		=> new()
 		{
 			Id = source.Id,
 			AlbumName = source.AlbumName,
 			AlbumGenreId= source.AlbumGenreId,
 			AlbumTypeId= source.AlbumTypeId,
-			AlbumCoverPath= source.AlbumCoverPath,
+			AlbumCoverPath= webPicUrl + source.AlbumCoverPath,
 			Released = source.Released,
 			MainArtistId= source.MainArtistId,
 			MainArtistName= source.MainArtistName,
@@ -48,7 +50,7 @@ public static class AlbumExts
 		{
 			Id = source.Id,
 			AlbumName = source.AlbumName,
-			AlbumCoverPath= source.AlbumCoverPath,
+			AlbumCoverPath= webPicUrl + source.AlbumCoverPath,
 			Released = source.Released,
 			MainArtistId= source.MainArtistId,
 			AlbumTypeId= source.AlbumTypeId,
@@ -68,7 +70,7 @@ public static class AlbumExts
     {
         Id = source.Id,
         AlbumName = source.AlbumName,
-        AlbumCoverPath = source.AlbumCoverPath,
+        AlbumCoverPath = webPicUrl + source.AlbumCoverPath,
         Released = source.Released,
         AlbumTypeId = source.AlbumTypeId,
         AlbumTypeName = source.AlbumType.TypeName,
@@ -85,7 +87,7 @@ public static class AlbumExts
     {
         Id = source.Id,
         AlbumName = source.AlbumName,
-        AlbumCoverPath = source.AlbumCoverPath,
+        AlbumCoverPath = webPicUrl + source.AlbumCoverPath,
         Released = source.Released,
         MainArtistId = source.MainArtistId,
         AlbumTypeId = source.AlbumTypeId,

@@ -7,24 +7,17 @@ namespace api.iSMusic.Models.Infrastructures.Extensions;
 
 public static class PlaylistExts
 {
-	public static PlaylistDetailVM ToDetailVM(this PlaylistDetailDTO source)
-		=> new PlaylistDetailVM
-		{
+    private static readonly string webUrl = "https://localhost:44373/Uploads/Covers/";
+
+    public static PlaylistDetailVM ToDetailVM(this PlaylistDetailDTO source)
+		=> new()
+        {
 			Id = source.Id,
 			ListName = source.ListName,
-			PlaylistCoverPath = source.PlaylistCoverPath,
-			MemberId = source.MemberId,
+			PlaylistCoverPath = webUrl + source.PlaylistCoverPath,
+            MemberId = source.MemberId,
 			IsPublic = source.IsPublic,
 			PlayListSongMetadata = source.PlayListSongMetadata,
-		};
-
-	public static PlaylistIndexVM ToIndexVM(this Playlist source)
-		=> new PlaylistIndexVM
-		{
-			Id = source.Id,
-			ListName = source.ListName,
-			MemberId= source.MemberId,
-			PlaylistCoverPath = source.PlaylistCoverPath,
 		};
 
 	public static PlaylistIndexVM ToIndexVM(this PlaylistIndexDTO source)
@@ -33,21 +26,21 @@ public static class PlaylistExts
 			Id= source.Id,
 			ListName= source.ListName,
 			MemberId= source.MemberId,
-			PlaylistCoverPath = source.PlaylistCoverPath,
+			PlaylistCoverPath = webUrl + source.PlaylistCoverPath,
 			TotalLikes = source.TotalLikes,
 		};
 
 	public static Playlist ToEntity(this PlaylistCreateVM source)
-		=> new Playlist
-		{
+		=> new()
+        {
 			ListName = source.ListName,
 			MemberId = source.MemberId,
 			Created = DateTime.Now,
 		};
 
 	public static PlaylistSongMetadataVM ToVM(this PlaylistSongMetadatum source)
-		=> new PlaylistSongMetadataVM
-		{
+		=> new()
+        {
 			Id= source.Id,
 			PlayListId = source.PlayListId,
 			SongId = source.SongId,
@@ -56,8 +49,8 @@ public static class PlaylistExts
 		};
 
 	public static PlaylistEditDTO ToEditDTO(this PlaylistEditVM source)
-		=> new PlaylistEditDTO
-		{
+		=> new()
+        {
 			ListName= source.ListName,
 			PlaylistCover = source.PlaylistCover,
 			PlaylistCoverPath= source.PlaylistCoverPath,

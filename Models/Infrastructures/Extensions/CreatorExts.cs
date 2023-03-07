@@ -7,21 +7,14 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
 {
     public static class CreatorExts
 	{
-		public static CreatorIndexDTO ToIndexDTO(this Creator source)
-			=> new()
-			{
-				Id= source.Id,
-				CreatorName= source.CreatorName,
-				CreatorPicPath= source.CreatorPicPath,
-				TotalFollows = source.CreatorFollows.Count,
-			};
+        private static readonly string webUrl = "https://localhost:44373/Uploads/Covers/";
 
 		public static CreatorIndexVM ToIndexVM(this CreatorIndexDTO source)
 			=> new()
 			{
 				Id = source.Id,
 				CreatorName = source.CreatorName,
-				CreatorPicPath = source.CreatorPicPath,
+				CreatorPicPath = webUrl + source.CreatorPicPath,
 			};
 
 		public static CreatorDetailVM ToDetailVM(this CreatorDetailDTO source)
@@ -29,10 +22,10 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
 			{
 				Id = source.Id,
 				CreatorName = source.CreatorName,
-				CreatorPicPath = source.CreatorPicPath,
-				PopularSongs = source.PopularSongs,
-				PopularAlbums = source.PopularAlbums,
-				IncludedPlaylists = source.IncludedPlaylists,
+				CreatorPicPath = webUrl + source.CreatorPicPath,
+				PopularSongs = source.PopularSongs.Select(song => song.ToIndexVM()).ToList(),
+				PopularAlbums = source.PopularAlbums.Select(dto => dto.ToIndexVM()).ToList(),
+				IncludedPlaylists = source.IncludedPlaylists.Select(dto => dto.ToIndexVM()).ToList(),
 			};
 	}
 }
