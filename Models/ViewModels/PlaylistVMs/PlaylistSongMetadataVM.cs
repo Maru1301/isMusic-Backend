@@ -15,6 +15,6 @@ namespace api.iSMusic.Models.ViewModels.PlaylistVMs
 
 		public DateTime AddedTime { get; set; }
 
-		public virtual SongInfoVM Song { get; set; } = null!;
+		public SongInfoVM Song { get; set; } = null!;
 	}
 }

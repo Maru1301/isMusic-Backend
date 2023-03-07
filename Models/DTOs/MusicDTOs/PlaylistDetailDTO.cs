@@ -14,6 +14,6 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
         public bool IsPublic { get; set; }
 
-        public virtual List<PlaylistSongMetadataVM> PlayListSongMetadata { get; set; } = null!;
+        public List<PlaylistSongMetadataDTO> Metadata { get; set; } = null!;
     }
 }

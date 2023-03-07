@@ -23,6 +23,8 @@ public static class SongExts
             Status = source.Status,
             AlbumId = source.AlbumId,
             AlbumName = source.AlbumName,
+            DisplayOrderInAlbum = source.DisplayOrderInAlbum,
+            PlayedTimes = source.PlayedTimes,
         };
 
 	public static SongInfoDTO ToInfoDTO(this Song source)
@@ -40,6 +42,8 @@ public static class SongExts
             AlbumName = source.Album != null ? source.Album.AlbumName: string.Empty,
             Artists = source.SongArtistMetadata.Select(metadata => metadata.Artist.ToInfoVM()).ToList(),
             Creators = source.SongCreatorMetadata.Select(metadata => metadata.Creator.ToInfoVM()).ToList(),
+            DisplayOrderInAlbum = source.DisplayOrderInAlbum,
+            PlayedTimes = source.SongPlayedRecords.Count,
 		};
 
 	public static SongIndexVM ToIndexVM(this SongIndexDTO source)
@@ -57,7 +61,7 @@ public static class SongExts
             Creatorlist = source.Creatorlist,
         };
 
-    public static SongInfoDTO ToProductIndexInfoDTO(this Song source)
+    public static SongInfoVM ToProductIndexInfoVM(this Song source)
         => new()
         {
             Id = source.Id,

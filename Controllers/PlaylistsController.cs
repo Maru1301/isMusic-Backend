@@ -41,19 +41,19 @@ namespace api.iSMusic.Controllers
 				return NoContent();
 			}
 
-			return Ok(recommendedPlaylists);
+			return Ok(recommendedPlaylists.Select(dto => dto.ToIndexVM()));
 		}
 
 		[HttpGet]
 		[Route("{playlistId}")]
-		public ActionResult<PlaylistDetailVM> GetPlaylistDetail(int playlistId)
+		public IActionResult GetPlaylistDetail(int playlistId)
 		{
 			var result = _service.GetPlaylistDetail(playlistId);
 			if (!result.Success)
 			{
 				return BadRequest(result.Message);
 			}
-			return result.PlaylistDetail;
+			return Ok(result.Dto.ToDetailVM());
 		}
 
 		/// <summary>

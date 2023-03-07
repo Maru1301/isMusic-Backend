@@ -28,9 +28,9 @@ namespace api.iSMusic.Controllers
 
 		[HttpGet]
 		[Route("Popular")]
-		public ActionResult<IEnumerable<SongIndexVM>> GetPopularSongs()
+		public ActionResult<IEnumerable<SongIndexVM>> GetPopularSongs([FromQuery]int rowNumber)
 		{
-			var dtos = _repository.GetPopularSongs();
+			var dtos = _repository.GetPopularSongs(0, "", rowNumber);
 
             return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}

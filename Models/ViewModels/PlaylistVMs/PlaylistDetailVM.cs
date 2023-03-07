@@ -1,4 +1,7 @@
-﻿namespace api.iSMusic.Models.ViewModels.PlaylistVMs
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.ViewModels.SongVMs;
+
+namespace api.iSMusic.Models.ViewModels.PlaylistVMs
 {
 	public class PlaylistDetailVM
 	{
@@ -12,6 +15,6 @@
 
 		public bool IsPublic { get; set; }
 
-		public virtual List<PlaylistSongMetadataVM> PlayListSongMetadata { get; set; } = null!;
+		public List<PlaylistSongMetadataVM> Metadata { get; set; } = null!;
 	}
 }

@@ -63,7 +63,7 @@ public static class AlbumExts
 			MainCreatorId= source.MainCreatorId,
 			MainCreatorName= source.MainCreatorName,
 			Description= source.Description,
-			Songs = source.Songs,
+			Songs = source.Songs.Select(song => song.ToInfoVM()).OrderBy(dto => dto.DisplayOrderInAlbum).ToList(),
 		};
     public static AlbumInfoVM ToInfoVM(this Album source)
     => new()
@@ -98,7 +98,7 @@ public static class AlbumExts
         AlbumProducer = source.AlbumProducer,
         MainArtistName = source.MainArtist!.ArtistName,
         Description = source.Description,
-        Songs = source.Songs.Select(song=>song.ToProductIndexInfoDTO()).OrderBy(dto=>dto.DisplayOrderInAlbum).ToList(),
+        Songs = source.Songs.Select(song=>song.ToProductIndexInfoVM()).OrderBy(dto=>dto.DisplayOrderInAlbum).ToList(),
     };
 }
 

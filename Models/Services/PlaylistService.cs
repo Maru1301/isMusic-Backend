@@ -47,29 +47,27 @@ namespace api.iSMusic.Models.Services
 			return await _repository.GetPlaylistIdByMemberIdAsync(memberId);
 		}
 
-		public (bool Success, string Message, PlaylistDetailVM PlaylistDetail) GetPlaylistDetail(int playlistId)
+		public (bool Success, string Message, PlaylistDetailDTO Dto) GetPlaylistDetail(int playlistId)
 		{
-			if (playlistId <= 0) return (false, "非法的清單編號", new PlaylistDetailVM());
+			if (playlistId <= 0) return (false, "非法的清單編號", new PlaylistDetailDTO());
 
 			var playlist = _repository.GetPlaylistById(playlistId);
 			if (playlist == null)
 			{
-				return (false, "清單不存在", new PlaylistDetailVM());
+				return (false, "清單不存在", new PlaylistDetailDTO());
 			}
 			var memberId = playlist.MemberId;
 			var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
-			var songs = _songRepository.GetSongsByPlaylistId(playlistId);
-			var playlistDetailVM = playlist.ToDetailVM();
-			foreach (var metadata in playlistDetailVM.PlayListSongMetadata)
+
+			foreach (var song in playlist.Metadata.Select(metadata => metadata.Song))
 			{
-				var song = songs.Single(s => s.Id == metadata.SongId).ToInfoVM();
 				if (likedSongIds.Contains(song.Id))
 				{
 					song.IsLiked = true;
 				}
-				metadata.Song = song;
 			}
-			return (true, string.Empty, playlistDetailVM);
+
+			return (true, string.Empty, playlist);
 		}
 
 		public IEnumerable<PlaylistIndexDTO> GetPlaylistsByName(string name, int rowNumber)
@@ -90,14 +88,16 @@ namespace api.iSMusic.Models.Services
 			var playlist = _repository.GetPlaylistById(playlistId);
 			if(playlist == null) return (false, "清單不存在");
 
-			var metadata = playlist.PlayListSongMetadata;
+			if (CheckSongExistence(songId) == false) return (false, "歌曲不存在");
 
-			if(!Force && metadata.Select(metadatum => metadatum.SongId).Contains(songId))
+			var metadata = playlist.Metadata;
+
+			if(Force == false && metadata.Select(metadatum => metadatum.Song.Id).Contains(songId))
 			{
-				return (false, string.Empty);
+				return (false, "歌曲已存在清單內");
 			}
 
-			var lastOrder = metadata != null ? metadata.Max(metadatum => metadatum.DisplayOrder) : 0;
+			var lastOrder = metadata.Count() != 0 ? metadata.Max(metadatum => metadatum.DisplayOrder) : 0;
 
 			_repository.AddSongToPlaylist(playlistId, songId, lastOrder);
 
@@ -112,7 +112,7 @@ namespace api.iSMusic.Models.Services
 			var album = _albumRepository.GetAlbumById(albumId);
 			if (album == null) return (false, "專輯不存在");
 
-			var songIdsInPlaylist = playlist.PlayListSongMetadata.Select(metadata => metadata.SongId).ToHashSet();
+			var songIdsInPlaylist = playlist.Metadata.Select(metadata => metadata.Song.Id).ToHashSet();
 
 			var selectedSongs = album.Songs.Select(song => song.Id).ToList();
 
@@ -133,7 +133,7 @@ namespace api.iSMusic.Models.Services
 				selectedSongs = selectedSongs.Where(songId => songIdsInPlaylist.Contains(songId) == false).ToList();
 			}
 
-			var metadata = playlist.PlayListSongMetadata;
+			var metadata = playlist.Metadata;
 
 			var newOrder = metadata != null ? metadata.Max(metadatum => metadatum.DisplayOrder)+1 : 0;
 
@@ -166,7 +166,7 @@ namespace api.iSMusic.Models.Services
 			return (true, "更新成功");
 		}
 
-        private string GetNewFileName(string path, string fileName)
+        private static string GetNewFileName(string path, string fileName)
         {
             string ext = System.IO.Path.GetExtension(fileName); // 取得副檔名,例如".jpg"
             string newFileName;

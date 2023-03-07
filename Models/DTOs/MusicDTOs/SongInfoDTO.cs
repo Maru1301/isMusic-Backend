@@ -30,6 +30,8 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
         public bool FromList { get; set; }
 
+        public int PlayedTimes { get; set; }
+
         public int? DisplayOrderInAlbum { get; set; }
         
         public List<ArtistInfoVM> Artists { get; set; } = null!;

@@ -124,12 +124,15 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.Include(album => album.AlbumType)
 				.Include(album => album.MainArtist)
 				.Include(album => album.MainCreator)
+				.Include (album => album.Songs)
 				.Include(album => album.Songs)
 					.ThenInclude(song => song.SongArtistMetadata)
 					.ThenInclude(metadata => metadata.Artist)
 				.Include(album => album.Songs)
 					.ThenInclude(song => song.SongCreatorMetadata)
 					.ThenInclude(metadata => metadata.Creator)
+				.Include(album => album.Songs)
+					.ThenInclude(song => song.SongPlayedRecords)
 				.Select(album => new AlbumDetailDTO
 				{
 					Id = album.Id,
@@ -206,7 +209,25 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				albums = albums.Where(album => album.MainCreatorId == contentId);
 			}
 
-			var dtos = albums.Select(album => album.ToIndexDTO())
+			var dtos = albums.Select(album => new AlbumIndexDTO
+				{
+					Id = album.Id,
+					AlbumCoverPath = album.AlbumCoverPath,
+					AlbumName = album.AlbumName,
+					AlbumGenreId = album.AlbumGenreId,
+					AlbumGenreName = album.AlbumGenre.GenreName,
+					AlbumTypeId = album.AlbumTypeId,
+					AlbumTypeName = album.AlbumType.TypeName,
+					Released = album.Released,
+					MainArtistId = album.MainArtistId,
+					MainArtistName = album.MainArtist != null ?
+							album.MainArtist.ArtistName :
+							string.Empty,
+					MainCreatorId = album.MainCreatorId,
+					MainCreatorName = album.MainCreator != null ?      album.MainCreator.CreatorName :
+							string.Empty,
+					TotalLikes = album.LikedAlbums.Count,
+				})
 				.OrderByDescending(dto => dto.TotalLikes)
 				.Skip(rowNumber == 2 ? 0 : (rowNumber - 1) * skipNumber)
 				.Take(rowNumber == 2 ? takeNumber * 2 : takeNumber)

@@ -25,5 +25,9 @@ namespace api.iSMusic.Models.ViewModels.SongVMs
 		public string AlbumName { get; set; } = null!;
 
 		public bool IsLiked { get; set; }
-	}
+
+        public int? DisplayOrderInAlbum { get; set; }
+
+        public int PlayedTimes { get; set; }
+    }
 }

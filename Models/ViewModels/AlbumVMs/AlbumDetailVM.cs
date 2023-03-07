@@ -35,6 +35,6 @@ namespace api.iSMusic.Models.ViewModels.AlbumVMs
 
 		public string? AlbumCompany { get; set; }
 
-		public List<SongInfoDTO> Songs { get; set; } = new();
+		public List<SongInfoVM> Songs { get; set; } = new();
 	}
 }

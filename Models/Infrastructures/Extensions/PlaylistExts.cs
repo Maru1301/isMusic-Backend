@@ -17,7 +17,7 @@ public static class PlaylistExts
 			PlaylistCoverPath = webUrl + source.PlaylistCoverPath,
             MemberId = source.MemberId,
 			IsPublic = source.IsPublic,
-			PlayListSongMetadata = source.PlayListSongMetadata,
+			Metadata = source.Metadata.Select(metadata => metadata.ToVM()).ToList(),
 		};
 
 	public static PlaylistIndexVM ToIndexVM(this PlaylistIndexDTO source)
@@ -53,7 +53,25 @@ public static class PlaylistExts
         {
 			ListName= source.ListName,
 			PlaylistCover = source.PlaylistCover,
-			PlaylistCoverPath= source.PlaylistCoverPath,
 			Description= source.Description,
 		};
+
+	public static PlaylistSongMetadataDTO ToDTO(this PlaylistSongMetadatum source)
+		=> new()
+		{
+			Id = source.Id,
+			PlayListId= source.PlayListId,
+			DisplayOrder = source.DisplayOrder,
+			AddedTime = source.AddedTime,
+			Song = source.Song.ToInfoDTO(),
+		};
+
+	public static PlaylistSongMetadataVM ToVM(this PlaylistSongMetadataDTO source) => new()
+	{
+		Id = source.Id,
+		PlayListId = source.PlayListId,
+		DisplayOrder = source.DisplayOrder,
+		AddedTime = source.AddedTime,
+		Song = source.Song.ToInfoVM(),
+	};
 }

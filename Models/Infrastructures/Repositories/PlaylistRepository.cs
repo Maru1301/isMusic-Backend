@@ -113,7 +113,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		public PlaylistDetailDTO GetPlaylistById(int playlistId)
 		{
 			return _db.Playlists
-				.Include(p => p.PlaylistSongMetadata)
+				.Include(playlist => playlist.PlaylistSongMetadata)
+					.ThenInclude(metadata => metadata.Song)
 				.Select(playlist => new PlaylistDetailDTO
 				{
 					Id = playlist.Id,
@@ -121,9 +122,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					IsPublic = playlist.IsPublic,
 					MemberId = playlist.MemberId,
 					PlaylistCoverPath = playlist.PlaylistCoverPath,
-					PlayListSongMetadata = playlist.PlaylistSongMetadata
+					Metadata = playlist.PlaylistSongMetadata
 						.OrderBy(metadata => metadata.DisplayOrder)
-						.Select(m => m.ToVM())
+						.Select(metadata => metadata.ToDTO())
 						.ToList()
 				})
 				.Single(p => p.Id == playlistId);

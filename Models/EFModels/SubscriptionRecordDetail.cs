@@ -6,13 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.iSMusic.Models.EFModels;
 
-[Table("SubscriptionRecordDetail")]
+[Keyless]
 public partial class SubscriptionRecordDetail
 {
-    [Key]
+    [Column("id")]
     public int Id { get; set; }
 
+    [Column("subscriptionRecordId")]
     public int SubscriptionRecordId { get; set; }
 
-    public int MemnerId { get; set; }
+    [Column("memberId")]
+    public int MemberId { get; set; }
 }

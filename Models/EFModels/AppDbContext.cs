@@ -89,6 +89,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<SubscriptionRecord> SubscriptionRecords { get; set; }
 
+    public virtual DbSet<SubscriptionRecordDetail> SubscriptionRecordDetails { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Activity>(entity =>
@@ -407,7 +409,12 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SongPlayedRecords_Songs");
         });
-        
+
+        modelBuilder.Entity<SubscriptionPlan>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_SubscriptionPlan");
+        });
+
         modelBuilder.Entity<SubscriptionRecord>(entity =>
         {
             entity.HasOne(d => d.Member).WithMany(p => p.SubscriptionRecords)
@@ -417,6 +424,11 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.SubscriptionPlan).WithMany(p => p.SubscriptionRecords)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SubscriptionRecords_SubscriptionPlan");
+        });
+
+        modelBuilder.Entity<SubscriptionRecordDetail>(entity =>
+        {
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
 
         OnModelCreatingPartial(modelBuilder);
