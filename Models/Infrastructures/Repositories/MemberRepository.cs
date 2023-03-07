@@ -325,16 +325,27 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             return result;
         }
 
-        public void SubscribedPlan(int memberId, SubscriptionPlanDTO dto, IEnumerable<MemberDTO> memberdto, DateTime addDate)
+        public void SubscribedPlan(int memberId, SubscriptionPlanDTO dto, DateTime date)
         {
             var SubscriptionRecords = new SubscriptionRecord
             {
                 MemberId = memberId,
                 SubscriptionPlanId = dto.Id,
-                SubscribedTime = DateTime.Now,
-                SubscribedExpireTime= addDate,
+                SubscribedTime = date,
+                SubscribedExpireTime= date.AddMonths(1),
             };
             _db.SubscriptionRecords.Add(SubscriptionRecords);
+            _db.SaveChanges();
+        }
+
+        public void CreateSubscriptionRecordDetail(int subscriptionRecordId, int memberForSubscrptionPlanId)
+        {
+            var RecordDetail = new SubscriptionRecordDetail
+            {
+                SubscriptionRecordId = subscriptionRecordId,
+                MemnerId = memberForSubscrptionPlanId,
+            };
+            //_db.SubscriptionRecordDetail.Add(RecordDetail);            
             _db.SaveChanges();
         }
 
@@ -368,5 +379,6 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                 });
             return result;
         }        
+        
     }
 }

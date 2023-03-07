@@ -59,7 +59,9 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId);
 
-        void SubscribedPlan(int memberId, SubscriptionPlanDTO subscriptionPlan, IEnumerable<MemberDTO> memberdto, DateTime addDate);
+        void SubscribedPlan(int memberId, SubscriptionPlanDTO subscriptionPlan, DateTime addDate);
+
+        void CreateSubscriptionRecordDetail(int subscriptionRecordId, int memberForSubscrptionPlanId)
 
         IEnumerable<OrderDTO> GetMemberOrder(int memberId);
 

@@ -178,30 +178,13 @@ namespace api.iSMusic.Controllers
 
 		[HttpPost]
 		[Route("SubscribePlan")]
-		public IActionResult SubscribedPlan([FromForm] int SubscriptionPlanId)
+		public IActionResult SubscribedPlan([FromForm] int SubscriptionPlanId,[FromForm] IEnumerable<string>emails)
 		{
 			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
 			var SubscriptionPlan = _memberRepository.SubscriptionPlanLoad(SubscriptionPlanId);
-			if (SubscriptionPlan.NumberOfUsers == 1)
-			{
-				var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan);
-				return Ok(result);
-			}
-            return Ok();
 
-            //else if (SubscriptionPlan.NumberOfUsers == 2)
-            //{
-            //	var friend = 1;
-            //	var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, friend);
-            //	return Ok(result);
-            //}
-
-            //else
-            //{
-            //	var family = 1;
-            //	var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, family);
-            //	return Ok(result);
-            //};
+			var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, emails);
+			return Ok(result);         
         }
 
 		[HttpPatch]

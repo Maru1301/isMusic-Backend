@@ -365,7 +365,7 @@ namespace api.iSMusic.Models.Services
 
             if (dto == null)
             {
-                throw new Exception("帳號或 Email 錯誤");
+                return (false, "帳號或 Email 錯誤");
             }
 
             if (string.Compare(email, dto.MemberEmail) != 0)
@@ -423,17 +423,28 @@ namespace api.iSMusic.Models.Services
             return _memberRepository.GetMemberSubscriptionPlan(memberId)!;
         }
 
-        public (bool Success, string Message) SubscribedPlan(int memberId, SubscriptionPlanDTO dto, IEnumerable<MemberDTO> memberdto=null)
+        public (bool Success, string Message) SubscribedPlan(int memberId, SubscriptionPlanDTO dto, IEnumerable<string> emails)
         {
+            var date = DateTime.Now;
             var member = _memberRepository.Load(memberId);
-            if (member.CreditCardId == null) throw new Exception("請先輸入信用卡資訊");
-            if(memberId == 0) throw new Exception("找不到對應的會員記錄");
-            if (dto.Id == 0) throw new Exception("找不到對應的訂閱記錄");
-            if (dto.SubscribedExpireTime < DateTime.Now) throw new Exception("訂閱已到期");
+            emails.Append(member.MemberEmail);
+            if (member.CreditCardId == null) return (false, "請先輸入信用卡資訊");
+            if (memberId == 0) return (false, "找不到對應的會員記錄");
+            if (dto.Id == 0) return (false, "找不到對應的訂閱記錄");
+            if (dto.SubscribedExpireTime < DateTime.Now) return (false, "訂閱已到期");
+            if (dto.NumberOfUsers != emails.Count())
+            {
+                return (false, "吃屎");
+            }
+            _memberRepository.SubscribedPlan(memberId, dto, date);
+            var subscriptionRecordId = dto.Id;
 
+            foreach(var email in emails)
+            {
+                var memberForSubscrptionPlan = _memberRepository.GetByEmail(email);
+                _memberRepository.CreateSubscriptionRecordDetail(subscriptionRecordId, memberForSubscrptionPlan.Id);
+            }
             return (true, "訂閱成功");
-
-
         }        
 
         public IEnumerable<OrderDTO> GetMemberOrder(int memberId)
