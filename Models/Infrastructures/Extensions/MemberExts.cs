@@ -49,7 +49,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
                 ConfirmCode = entity.ConfirmCode,
                 MemberAddress = entity.MemberAddress,
                 MemberDateOfBirth = entity.MemberDateOfBirth,
-                AvatarId = entity.AvatarId,
+                //AvatarId = entity.AvatarId,
                 MemberReceivedMessage = entity.MemberReceivedMessage,
                 MemberSharedData = entity.MemberSharedData,
                 LibraryPrivacy = entity.LibraryPrivacy,
@@ -78,6 +78,18 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
             {
                 MemberAccount = source.MemberAccount!,
                 MemberPassword = source.MemberPassword!,
+            };
+        }
+
+        public static SubscriptionRecordsDTO ToSubscriptionRecordsDTO(this SubscriptionRecord dto)
+        {
+            return new()
+            {
+                Id = dto.Id,
+                MemberId = dto.MemberId,
+                SubscriptionPlanId = dto.SubscriptionPlanId,
+                SubscribedTime= dto.SubscribedTime,
+                SubscribedExpireTime= dto.SubscribedExpireTime,
             };
         }
     }

@@ -29,6 +29,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                 Id = entity.Id,
                 MemberAccount = entity.MemberAccount,
                 MemberEmail = entity.MemberEmail,
+                CreditCardId = entity.CreditCardId,
                 IsConfirmed = entity.IsConfirmed,
                 ConfirmCode = entity.ConfirmCode
             };
@@ -43,6 +44,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
             SubscriptionPlanDTO dto = new SubscriptionPlanDTO
             {
+                Id = entity.Id,
                 PlanName = entity.PlanName,
                 Price = entity.Price,
                 NumberOfUsers = entity.NumberOfUsers,                
@@ -52,7 +54,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
         public bool SubscriptionRecordExist(int memberId)
         {
-            var entity = _db.SubscriptionRecords.Where(s => s.Member.Id == memberId).SingleOrDefault();
+            var entity = _db.SubscriptionRecords.Where(s => s.MemberId == memberId).SingleOrDefault();
 
             return (entity != null);
         }
@@ -316,6 +318,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                     MemberId = memberId,
                     MemberNickName = s.Member.MemberNickName,                    
                     SubscribedTime = s.SubscribedTime,
+                    SubscribedExpireTime = s.SubscribedExpireTime,
                     PlanName = s.SubscriptionPlan.PlanName,
                     Price = s.SubscriptionPlan.Price,
                     NumberOfUsers = s.SubscriptionPlan.NumberOfUsers,                    
@@ -325,7 +328,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             return result;
         }
 
-        public void SubscribedPlan(int memberId, SubscriptionPlanDTO dto, DateTime date)
+        public void CreateSubscribedPlanRecord(int memberId, SubscriptionPlanDTO dto, DateTime date)
         {
             var SubscriptionRecords = new SubscriptionRecord
             {
@@ -343,9 +346,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             var RecordDetail = new SubscriptionRecordDetail
             {
                 SubscriptionRecordId = subscriptionRecordId,
-                MemnerId = memberForSubscrptionPlanId,
+                MemberId = memberForSubscrptionPlanId,
             };
-            //_db.SubscriptionRecordDetail.Add(RecordDetail);            
+            _db.SubscriptionRecordDetails.Add(RecordDetail);
             _db.SaveChanges();
         }
 
@@ -378,7 +381,15 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                     Status = o.Product.Status,                    
                 });
             return result;
-        }        
-        
+        }
+
+        public SubscriptionRecordsDTO GetSubscriptionRecords(int memberId)
+        {
+            var data = _db.SubscriptionRecords.SingleOrDefault(s => s.MemberId == memberId);
+
+            return data.ToSubscriptionRecordsDTO();
+        }
+
+
     }
 }
