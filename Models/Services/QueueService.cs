@@ -33,13 +33,13 @@ namespace api.iSMusic.Models.Services
 			_playlistRepository = playlistRepository;
 		}
 
-		public (bool Success, string Message) AddSongIntoQueue(int queueId, int songId)
+		public (bool Success, string Message) AddSongIntoQueue(int memberId, int songId)
 		{
-			if (!CheckQueueExistence(queueId)) return (false, "佇列不存在");
+			if (!CheckQueueExistence(memberId)) return (false, "佇列不存在");
 
 			if (!CheckSongExistence(songId)) return (false, "歌曲不存在");
 
-            _queueRepository.AddSongIntoQueue(queueId, songId);
+            _queueRepository.AddSongIntoQueue(memberId, songId);
 			return (true, "新增成功");
 		}
 
@@ -63,9 +63,9 @@ namespace api.iSMusic.Models.Services
 			return (true, "新增成功");
 		}
 
-		public (bool Success, string Message) ChangeQueueContent(int queueId, int contentId, string condition)
+		public (bool Success, string Message) ChangeQueueContent(int memberId, int contentId, string condition)
 		{
-			if (CheckQueueExistence(queueId) == false) return (false, "佇列不存在");
+			if (CheckQueueExistence(memberId) == false) return (false, "佇列不存在");
 
 			var songIds = new List<int>();
 			int takeRow = 2;
@@ -74,8 +74,8 @@ namespace api.iSMusic.Models.Services
 				case "SingleSong":
                     if (CheckSongExistence(contentId) == false) return (false, "歌曲不存在");
 
-                    _queueRepository.UpdateQueueBySong(queueId, contentId);
-                    break;
+                    _queueRepository.UpdateQueueBySong(memberId, contentId);
+					return (true, string.Empty);
 
                 case "Artist":
                 case "Creator":
@@ -113,16 +113,16 @@ namespace api.iSMusic.Models.Services
                     return (false, "不支援的操作");
             }
 
-            _queueRepository.UpdateQueueBySongs(queueId, songIds, condition, contentId);
+            _queueRepository.UpdateQueueBySongs(memberId, songIds, condition, contentId);
 
 			return (true, string.Empty);
 		}
 
-		public (bool Success, string Message) UpdateByDisplayOredr(int queueId, int displayOrder)
+		public (bool Success, string Message) UpdateByDisplayOredr(int memberId, int displayOrder)
 		{
-			if (CheckQueueExistence(queueId) == false) return (false, "佇列不存在");
+			if (CheckQueueExistence(memberId) == false) return (false, "佇列不存在");
 
-            _queueRepository.UpdateByDisplayOredr(queueId, displayOrder);
+            _queueRepository.UpdateByDisplayOredr(memberId, displayOrder);
 
 			return (true, string.Empty);
 		}

@@ -28,24 +28,20 @@ namespace api.iSMusic.Controllers
 			_service = new(_repository, songRepository, artistRepository, creatorRepository, albumRepository, playlistRepository);
         }
 
-		private int GetMemberId()
-		{
-            return Int32.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
-        }
-
 		[HttpPost]
-		[Route("{queueId}/Songs/{songId}")]
-		public IActionResult AddSongIntoQueue(int queueId, int songId)
+		[Route("Songs/{songId}")]
+		public async Task<IActionResult> AddSongIntoQueue(int songId)
 		{
-			var result = _service.AddSongIntoQueue(queueId, songId);
+			int memberId = this.GetMemberId();
+			var result = _service.AddSongIntoQueue(memberId, songId);
 			if (!result.Success)
 			{
 				return BadRequest(result.Message);
 			}
 
-			var updatedQueue = _repository.GetQueueById(queueId);
+            var updatedQueue = await _repository.GetQueueByMemberIdAsync(memberId);
 
-			if (updatedQueue == null)
+            if (updatedQueue == null)
 			{
 				return NoContent();
 			}
@@ -56,18 +52,19 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{queueId}/Playlists/{playlistId}")]
-		public IActionResult AddPlaylistIntoQueue(int queueId, int playlistId)
+		[Route("Playlists/{playlistId}")]
+		public async Task<IActionResult> AddPlaylistIntoQueue(int playlistId)
 		{
-			var result = _service.AddPlaylistIntoQueue(queueId, playlistId);
+            int memberId = this.GetMemberId();
+            var result = _service.AddPlaylistIntoQueue(memberId, playlistId);
 			if (!result.Success)
 			{
 				return BadRequest(result.Message);
 			}
 
-			var updatedQueue = _repository.GetQueueById(queueId);
+            var updatedQueue = await _repository.GetQueueByMemberIdAsync(memberId);
 
-			if (updatedQueue == null)
+            if (updatedQueue == null)
 			{
 				return NoContent();
 			}
@@ -78,16 +75,17 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{queueId}/Albums/{albumId}")]
-		public IActionResult AddAlbumIntoQueue(int queueId, int albumId)
+		[Route("Albums/{albumId}")]
+		public async Task<IActionResult> AddAlbumIntoQueue(int albumId)
 		{
-			var result = _service.AddAlbumIntoQueue(queueId, albumId);
+			int memberId = this.GetMemberId();
+			var result = _service.AddAlbumIntoQueue(memberId, albumId);
 			if (!result.Success)
 			{
 				return BadRequest(result.Message);
 			}
 
-			var updatedQueue = _repository.GetQueueById(queueId);
+			var updatedQueue = await _repository.GetQueueByMemberIdAsync(memberId);
 
 			if (updatedQueue == null)
 			{
@@ -97,41 +95,23 @@ namespace api.iSMusic.Controllers
 			updatedQueue = ProcessLikedSongs(updatedQueue);
 
 			return Ok(updatedQueue.ToIndexVM());
-		}
-
-		private QueueIndexDTO ProcessLikedSongs(QueueIndexDTO updatedQueue)
-		{
-			var queueSongIds = updatedQueue.SongInfos.Select(info => info.Id);
-
-			var memberId = updatedQueue.MemberId;
-
-			var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
-
-			foreach (int queueSongId in queueSongIds)
-			{
-				if (likedSongIds.Contains(queueSongId))
-				{
-					updatedQueue.SongInfos.Single(info => info.Id == queueSongId).IsLiked = true;
-				}
-			}
-
-			return updatedQueue;
 		}
 
 		[HttpPut]
-		[Route("{queueId}/{contentId}")]
-		public IActionResult ChangeQueueContent(int queueId, int contentId, [FromBody]string condition)
+		[Route("{contentId}")]
+		public async Task<IActionResult> ChangeQueueContent(int contentId, [FromBody]string condition)
 		{
-			var result = _service.ChangeQueueContent(queueId, contentId, condition);
+			int memberId = this.GetMemberId();
+			var result = _service.ChangeQueueContent(memberId, contentId, condition);
 
 			if (!result.Success)
 			{
 				return NotFound(new { message = result.Message });
 			}
 
-			var updatedQueue = _repository.GetQueueById(queueId);
+            var updatedQueue = await _repository.GetQueueByMemberIdAsync(memberId);
 
-			if (updatedQueue == null)
+            if (updatedQueue == null)
 			{
 				return NoContent();
 			}
@@ -142,19 +122,20 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPut]
-		[Route("{queueId}/DisplayOredr/{displayOrder}")]
-		public IActionResult UpdateByDisplayOredr(int queueId, int displayOrder)
+		[Route("DisplayOredr/{displayOrder}")]
+		public async Task<IActionResult> UpdateByDisplayOredr(int displayOrder)
 		{
-			var result = _service.UpdateByDisplayOredr(queueId, displayOrder);
+			int memberId = this.GetMemberId();
+			var result = _service.UpdateByDisplayOredr(memberId, displayOrder);
 
 			if(!result.Success)
 			{
 				return BadRequest(result.Message);
 			}
 
-			var updatedQueue = _repository.GetQueueById(queueId);
+            var updatedQueue = await _repository.GetQueueByMemberIdAsync(memberId);
 
-			if (updatedQueue == null)
+            if (updatedQueue == null)
 			{
 				return NoContent();
 			}
@@ -168,7 +149,7 @@ namespace api.iSMusic.Controllers
 		[Route("NextSong")]
 		public IActionResult NextSong()
 		{
-			int memberId = GetMemberId();
+			int memberId = this.GetMemberId();
             var result = _service.NextSong(memberId);
 			if(!result.Success)
 			{
@@ -183,10 +164,10 @@ namespace api.iSMusic.Controllers
 		}
 
         [HttpPut]
-        [Route("/Previous")]
+        [Route("PreviousSong")]
         public IActionResult PreviousSong()
         {
-            int memberId = GetMemberId();
+            int memberId = this.GetMemberId();
             var result = _service.PreviousSong(memberId);
             if (!result.Success)
             {
@@ -204,7 +185,7 @@ namespace api.iSMusic.Controllers
 		[Route("ShuffleSetting")]
 		public IActionResult ChangeShuffle()
 		{
-            int memberId = GetMemberId();
+            int memberId = this.GetMemberId();
             var result = _service.ChangeShuffle(memberId);
 			if(!result.Success)
 				return NotFound(result.Message);
@@ -216,7 +197,7 @@ namespace api.iSMusic.Controllers
         [Route("RepeatSetting")]
         public async Task<IActionResult> ChangeRepeat([FromQuery] string mode)
         {
-            int memberId = GetMemberId();
+            int memberId = this.GetMemberId();
             var result = _service.ChangeRepeat(memberId, mode);
             if (!result.Success)
             {
@@ -230,6 +211,25 @@ namespace api.iSMusic.Controllers
             }
 
             return Ok(queue.ToIndexVM());
+        }
+
+        private QueueIndexDTO ProcessLikedSongs(QueueIndexDTO updatedQueue)
+        {
+            var queueSongIds = updatedQueue.SongInfos.Select(info => info.Id);
+
+            var memberId = updatedQueue.MemberId;
+
+            var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
+
+            foreach (int queueSongId in queueSongIds)
+            {
+                if (likedSongIds.Contains(queueSongId))
+                {
+                    updatedQueue.SongInfos.Single(info => info.Id == queueSongId).IsLiked = true;
+                }
+            }
+
+            return updatedQueue;
         }
     }
 }
