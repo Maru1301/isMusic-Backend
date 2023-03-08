@@ -53,13 +53,13 @@ namespace api.iSMusic.Models.Services
 			return (true, "新增成功");
 		}
 
-		public (bool Success, string Message) AddAlbumIntoQueue(int queueId, int albumId)
+		public (bool Success, string Message) AddAlbumIntoQueue(int memberId, int albumId)
 		{
-			if (!CheckQueueExistence(queueId)) return (false, "佇列不存在");
+			if (!CheckQueueExistence(memberId)) return (false, "佇列不存在");
 
 			if (!CheckAlbumExistence(albumId)) return (false, "專輯不存在");
 
-            _queueRepository.AddAlbumIntoQueue(queueId, albumId);
+            _queueRepository.AddAlbumIntoQueue(memberId, albumId);
 			return (true, "新增成功");
 		}
 
@@ -127,43 +127,47 @@ namespace api.iSMusic.Models.Services
 			return (true, string.Empty);
 		}
 
-        public (bool Success, string Message, SongInfoDTO? Dto) NextSong(int queueId)
+        public (bool Success, string Message, SongIndexDTO? Dto) NextSong(int memberId)
 		{
 			string message = string.Empty;
-			SongInfoDTO? addedQueueSong = new();
+            int? takeOrder;
             try
-			{
-                if (CheckQueueExistence(queueId) == false) throw new Exception("佇列不存在");
+            {
+                if (CheckQueueExistence(memberId) == false) throw new Exception("佇列不存在");
 
-                addedQueueSong = _queueRepository.NextSong(queueId);
+                int nextSongId;
+                (takeOrder, nextSongId) = _queueRepository.NextSong(memberId);
 
-				if (addedQueueSong != null)
-				{
-                    _songRepository.CreatePlayRecord(_memberId, addedQueueSong.Id);
-				}
-				else
-				{
-                    message = "不須增加佇列項目";
-                }
+                _songRepository.CreatePlayRecord(memberId, nextSongId);
 
             }
             catch (Exception ex)
-			{
-				return (false, ex.Message, addedQueueSong);
+            {
+                return (false, ex.Message, null);
+            }
+
+            SongIndexDTO? addedQueueSong = null;
+            if (takeOrder == null)
+            {
+                message = "不須增加佇列項目";
 			}
+			else
+			{
+                addedQueueSong = _songRepository.GetSongByQueueOrder(memberId, takeOrder.Value);
+            }
 
 			return (true, message, addedQueueSong);
         }
 
-        public (bool Success, string Message, SongInfoDTO? Dto) PreviousSong(int queueId)
+        public (bool Success, string Message, SongInfoDTO? Dto) PreviousSong(int memberId)
         {
             string message = string.Empty;
             SongInfoDTO? addedQueueSong = new();
             try
 			{
-                if (CheckQueueExistence(queueId) == false) throw new Exception ("佇列不存在");
+                if (CheckQueueExistence(memberId) == false) throw new Exception ("佇列不存在");
 
-                addedQueueSong = _queueRepository.PreviousSong(queueId);
+                addedQueueSong = _queueRepository.PreviousSong(memberId);
 
                 if (addedQueueSong != null)
                 {
@@ -182,11 +186,11 @@ namespace api.iSMusic.Models.Services
             return (true, message, addedQueueSong);
         }
 
-        public (bool Success, string Message) ChangeShuffle(int queueId)
+        public (bool Success, string Message) ChangeShuffle(int memberId)
 		{
-			if (CheckQueueExistence(queueId) == false) return (false, "佇列不存在");
+			if (CheckQueueExistence(memberId) == false) return (false, "佇列不存在");
 
-            _queueRepository.ChangeShuffle(queueId);
+            _queueRepository.ChangeShuffle(memberId);
 			
 			return (true, "更新成功");
 		}
@@ -201,9 +205,9 @@ namespace api.iSMusic.Models.Services
 		}
 
 
-		private bool CheckQueueExistence(int queueId)
+		private bool CheckQueueExistence(int memberId)
 		{
-			var queue = _queueRepository.GetQueueByIdForCheck(queueId);
+			var queue = _queueRepository.GetQueueByMemberIdForCheck(memberId);
 			_memberId = queue != null ? queue.MemberId : 0;
 
 			return queue != null;

@@ -41,9 +41,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SaveChanges();
 		}
 
-        public Queue? GetQueueByIdForCheck(int queueId)
+        public Queue? GetQueueByMemberIdForCheck(int memberId)
 		{
-			return _db.Queues.Find(queueId);
+			return _db.Queues.SingleOrDefault(queue => queue.MemberId == memberId);
 		}
 
 		public QueueIndexDTO? GetQueueById(int queueId)
@@ -70,7 +70,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			return queue;
 		}
 
-		public async Task<QueueIndexDTO?> GetQueueByMemberIdAsync(int memberId)
+        public async Task<QueueIndexDTO?> GetQueueByMemberIdAsync(int memberId)
 		{
 			var queue = await _db.Queues
 				.Include(q => q.QueueSongs)
@@ -99,14 +99,13 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             queue.SongInfos = _db.QueueSongs
                 .Where(qs => qs.QueueId == queue.Id)
                 .OrderBy(qs => queue.IsShuffle ? qs.ShuffleOrder : qs.DisplayOrder)
-                .Skip(queue.CurrentSongOrder - 1 ?? 0)
                 .Take(this.takeLimit)
                 .Join(_db.Songs, qs => qs.SongId, s => s.Id, (qs, s) => new SongInfoDTO
                 {
                     Id = qs.SongId,
                     SongName = s.SongName,
-                    SongCoverPath = s.SongCoverPath,
-                    SongPath = s.SongPath,
+                    SongCoverPath = "https://localhost:44373/Uploads/Covers/" + s.SongCoverPath,
+                    SongPath = "https://localhost:44373/Uploads/Songs/" + s.SongPath,
                     AlbumId = s.AlbumId,
                     AlbumName = s.Album != null ?
                                 s.Album.AlbumName :
@@ -256,7 +255,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		public void AddSongIntoQueue(int queueId, int songId)
 		{
 			var qss = _db.QueueSongs
-				.Where(qs => qs.QueueId == queueId);
+				.Where(qs => qs.QueueId == queueId)
+				.ToList();
 
 			var lastDisplayOrder = (qss != null) ?
 				qss.Max(qs => qs.DisplayOrder) :
@@ -279,12 +279,13 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			var qss = _db.QueueSongs
 				.Where(qs => qs.QueueId == queueId);
 
-			var displayOrder = (qss!=null) ? 
+			var displayOrder = qss!=null ? 
 				qss.Max(qs => qs.DisplayOrder) : 
 				0;
 
 			var songIds = _db.PlaylistSongMetadata
 				.Where(metadata => metadata.PlayListId == playlistId)
+				.OrderBy(metadata => metadata.DisplayOrder)
 				.Select(metadata => metadata.SongId)
 				.ToList();
 
@@ -300,17 +301,19 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SaveChanges();
 		}
 
-		public void AddAlbumIntoQueue(int queueId, int albumId)
+		public void AddAlbumIntoQueue(int memberId, int albumId)
 		{
-			var qss = _db.QueueSongs
-				.Where(qs => qs.QueueId == queueId);
+			var queue = _db.Queues
+				.Where(queue => queue.MemberId == memberId)
+				.ToList();
 
-			var displayOrder = (qss != null) ?
-				qss.Max(qs => qs.DisplayOrder) :
+			var displayOrder = queue != null ?
+				queue.Select(queue=>queue.QueueSongs).Max(qs => qs.DisplayOrder) :
 				0;
 
 			var songIds = _db.Songs
 				.Where(song => song.AlbumId == albumId)
+				.OrderBy(song => song.DisplayOrderInAlbum)
 				.Select(song => song.Id)
 				.ToList();
 
@@ -326,15 +329,15 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SaveChanges();
 		}
 
-		public void ChangeShuffle(int queueId)
+		public void ChangeShuffle(int memberId)
 		{
-			var queue = _db.Queues.Single(queue => queue.Id == queueId);
+			var queue = _db.Queues.Single(queue => queue.MemberId == memberId);
 
 			queue.IsShuffle = !queue.IsShuffle;
 
 			if (queue.IsShuffle)
 			{
-				var queueSongs = _db.QueueSongs.Where(qs => qs.QueueId == queueId).ToList();
+				var queueSongs = _db.QueueSongs.Where(qs => qs.QueueId == queue.Id).ToList();
 				int numOfSongs = queueSongs.Count;
 				var rand = new Random();
 				var orders = new HashSet<int>();
@@ -368,20 +371,21 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SaveChanges();
 		}
 
-        public SongInfoDTO? NextSong(int queueId)
+        public (int? TakeOrder, int NextSongId) NextSong(int memberId)
         {
             var queue = _db.Queues
                 .Include(q => q.QueueSongs)
-                .Single(q => q.Id == queueId);
+                .Single(q => q.MemberId == memberId);
 
-            if (queue.CurrentSongOrder == null)
+            if (queue.CurrentSongOrder == 0)
             {
                 throw new InvalidOperationException("佇列為空");
             }
 
             var queueSongs = queue.QueueSongs;
+			var nextSongId = queueSongs.First(qs => qs.DisplayOrder == queue.CurrentSongOrder + 1).SongId;
             int numOfSongs = queueSongs.Count;
-			int currentOrder = queue.CurrentSongOrder.Value;
+			int currentOrder = queue.CurrentSongOrder!.Value;
 
             queue.CurrentSongOrder = queue.IsRepeat switch
             {
@@ -408,23 +412,23 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 				if(queueSongs.Count >= takeOrder)
 				{
-					return _db.Songs.Single(song => song.Id == queueSongs.Single(qs => qs.DisplayOrder == takeOrder).SongId).ToInfoDTO();
+                    return (takeOrder, nextSongId);
                 }
             }
 			
 			if(numOfSongs - currentOrder >= takeLimit)
 			{
-				return _db.Songs.Single(song => song.Id == queueSongs.Single(qs => qs.DisplayOrder == currentOrder + takeLimit).SongId).ToInfoDTO();
+				return (currentOrder + takeLimit, nextSongId);
             }
 
-            return null;
+            return (null, nextSongId);
 		}
 
-        public SongInfoDTO? PreviousSong(int queueId)
+        public SongInfoDTO? PreviousSong(int memberId)
         {
             var queue = _db.Queues
                 .Include(q => q.QueueSongs)
-                .Single(q => q.Id == queueId);
+                .Single(q => q.MemberId == memberId);
 
             if (queue.CurrentSongOrder == null)
             {

@@ -71,10 +71,16 @@ namespace api.iSMusic.Controllers
 			return Ok(data.Select(p => p.ToIndexVM()));
 		}
 
+		private int GetMemberId()
+		{
+            return Int32.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
+        }
+
         [HttpPost]
-        [Route("{memberId}")]
-        public async Task<IActionResult> CreatePlaylist([FromRoute] int memberId)
+        [Route("NewList")]
+        public async Task<IActionResult> CreatePlaylist()
         {
+			int memberId = GetMemberId();
             //Check if the provided memberAccount is valid
             if (memberId <= 0)
             {

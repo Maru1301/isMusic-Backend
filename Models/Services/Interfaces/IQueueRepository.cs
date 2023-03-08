@@ -9,7 +9,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		QueueIndexDTO? GetQueueById(int queueId);
 
-		Queue? GetQueueByIdForCheck(int queueId);
+        Queue? GetQueueByMemberIdForCheck(int queueId);
 		
 		Task<QueueIndexDTO?> GetQueueByMemberIdAsync(int memberId);
 
@@ -25,11 +25,11 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		void UpdateByDisplayOredr(int queueId, int displayOrder);
 
-        SongInfoDTO? NextSong(int queueId);
+        (int? TakeOrder, int NextSongId) NextSong(int memberId);
 
-        SongInfoDTO? PreviousSong(int queueId);
+        SongInfoDTO? PreviousSong(int memberId);
 
-		void ChangeShuffle(int queueId);
+		void ChangeShuffle(int memberId);
 
 		void ChangeRepeat(int queueId, string mode);
 	}

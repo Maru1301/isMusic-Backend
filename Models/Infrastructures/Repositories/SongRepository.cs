@@ -145,7 +145,19 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.SingleOrDefault(song => song.Id == id);
 		}
 
-		public IEnumerable<SongInfoDTO> GetSongsByAlbumId(int albumId)
+        public SongIndexDTO? GetSongByQueueOrder(int memberId, int takeOrder)
+        {
+			var queue = _db.Queues
+				.Single(queue => queue.MemberId == memberId);
+
+			var songId = _db.QueueSongs
+				.Where(qs => qs.QueueId == queue.Id && ((queue.IsShuffle) ? qs.ShuffleOrder == takeOrder : qs.DisplayOrder == takeOrder))
+				.Single().SongId;
+
+			return GetSongById(songId);
+		}
+
+        public IEnumerable<SongInfoDTO> GetSongsByAlbumId(int albumId)
 		{
 			return _db.Songs
 				.Where(song => song.AlbumId == albumId)
@@ -187,7 +199,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
-        public void CreatePlayRecord(int songId, int memberId)
+        public void CreatePlayRecord(int memberId, int songId)
         {
 			var newRecord = new SongPlayedRecord
 			{

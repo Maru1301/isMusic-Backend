@@ -26,7 +26,12 @@ namespace api.iSMusic.Controllers
 			_repository = repository;
 			_songRepository = songRepository;
 			_service = new(_repository, songRepository, artistRepository, creatorRepository, albumRepository, playlistRepository);
-		}
+        }
+
+		private int GetMemberId()
+		{
+            return Int32.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
+        }
 
 		[HttpPost]
 		[Route("{queueId}/Songs/{songId}")]
@@ -160,27 +165,29 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPut]
-		[Route("{queueId}/NextSong")]
-		public IActionResult NextSong(int queueId)
+		[Route("NextSong")]
+		public IActionResult NextSong()
 		{
-			var result = _service.NextSong(queueId);
+			int memberId = GetMemberId();
+            var result = _service.NextSong(memberId);
 			if(!result.Success)
 			{
 				return NotFound(result.Message);
 			}
 			else if(result.Dto == null)
 			{
-				return Accepted(result.Message);
+				return Ok(result.Message);
 			}
 
             return Ok(result.Dto);
 		}
 
         [HttpPut]
-        [Route("{queueId}/Previous")]
-        public IActionResult PreviousSong(int queueId)
+        [Route("/Previous")]
+        public IActionResult PreviousSong()
         {
-            var result = _service.PreviousSong(queueId);
+            int memberId = GetMemberId();
+            var result = _service.PreviousSong(memberId);
             if (!result.Success)
             {
                 return NotFound(result.Message);
@@ -194,29 +201,35 @@ namespace api.iSMusic.Controllers
         }
 
         [HttpPatch]
-		[Route("{queueId}/Shuffle")]
-		public IActionResult ChangeShuffle(int queueId)
+		[Route("ShuffleSetting")]
+		public IActionResult ChangeShuffle()
 		{
-			var result = _service.ChangeShuffle(queueId);
+            int memberId = GetMemberId();
+            var result = _service.ChangeShuffle(memberId);
 			if(!result.Success)
 				return NotFound(result.Message);
 
 			return Ok(result.Message);
 		}
 
-		[HttpPatch]
-		[Route("{queueId}/Repeat")]
-		public IActionResult ChangeRepeat(int queueId, [FromQuery]string mode)
-		{
-			var result = _service.ChangeRepeat(queueId, mode);
-			if (!result.Success)
-				return NotFound(result.Message);
+        [HttpPatch]
+        [Route("RepeatSetting")]
+        public async Task<IActionResult> ChangeRepeat([FromQuery] string mode)
+        {
+            int memberId = GetMemberId();
+            var result = _service.ChangeRepeat(memberId, mode);
+            if (!result.Success)
+            {
+                return NotFound(result.Message);
+            }
 
-			var queue = _repository.GetQueueById(queueId);
-			if (queue == null)
-				return NotFound("佇列不存在");
+            var queue = await _repository.GetQueueByMemberIdAsync(memberId);
+            if (queue == null)
+            {
+                return NotFound("佇列不存在");
+            }
 
-			return Ok(queue.ToIndexVM());
-		}
-	}
+            return Ok(queue.ToIndexVM());
+        }
+    }
 }

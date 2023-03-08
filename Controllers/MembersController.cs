@@ -65,7 +65,7 @@ namespace api.iSMusic.Controllers
         [HttpPost]
         [Route("MemberLogin")]
 		[AllowAnonymous]
-		public IActionResult MemberLogin([FromForm]MemberLoginVM member)
+		public IActionResult MemberLogin([FromBody]MemberLoginVM member)
         {
             var result = _memberService.MemberLogin(member.ToLoginDTO());
 
@@ -252,21 +252,22 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/Queue")]
-		public async Task<IActionResult> GetMemberQueue([FromRoute] int memberId)
+		[Route("Queue")]
+		public async Task<IActionResult> GetMemberQueue()
 		{
+			var memberId = Int32.Parse(HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == "MemberId")!.Value);
 			try
 			{
 				var member = await _memberRepository.GetMemberAsync(memberId);
 				if (member == null)
 				{
-					return NotFound(new { message = "Member not found" });
+					return NotFound("會員不存在");
 				}
 
 				var queue = await _queueRepository.GetQueueByMemberIdAsync(memberId);
 				if (queue == null)
 				{
-					return NotFound(new { message = "Queue not found for the given member" });
+					return NotFound("佇列不存在");
 				}
 
 				var queueSongIds = queue.SongInfos.Select(info => info.Id);
