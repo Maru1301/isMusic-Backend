@@ -65,7 +65,7 @@ namespace api.iSMusic.Controllers
         [HttpPost]
         [Route("MemberLogin")]
 		[AllowAnonymous]
-		public IActionResult MemberLogin([FromForm]MemberLoginVM member)
+		public IActionResult MemberLogin([FromBody]MemberLoginVM member)
         {
             var result = _memberService.MemberLogin(member.ToLoginDTO());
 
@@ -178,13 +178,13 @@ namespace api.iSMusic.Controllers
 
 		[HttpPost]
 		[Route("SubscribePlan")]
-		public IActionResult SubscribedPlan([FromForm] int SubscriptionPlanId,[FromForm] IEnumerable<string>emails)
+		public IActionResult SubscribedPlan([FromForm] SubscribedPlanVM source)
 		{
 			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
-			var SubscriptionPlan = _memberRepository.SubscriptionPlanLoad(SubscriptionPlanId);
-
-			var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, emails);
-			return Ok(result);         
+			var SubscriptionPlan = _memberRepository.SubscriptionPlanLoad(source.SubscriptionPlanId);
+      
+			var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, source.Emails);
+			return Ok(result.Message);
         }
 
 		[HttpPatch]

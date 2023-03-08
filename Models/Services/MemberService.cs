@@ -9,6 +9,7 @@ using api.iSMusic.Models.ViewModels.MemberVMs;
 using BookStore.Site.Models.Infrastructures;
 using iSMusic.Models.Infrastructures;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using static api.iSMusic.Controllers.MembersController;
 using static api.iSMusic.Controllers.QueuesController;
@@ -312,7 +313,7 @@ namespace api.iSMusic.Models.Services
 
             _memberRepository.MemberRegister(dto);
 
-            MemberDTO entity = _memberRepository.GetByAccount(dto.MemberAccount!);
+            MemberDTO entity = _memberRepository.GetByAccount(dto.MemberAccount);
             // 發email
             string url = string.Format(urlTemplate, entity.Id, dto.ConfirmCode);
 
@@ -373,11 +374,11 @@ namespace api.iSMusic.Models.Services
                 return (false, "帳號或 Email 錯誤");
             }
 
-            //檢查 IsConfirmed必需是true
-            if (dto.IsConfirmed == false)
-            {
-                return (false, "您還沒有啟用本帳號, 請先完成才能重設密碼");
-            }
+            ////檢查 IsConfirmed必需是true
+            //if (dto.IsConfirmed == false)
+            //{
+            //    return (false, "您還沒有啟用本帳號, 請先完成才能重設密碼");
+            //}
 
             // 更新記錄, 填入 confirmCode
             string confirmCode = Guid.NewGuid().ToString("N");
@@ -425,27 +426,32 @@ namespace api.iSMusic.Models.Services
 
         public (bool Success, string Message) SubscribedPlan(int memberId, SubscriptionPlanDTO dto, IEnumerable<string> emails)
         {
+            // TODO 如果有並過期 傳回訂閱已到期訊息
+            //if (dto.SubscribedExpireTime < DateTime.Now) return (false, "訂閱已到期")            
             var date = DateTime.Now;
             var member = _memberRepository.Load(memberId);
-            emails.Append(member.MemberEmail);
             if (member.CreditCardId == null) return (false, "請先輸入信用卡資訊");
             if (memberId == 0) return (false, "找不到對應的會員記錄");
             if (dto.Id == 0) return (false, "找不到對應的訂閱記錄");
-            if (dto.SubscribedExpireTime < DateTime.Now) return (false, "訂閱已到期");
-            if (dto.NumberOfUsers != emails.Count())
-            {
-                return (false, "吃屎");
-            }
-            _memberRepository.SubscribedPlan(memberId, dto, date);
-            var subscriptionRecordId = dto.Id;
 
-            foreach(var email in emails)
+            if (emails == null) emails = Enumerable.Empty<string>();
+            if (dto.NumberOfUsers != emails.Count()+1)
+            {
+                return (false, $"email數量不能超過{dto.NumberOfUsers}個");
+            }
+            if (_memberRepository.SubscriptionRecordExist(memberId)) return (false, "已經訂閱過了");
+
+            _memberRepository.CreateSubscribedPlanRecord(memberId, dto, date);
+            var subscriptionRecord = _memberRepository.GetSubscriptionRecords(memberId);
+            _memberRepository.CreateSubscriptionRecordDetail(subscriptionRecord.Id, memberId);
+
+            foreach (var email in emails)
             {
                 var memberForSubscrptionPlan = _memberRepository.GetByEmail(email);
-                _memberRepository.CreateSubscriptionRecordDetail(subscriptionRecordId, memberForSubscrptionPlan.Id);
+                _memberRepository.CreateSubscriptionRecordDetail(subscriptionRecord.Id, memberForSubscrptionPlan.Id);
             }
             return (true, "訂閱成功");
-        }        
+        }   
 
         public IEnumerable<OrderDTO> GetMemberOrder(int memberId)
         {

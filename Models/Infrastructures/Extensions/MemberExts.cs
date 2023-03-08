@@ -37,8 +37,10 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
 
         public static MemberDTO ToDTO(this Member entity)
         {
-            return new()
-            {
+            return entity == null
+                ? null
+                : new MemberDTO
+                {
                 Id = entity.Id,
                 MemberAccount = entity.MemberAccount,
                 MemberEncryptedPassword = entity.MemberEncryptedPassword,
@@ -78,6 +80,18 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
             {
                 MemberAccount = source.MemberAccount!,
                 MemberPassword = source.MemberPassword!,
+            };
+        }
+
+        public static SubscriptionRecordsDTO ToSubscriptionRecordsDTO(this SubscriptionRecord dto)
+        {
+            return new()
+            {
+                Id = dto.Id,
+                MemberId = dto.MemberId,
+                SubscriptionPlanId = dto.SubscriptionPlanId,
+                SubscribedTime= dto.SubscribedTime,
+                SubscribedExpireTime= dto.SubscribedExpireTime,
             };
         }
     }

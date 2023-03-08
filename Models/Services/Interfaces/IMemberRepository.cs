@@ -59,12 +59,15 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId);
 
-        void SubscribedPlan(int memberId, SubscriptionPlanDTO subscriptionPlan, DateTime addDate);
+        void CreateSubscribedPlanRecord(int memberId, SubscriptionPlanDTO subscriptionPlan, DateTime addDate);
 
-        void CreateSubscriptionRecordDetail(int subscriptionRecordId, int memberForSubscrptionPlanId)
+        void CreateSubscriptionRecordDetail(int subscriptionRecordId, int memberForSubscrptionPlanId);
 
         IEnumerable<OrderDTO> GetMemberOrder(int memberId);
 
         void UpdateEmail(MemberDTO dto, string email);
+
+        SubscriptionRecordsDTO GetSubscriptionRecords(int memberId);
+
     }
 }

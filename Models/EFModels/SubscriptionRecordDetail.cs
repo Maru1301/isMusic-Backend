@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.iSMusic.Models.EFModels;
 
-[Table("SubscriptionRecordDetail")]
 public partial class SubscriptionRecordDetail
 {
     [Key]
@@ -14,5 +13,13 @@ public partial class SubscriptionRecordDetail
 
     public int SubscriptionRecordId { get; set; }
 
-    public int MemnerId { get; set; }
+    public int MemberId { get; set; }
+
+    [ForeignKey("MemberId")]
+    [InverseProperty("SubscriptionRecordDetails")]
+    public virtual Member Member { get; set; } = null!;
+
+    [ForeignKey("SubscriptionRecordId")]
+    [InverseProperty("SubscriptionRecordDetails")]
+    public virtual SubscriptionRecord SubscriptionRecord { get; set; } = null!;
 }

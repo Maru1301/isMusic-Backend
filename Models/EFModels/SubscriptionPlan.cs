@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.iSMusic.Models.EFModels;
 
-[Table("SubscriptionPlan")]
 public partial class SubscriptionPlan
 {
     [Key]
