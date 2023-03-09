@@ -225,7 +225,10 @@ namespace api.iSMusic.Controllers
             {
                 if (likedSongIds.Contains(queueSongId))
                 {
-                    updatedQueue.SongInfos.Single(info => info.Id == queueSongId).IsLiked = true;
+					updatedQueue.SongInfos
+						.Where(info => info.Id == queueSongId)
+						.ToList()
+						.ForEach(info => info.IsLiked = true);
                 }
             }
 

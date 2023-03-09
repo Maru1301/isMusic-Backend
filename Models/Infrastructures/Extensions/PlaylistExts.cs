@@ -15,8 +15,12 @@ public static class PlaylistExts
 			Id = source.Id,
 			ListName = source.ListName,
 			PlaylistCoverPath = webUrl + source.PlaylistCoverPath,
-            MemberId = source.MemberId,
+			MemberName = source.MemberName,
+			MemberPicPath = webUrl + source.MemberPicPath,
 			IsPublic = source.IsPublic,
+			IsLiked = source.IsLiked,
+			IsOwner = source.IsOwner,
+			TotalLikes = source.TotalLikes,
 			Metadata = source.Metadata.Select(metadata => metadata.ToVM()).ToList(),
 		};
 

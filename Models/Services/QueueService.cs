@@ -43,13 +43,13 @@ namespace api.iSMusic.Models.Services
 			return (true, "新增成功");
 		}
 
-		public (bool Success, string Message) AddPlaylistIntoQueue(int queueId, int playlistId)
+		public (bool Success, string Message) AddPlaylistIntoQueue(int memberId, int playlistId)
 		{
-			if (!CheckQueueExistence(queueId)) return (false, "佇列不存在");
+			if (!CheckQueueExistence(memberId)) return (false, "佇列不存在");
 
 			if (!CheckPlaylistExistence(playlistId)) return (false, "清單不存在");
 
-            _queueRepository.AddPlaylistIntoQueue(queueId, playlistId);
+            _queueRepository.AddPlaylistIntoQueue(memberId, playlistId);
 			return (true, "新增成功");
 		}
 
@@ -143,7 +143,7 @@ namespace api.iSMusic.Models.Services
             }
             catch (Exception ex)
             {
-                return (false, ex.Message, null);
+                return (true, ex.Message, null);
             }
 
             SongIndexDTO? addedQueueSong = null;

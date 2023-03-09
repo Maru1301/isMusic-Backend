@@ -48,7 +48,8 @@ namespace api.iSMusic.Controllers
 		[Route("{playlistId}")]
 		public IActionResult GetPlaylistDetail(int playlistId)
 		{
-			var result = _service.GetPlaylistDetail(playlistId);
+			int memberId = this.GetMemberId();
+			var result = _service.GetPlaylistDetail(playlistId, memberId);
 			if (!result.Success)
 			{
 				return BadRequest(result.Message);

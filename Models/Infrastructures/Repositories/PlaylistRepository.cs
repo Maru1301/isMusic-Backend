@@ -115,13 +115,19 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			return _db.Playlists
 				.Include(playlist => playlist.PlaylistSongMetadata)
 					.ThenInclude(metadata => metadata.Song)
+				.Include(playlist => playlist.Member)
+					.ThenInclude(member => member.Avatar)
+				.Include(playlist => playlist.LikedPlaylists)
 				.Select(playlist => new PlaylistDetailDTO
 				{
 					Id = playlist.Id,
 					ListName = playlist.ListName,
 					IsPublic = playlist.IsPublic,
 					MemberId = playlist.MemberId,
+					MemberName = playlist.Member.MemberNickName,
+					MemberPicPath = playlist.Member.Avatar!.Path,
 					PlaylistCoverPath = playlist.PlaylistCoverPath,
+					TotalLikes = playlist.LikedPlaylists.Count,
 					Metadata = playlist.PlaylistSongMetadata
 						.OrderBy(metadata => metadata.DisplayOrder)
 						.Select(metadata => metadata.ToDTO())

@@ -16,9 +16,10 @@ namespace api.iSMusic.Models.Services
 
 		private readonly IAlbumRepository _albumRepository;
 
+
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PlaylistService(IPlaylistRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository,IWebHostEnvironment webHostEnvironment)
+        public PlaylistService(IPlaylistRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository, IWebHostEnvironment webHostEnvironment)
 		{
 			_repository = repository;
 			_songRepository = songRepository;
@@ -47,7 +48,7 @@ namespace api.iSMusic.Models.Services
 			return await _repository.GetPlaylistIdByMemberIdAsync(memberId);
 		}
 
-		public (bool Success, string Message, PlaylistDetailDTO Dto) GetPlaylistDetail(int playlistId)
+		public (bool Success, string Message, PlaylistDetailDTO Dto) GetPlaylistDetail(int playlistId, int memberId)
 		{
 			if (playlistId <= 0) return (false, "非法的清單編號", new PlaylistDetailDTO());
 
@@ -56,8 +57,21 @@ namespace api.iSMusic.Models.Services
 			{
 				return (false, "清單不存在", new PlaylistDetailDTO());
 			}
-			var memberId = playlist.MemberId;
+			if(playlist.MemberId == memberId)
+			{
+				playlist.IsOwner = true;
+			}
+			else
+			{
+				playlist.IsOwner = false;
+			}
+
 			var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
+			var likedPlaylists = _repository.GetLikedPlaylists(memberId);
+			if(likedPlaylists.Select(playlist => playlist.Id).Contains(playlistId))
+			{
+				playlist.IsLiked = true;
+			}
 
 			foreach (var song in playlist.Metadata.Select(metadata => metadata.Song))
 			{

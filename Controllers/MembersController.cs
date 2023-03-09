@@ -198,23 +198,12 @@ namespace api.iSMusic.Controllers
             return Ok(result.Message);
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
 		[HttpGet]
-		[Route("{memberId}/Playlists")]
-		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromQuery] InputQuery query)
+		[Route("Playlists")]
+		public IActionResult GetMemberPlaylists([FromQuery] InputQuery query)
 		{
-			var dtos = _memberService.GetMemberPlaylists(memberId, query);
+            int memberId = this.GetMemberId();
+            var dtos = _memberService.GetMemberPlaylists(memberId, query);
 
 			if (dtos == null)
 			{
@@ -243,10 +232,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/Playlists/{playlistName}")]
-		public IActionResult GetMemberPlaylistsByName(int memberId, string name, [FromQuery] int rowNumber = 2)
+		[Route("Playlists/{playlistName}")]
+		public IActionResult GetMemberPlaylistsByName(string name, [FromQuery] int rowNumber = 2)
 		{
-			var dto = _memberService.GetMemberPlaylistsByName(memberId, name, rowNumber);
+            int memberId = this.GetMemberId();
+            var dto = _memberService.GetMemberPlaylistsByName(memberId, name, rowNumber);
 
 			return Ok(dto);
 		}
@@ -278,8 +268,11 @@ namespace api.iSMusic.Controllers
 				{
 					if (likedSongIds.Contains(songId))
 					{
-						queue.SongInfos.Single(info => info.Id == songId).IsLiked = true;
-					}
+                        queue.SongInfos
+							.Where(info => info.Id == songId)
+							.ToList()
+							.ForEach(info => info.IsLiked = true);
+                    }
 				}
 
 				return Ok(queue.ToIndexVM());
@@ -291,11 +284,12 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/RecentlyPlayed")]
-		public IActionResult GetRecentlyPlayed(int memberId)
+		[Route("RecentlyPlayed")]
+		public IActionResult GetRecentlyPlayed()
 		{
-			//Check if the provided memberAccount is valid
-			if (memberId <= 0)
+            int memberId = this.GetMemberId();
+            //Check if the provided memberAccount is valid
+            if (memberId <= 0)
 			{
 				return BadRequest("Invalid member account");
 			}
@@ -313,10 +307,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/LikedArtists")]
-		public IActionResult GetLikedArtists(int memberId, [FromQuery] LikedQuery query)
+		[Route("LikedArtists")]
+		public IActionResult GetLikedArtists([FromQuery] LikedQuery query)
 		{
-			var result = _memberService.GetLikedArtists(memberId, query);
+            int memberId = this.GetMemberId();
+            var result = _memberService.GetLikedArtists(memberId, query);
 
 			if (!result.Success)
 			{
@@ -327,10 +322,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/LikedCreators")]
-		public IActionResult GetLikedCreators(int memberId, [FromQuery] LikedQuery query)
+		[Route("LikedCreators")]
+		public IActionResult GetLikedCreators([FromQuery] LikedQuery query)
 		{
-			var result = _memberService.GetLikedCreators(memberId, query);
+            int memberId = this.GetMemberId();
+            var result = _memberService.GetLikedCreators(memberId, query);
 
 			if (!result.Success)
 			{
@@ -341,10 +337,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/LikedAlbums")]
-		public IActionResult GetLikedAlbums(int memberId, [FromQuery] LikedQuery query)
+		[Route("LikedAlbums")]
+		public IActionResult GetLikedAlbums([FromQuery] LikedQuery query)
 		{
-			var result = _memberService.GetLikedAlbums(memberId, query);
+            int memberId = this.GetMemberId();
+            var result = _memberService.GetLikedAlbums(memberId, query);
 
 			if (!result.Success)
 			{
@@ -370,10 +367,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/Activities")]
-		public IActionResult GetMemberFollowedActivities(int memberId)
+		[Route("Activities")]
+		public IActionResult GetMemberFollowedActivities()
 		{
-			var result = _memberService.GetMemberFollowedActivities(memberId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.GetMemberFollowedActivities(memberId);
 			if (!result.Success)
 			{
 				return BadRequest(result.Message);
@@ -384,10 +382,11 @@ namespace api.iSMusic.Controllers
         }
 
 		[HttpPost]
-		[Route("{memberId}/LikedSongs/{songId}")]
-		public IActionResult AddLikedSong(int memberId, int songId)
+		[Route("LikedSongs/{songId}")]
+		public IActionResult AddLikedSong(int songId)
 		{
-			var result = _memberService.AddLikedSong(memberId, songId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.AddLikedSong(memberId, songId);
 
 			if (!result.Success)
 			{
@@ -398,10 +397,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{memberId}/LikedPlaylists/{playlistId}")]
-		public IActionResult AddLikedPlaylist(int memberId, int playlistId)
+		[Route("LikedPlaylists/{playlistId}")]
+		public IActionResult AddLikedPlaylist(int playlistId)
 		{
-			var result = _memberService.AddLikedPlaylist(memberId, playlistId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.AddLikedPlaylist(memberId, playlistId);
 
 			if (!result.Success)
 			{
@@ -412,10 +412,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{memberId}/LikedAlbums/{albumId}")]
-		public IActionResult AddLikedAlbum(int memberId, int albumId)
+		[Route("LikedAlbums/{albumId}")]
+		public IActionResult AddLikedAlbum(int albumId)
 		{
-			var result = _memberService.AddLikedAlbum(memberId, albumId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.AddLikedAlbum(memberId, albumId);
 
 			if (!result.Success)
 			{
@@ -426,10 +427,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{memberId}/FollowedArtists/{artistId}")]
-		public IActionResult FollowArtist(int memberId, int artistId)
+		[Route("FollowedArtists/{artistId}")]
+		public IActionResult FollowArtist(int artistId)
 		{
-			var result = _memberService.FollowArtist(memberId, artistId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.FollowArtist(memberId, artistId);
 
 			if (!result.Success)
 			{
@@ -440,10 +442,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{memberId}/FollowedCreators/{creatorId}")]
-		public IActionResult FollowCreator(int memberId, int creatorId)
+		[Route("FollowedCreators/{creatorId}")]
+		public IActionResult FollowCreator(int creatorId)
 		{
-			var result = _memberService.FollowCreator(memberId, creatorId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.FollowCreator(memberId, creatorId);
 
 			if (!result.Success)
 			{
@@ -454,10 +457,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{memberId}/Activities/{activityId}/{attendDate}")]
-		public IActionResult FollowActivity(int memberId, int activityId, DateTime attendDate)
+		[Route("Activities/{activityId}/{attendDate}")]
+		public IActionResult FollowActivity(int activityId, DateTime attendDate)
 		{
-			var result = _memberService.FollowActivity(memberId, activityId, attendDate);
+            int memberId = this.GetMemberId();
+            var result = _memberService.FollowActivity(memberId, activityId, attendDate);
 
 			if (!result.Success)
 			{
@@ -468,10 +472,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpDelete]
-		[Route("{memberId}/LikedSongs/{songId}")]
-		public IActionResult DeleteLikedSong(int memberId, int songId)
+		[Route("LikedSongs/{songId}")]
+		public IActionResult DeleteLikedSong(int songId)
 		{
-			var result = _memberService.DeleteLikedSong(memberId, songId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.DeleteLikedSong(memberId, songId);
 
 			if (!result.Success)
 			{
@@ -482,10 +487,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpDelete]
-		[Route("{memberId}/LikedPlaylists/{playlistId}")]
-		public IActionResult DeleteLikedPlaylist(int memberId, int playlistId)
+		[Route("LikedPlaylists/{playlistId}")]
+		public IActionResult DeleteLikedPlaylist(int playlistId)
 		{
-			var result = _memberService.DeleteLikedPlaylist(memberId, playlistId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.DeleteLikedPlaylist(memberId, playlistId);
 
 			if (!result.Success)
 			{
@@ -496,10 +502,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpDelete]
-		[Route("{memberId}/LikedAlbums/{albumId}")]
-		public IActionResult DeleteLikedAlbum(int memberId, int albumId)
+		[Route("LikedAlbums/{albumId}")]
+		public IActionResult DeleteLikedAlbum(int albumId)
 		{
-			var result = _memberService.DeleteLikedAlbum(memberId, albumId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.DeleteLikedAlbum(memberId, albumId);
 
 			if (!result.Success)
 			{
@@ -510,10 +517,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpDelete]
-		[Route("{memberId}/FollowedArtists/{artistId}")]
-		public IActionResult UnfollowArtist(int memberId, int artistId)
+		[Route("FollowedArtists/{artistId}")]
+		public IActionResult UnfollowArtist(int artistId)
 		{
-			var result = _memberService.UnfollowArtist(memberId, artistId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.UnfollowArtist(memberId, artistId);
 
 			if (!result.Success)
 			{
@@ -524,10 +532,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpDelete]
-		[Route("{memberId}/FollowedCreators/{creatorId}")]
-		public IActionResult UnfollowCreator(int memberId, int creatorId)
+		[Route("FollowedCreators/{creatorId}")]
+		public IActionResult UnfollowCreator(int creatorId)
 		{
-			var result = _memberService.UnfollowCreator(memberId, creatorId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.UnfollowCreator(memberId, creatorId);
 
 			if (!result.Success)
 			{
@@ -538,9 +547,10 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpDelete]
-		[Route("{memberId}/Activities/{activityId}")]
-		public IActionResult UnfollowActivity(int memberId, int activityId)
+		[Route("Activities/{activityId}")]
+		public IActionResult UnfollowActivity(int activityId)
 		{
+			int memberId = this.GetMemberId();
 			var result = _memberService.UnfollowActivity(memberId, activityId);
 
 			if (!result.Success)

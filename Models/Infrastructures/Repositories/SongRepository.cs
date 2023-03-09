@@ -161,6 +161,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		{
 			return _db.Songs
 				.Where(song => song.AlbumId == albumId)
+				.OrderBy(song => song.DisplayOrderInAlbum)
 				.Select(song => new SongInfoDTO
 				{
 					Id = song.Id,

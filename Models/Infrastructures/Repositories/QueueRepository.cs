@@ -131,8 +131,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                     {
                         Id = s.Id,
                         SongName = s.SongName,
-                        SongCoverPath = s.SongCoverPath,
-                        SongPath = s.SongPath,
+                        SongCoverPath = "https://localhost:44373/Uploads/Covers/" +s.SongCoverPath,
+                        SongPath = "https://localhost:44373/Uploads/Songs/" + s.SongPath,
                         AlbumId = s.AlbumId,
                         AlbumName = s.Album != null ?
                                 s.Album.AlbumName :
@@ -386,9 +386,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db.SaveChanges();
 		}
 
-		public void ChangeRepeat(int queueId, string mode)
+		public void ChangeRepeat(int memberId, string mode)
 		{
-			var queue = _db.Queues.Single(queue => queue.Id == queueId);
+			var queue = _db.Queues.Single(queue => queue.MemberId == memberId);
 
 			queue.IsRepeat = mode switch
 			{
@@ -406,68 +406,105 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                 .Include(q => q.QueueSongs)
                 .Single(q => q.MemberId == memberId);
 
+            if (queue.CurrentSongOrder == 0) 
+				throw new InvalidOperationException("佇列為空");
+
+            var currentSong = FindCurrentSong(queue);
+
+            //if the current song is not from a list
+            if (currentSong.FromPlaylist == false)
+                _db.QueueSongs.Remove(currentSong);
+
+			int currentOrder = UpdateCurrentSongOrder(queue);
+
+            _db.SaveChanges();
+
+			//find the next song id
+			int nextSongId = FindNextSongId(queue);
+
+
+            var queueSongs = queue.QueueSongs.OrderBy(qs => queue.IsShuffle ? qs.ShuffleOrder : qs.DisplayOrder).ToList();
+
+            int currentIndex = queueSongs.IndexOf(currentSong) + 1;
+            int numOfSongs = queueSongs.Count;
+
+            //find the addedQueueSong display order
+            if (queue.IsRepeat == true && numOfSongs - currentIndex < takeLimit)
+			{
+				int takeOrder = takeLimit - (numOfSongs - currentIndex);
+
+				if(numOfSongs >= takeOrder)
+				{
+                    return (takeOrder, nextSongId);
+                }
+            }
+			
+			if(numOfSongs - currentIndex >= takeLimit)
+			{
+				return (currentIndex + takeLimit, nextSongId);
+            }
+
+            return (null, nextSongId);
+		}
+
+        private int UpdateCurrentSongOrder(Queue queue)
+        {
+            var queueSongs = queue.QueueSongs;
+            int firstOrder = queueSongs.Min(qs => (queue.IsShuffle)
+                                                ? qs.ShuffleOrder
+                                                : qs.DisplayOrder);
+            int lastOrder = queueSongs.Max(qs => (queue.IsShuffle)
+                                                ? qs.ShuffleOrder
+                                                : qs.DisplayOrder);
+            int currentOrder = queue.CurrentSongOrder!.Value;
+
+            queue.CurrentSongOrder = (queue.IsRepeat == true)
+                ? (currentOrder == lastOrder) ? firstOrder : currentOrder + 1
+                : (currentOrder == lastOrder) ? 0 : currentOrder + 1;
+
+            queue.CurrentSongTime = 0;
+
+            if (queue.CurrentSongOrder == 0)
+            {
+                queue.AlbumId = null;
+                queue.ArtistId = null;
+                queue.PlaylistId = null;
+				ClearQueueSongs(queue.Id);
+				_db.SaveChanges();
+                throw new InvalidOperationException("佇列沒有下一首歌");
+            }
+
+			return currentOrder;
+        }
+
+        private QueueSong FindCurrentSong(Queue queue)
+        {
             if (queue.CurrentSongOrder == 0)
             {
                 throw new InvalidOperationException("佇列為空");
             }
 
-            var queueSongs = queue.QueueSongs;
-			int firstOrder = queueSongs.Min(qs => (queue.IsShuffle)
-											? qs.ShuffleOrder
-											: qs.DisplayOrder);
-			int lastOrder = queueSongs.Max(qs => (queue.IsShuffle)
-											? qs.ShuffleOrder
-											:qs.DisplayOrder);
-            int numOfSongs = queueSongs.Count;
-			int currentOrder = queue.CurrentSongOrder!.Value;
+            var currentSong = queue.QueueSongs.SingleOrDefault(qs =>		
+					(queue.IsShuffle)
+					? qs.ShuffleOrder == queue.CurrentSongOrder
+					: qs.DisplayOrder == queue.CurrentSongOrder);
 
-            //change the current song order to the next song
-            queue.CurrentSongOrder = queue.IsRepeat switch
+            if (currentSong == null)
             {
-                false => currentOrder,
-                null => (currentOrder == lastOrder) ? 0 : currentOrder + 1,
-                true => (currentOrder == lastOrder) ? firstOrder : currentOrder + 1
-            };
-            queue.CurrentSongTime = 0;
-
-			if(queue.CurrentSongOrder == 0)
-			{
-				queue.AlbumId = 0;
-				queue.ArtistId = 0;
-				queue.PlaylistId = 0;
-				_db.SaveChanges();
-                throw new InvalidOperationException("佇列沒有下一首歌");
+                throw new InvalidOperationException("找不到目前播放歌曲");
             }
 
-            //find the current song
-            var currentSong = queue.QueueSongs.Single(qs => (queue.IsShuffle) ?
-                                            qs.ShuffleOrder == currentOrder :
-                                            qs.DisplayOrder == currentOrder);
+            return currentSong;
+        }
 
-            if (queue.IsRepeat != false && currentSong.FromPlaylist == false)
-            {
-                _db.QueueSongs.Remove(currentSong);
-            }
-
-            _db.SaveChanges();
-
-            if (queue.IsRepeat == true && numOfSongs - currentOrder < takeLimit)
-			{
-				int takeOrder = takeLimit - (numOfSongs - currentOrder);
-
-				if(queueSongs.Count >= takeOrder)
-				{
-                    return (takeOrder, nextSong.Id);
-                }
-            }
-			
-			if(numOfSongs - currentOrder >= takeLimit)
-			{
-				return (currentOrder + takeLimit, nextSong.Id);
-            }
-
-            return (null, nextSong.Id);
-		}
+        private int FindNextSongId(Queue queue)
+        {
+            int nextSongOrder = queue.CurrentSongOrder!.Value;
+            int nextSongId = queue.QueueSongs.Single(qs => (queue.IsShuffle) 
+								? qs.ShuffleOrder == nextSongOrder
+								: qs.DisplayOrder == nextSongOrder).SongId;
+            return nextSongId;
+        }
 
         public SongInfoDTO? PreviousSong(int memberId)
         {

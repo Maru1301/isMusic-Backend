@@ -11,10 +11,18 @@ namespace api.iSMusic.Models.ViewModels.PlaylistVMs
 
 		public string? PlaylistCoverPath { get; set; }
 
-		public int MemberId { get; set; }
+		public string MemberName { get; set; } = null!;
 
-		public bool IsPublic { get; set; }
+		public string MemberPicPath { get; set; } = null!;
 
-		public List<PlaylistSongMetadataVM> Metadata { get; set; } = null!;
+        public bool IsPublic { get; set; }
+
+        public bool IsLiked { get; set; }
+
+        public bool IsOwner { get; set; }
+
+        public int TotalLikes { get; set; }
+
+        public List<PlaylistSongMetadataVM> Metadata { get; set; } = null!;
 	}
 }

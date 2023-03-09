@@ -17,6 +17,7 @@ public static class SongExts
             SongName = source.SongName,
             Duration = source.Duration,
             IsExplicit = source.IsExplicit,
+            IsLiked = source.IsLiked,
             Released = source.Released,
             SongCoverPath = webPicUrl + source.SongCoverPath,
             SongPath = webSongUrl + source.SongPath,
