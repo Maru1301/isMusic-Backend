@@ -51,7 +51,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
                 ConfirmCode = entity.ConfirmCode,
                 MemberAddress = entity.MemberAddress,
                 MemberDateOfBirth = entity.MemberDateOfBirth,
-                AvatarId = entity.AvatarId,
+                //AvatarId = entity.AvatarId,
                 MemberReceivedMessage = entity.MemberReceivedMessage,
                 MemberSharedData = entity.MemberSharedData,
                 LibraryPrivacy = entity.LibraryPrivacy,
