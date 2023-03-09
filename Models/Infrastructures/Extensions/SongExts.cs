@@ -1,4 +1,5 @@
-﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+﻿using api.iSMusic.Controllers;
+using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.SongVMs;
 
@@ -26,6 +27,8 @@ public static class SongExts
             AlbumName = source.AlbumName,
             DisplayOrderInAlbum = source.DisplayOrderInAlbum,
             PlayedTimes = source.PlayedTimes,
+            Artists = source.Artists,
+            Creators = source.Creators,
         };
 
 	public static SongInfoDTO ToInfoDTO(this Song source)

@@ -115,7 +115,16 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			return _db.Playlists
 				.Include(playlist => playlist.PlaylistSongMetadata)
 					.ThenInclude(metadata => metadata.Song)
-				.Include(playlist => playlist.Member)
+					.ThenInclude(song => song.Album)
+				.Include(playlist => playlist.PlaylistSongMetadata)
+					.ThenInclude(metadata => metadata.Song)
+					.ThenInclude(song => song.SongArtistMetadata)
+					.ThenInclude(sametadata => sametadata.Artist)
+                .Include(playlist => playlist.PlaylistSongMetadata)
+                    .ThenInclude(metadata => metadata.Song)
+                    .ThenInclude(song => song.SongCreatorMetadata)
+                    .ThenInclude(scmetadata => scmetadata.Creator)
+                .Include(playlist => playlist.Member)
 					.ThenInclude(member => member.Avatar)
 				.Include(playlist => playlist.LikedPlaylists)
 				.Select(playlist => new PlaylistDetailDTO

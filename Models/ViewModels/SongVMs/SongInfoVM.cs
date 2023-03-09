@@ -1,4 +1,6 @@
 ﻿using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.ViewModels.ArtistVMs;
+using api.iSMusic.Models.ViewModels.CreatorVMs;
 
 namespace api.iSMusic.Models.ViewModels.SongVMs
 {
@@ -29,5 +31,9 @@ namespace api.iSMusic.Models.ViewModels.SongVMs
         public int? DisplayOrderInAlbum { get; set; }
 
         public int PlayedTimes { get; set; }
+
+		public List<ArtistInfoVM> Artists { get; set; } = new();
+
+        public List<CreatorInfoVM> Creators { get; set; } = new();
     }
 }

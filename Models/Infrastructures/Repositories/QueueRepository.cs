@@ -74,6 +74,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		{
 			var queue = await _db.Queues
 				.Include(q => q.QueueSongs)
+                    .ThenInclude(qss => qss.Song)
+					.ThenInclude(song => song.SongArtistMetadata)
+				.Include(queue => queue.QueueSongs)
+                    .ThenInclude(qss => qss.Song)
+                    .ThenInclude(song => song.SongCreatorMetadata)
 				.Select(queue => new QueueIndexDTO
 				{
 					Id= queue.Id,
@@ -81,7 +86,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					CurrentSongTime= queue.CurrentSongTime,
 					IsShuffle= queue.IsShuffle,
 					IsRepeat= queue.IsRepeat,
-					MemberId= memberId,
+					MemberId= queue.MemberId,
 					AlbumId = queue.AlbumId,
 					ArtistId = queue.ArtistId,
 					PlaylistId = queue.PlaylistId,
@@ -96,26 +101,28 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		private QueueIndexDTO? CheckisRepeat(QueueIndexDTO queue)
 		{
-            queue.SongInfos = _db.QueueSongs
-                .Where(qs => qs.QueueId == queue.Id)
-                .OrderBy(qs => queue.IsShuffle ? qs.ShuffleOrder : qs.DisplayOrder)
-                .Take(this.takeLimit)
-                .Join(_db.Songs, qs => qs.SongId, s => s.Id, (qs, s) => new SongInfoDTO
-                {
-                    Id = qs.SongId,
-                    SongName = s.SongName,
-                    SongCoverPath = "https://localhost:44373/Uploads/Covers/" + s.SongCoverPath,
-                    SongPath = "https://localhost:44373/Uploads/Songs/" + s.SongPath,
-                    AlbumId = s.AlbumId,
-                    AlbumName = s.Album != null ?
-                                s.Album.AlbumName :
-                                string.Empty,
-                    Duration = s.Duration,
-                    Status = s.Status,
-                    FromList = qs.FromPlaylist,
-                    IsExplicit = s.IsExplicit,
-                    Released = s.Released,
-                })
+			queue.SongInfos = _db.QueueSongs
+				.Where(qs => qs.QueueId == queue.Id)
+				.OrderBy(qs => queue.IsShuffle ? qs.ShuffleOrder : qs.DisplayOrder)
+				.Take(this.takeLimit)
+				.Join(_db.Songs, qs => qs.SongId, s => s.Id, (qs, s) => new SongInfoDTO
+				{
+					Id = qs.SongId,
+					SongName = s.SongName,
+					SongCoverPath = "https://localhost:44373/Uploads/Covers/" + s.SongCoverPath,
+					SongPath = "https://localhost:44373/Uploads/Songs/" + s.SongPath,
+					AlbumId = s.AlbumId,
+					AlbumName = s.Album != null ?
+								s.Album.AlbumName :
+								string.Empty,
+					Duration = s.Duration,
+					Status = s.Status,
+					FromList = qs.FromPlaylist,
+					IsExplicit = s.IsExplicit,
+					Released = s.Released,
+					Artists = s.SongArtistMetadata.Select(metadata => metadata.Artist).Select(artist => artist.ToInfoVM()).ToList(),
+					Creators = s.SongCreatorMetadata.Select(metadata => metadata.Creator).Select(creator => creator.ToInfoVM()).ToList(),
+				})
                 .ToList();
 
             if (queue.IsRepeat == true && queue.SongInfos.Count < this.takeLimit)
