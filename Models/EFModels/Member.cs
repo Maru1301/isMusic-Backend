@@ -41,7 +41,7 @@ public partial class Member
     public DateTime? MemberDateOfBirth { get; set; }
 
     [Column("avatarId")]
-    public int AvatarId { get; set; }
+    public int? AvatarId { get; set; }
 
     [Column("memberReceivedMessage")]
     public bool MemberReceivedMessage { get; set; }
