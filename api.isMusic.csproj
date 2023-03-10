@@ -16,4 +16,12 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\ispan\Desktop\test\api.isMusic\Models\ViewModels\MemberVMs\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\ispan\Desktop\test\api.isMusic\Models\ViewModels\MemberVMs\.editorconfig" />
+  </ItemGroup>
+
 </Project>

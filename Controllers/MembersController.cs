@@ -101,10 +101,10 @@ namespace api.iSMusic.Controllers
         [HttpPatch]        
         [Route("ResetPassword")]
 		[AllowAnonymous]
-		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromForm]string password)
+		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromForm] MemberResetPasswordVM source)
         {
 
-            var result = _memberService.ResetPassword(memberId, confirmCode, password);
+            var result = _memberService.ResetPassword(memberId, confirmCode, source.Password);
             return Ok(result.Message);
         }
 
