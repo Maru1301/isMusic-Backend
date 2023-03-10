@@ -173,12 +173,8 @@ namespace api.iSMusic.Controllers
             {
                 return NotFound(result.Message);
             }
-            else if (result.Dto == null)
-            {
-                return Accepted(result.Message);
-            }
 
-            return Ok(result.Dto);
+            return Ok(result.Message);
         }
 
         [HttpPatch]
@@ -195,10 +191,10 @@ namespace api.iSMusic.Controllers
 
         [HttpPatch]
         [Route("RepeatSetting")]
-        public async Task<IActionResult> ChangeRepeat([FromQuery] string mode)
+        public async Task<IActionResult> ChangeRepeat()
         {
             int memberId = this.GetMemberId();
-            var result = _service.ChangeRepeat(memberId, mode);
+            var result = _service.ChangeRepeat(memberId);
             if (!result.Success)
             {
                 return NotFound(result.Message);

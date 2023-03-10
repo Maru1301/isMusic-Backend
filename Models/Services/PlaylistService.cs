@@ -66,14 +66,14 @@ namespace api.iSMusic.Models.Services
 				playlist.IsOwner = false;
 			}
 
-			var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
 			var likedPlaylists = _repository.GetLikedPlaylists(memberId);
 			if(likedPlaylists.Select(playlist => playlist.Id).Contains(playlistId))
 			{
 				playlist.IsLiked = true;
 			}
 
-			foreach (var song in playlist.Metadata.Select(metadata => metadata.Song))
+            var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
+            foreach (var song in playlist.Metadata.Select(metadata => metadata.Song))
 			{
 				if (likedSongIds.Contains(song.Id))
 				{

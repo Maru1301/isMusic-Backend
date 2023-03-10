@@ -159,31 +159,22 @@ namespace api.iSMusic.Models.Services
 			return (true, message, addedQueueSong);
         }
 
-        public (bool Success, string Message, SongInfoDTO? Dto) PreviousSong(int memberId)
+        public (bool Success, string Message) PreviousSong(int memberId)
         {
             string message = string.Empty;
-            SongInfoDTO? addedQueueSong = new();
             try
 			{
                 if (CheckQueueExistence(memberId) == false) throw new Exception ("佇列不存在");
 
-                addedQueueSong = _queueRepository.PreviousSong(memberId);
+                _queueRepository.PreviousSong(memberId);
 
-                if (addedQueueSong != null)
-                {
-                    _songRepository.CreatePlayRecord(_memberId, addedQueueSong.Id);
-                }
-                else
-                {
-                    message = "不須增加佇列項目";
-                }
             }
             catch(Exception ex)
 			{
-				return (false, ex.Message, addedQueueSong);
+				return (false, ex.Message);
 			}
 
-            return (true, message, addedQueueSong);
+            return (true, message);
         }
 
         public (bool Success, string Message) ChangeShuffle(int memberId)
@@ -195,11 +186,11 @@ namespace api.iSMusic.Models.Services
 			return (true, "更新成功");
 		}
 
-		public (bool Success, string Message)  ChangeRepeat(int queueId, string mode)
+		public (bool Success, string Message)  ChangeRepeat(int queueId)
 		{
 			if (CheckQueueExistence(queueId) == false) return (false, "佇列不存在");
 
-            _queueRepository.ChangeRepeat(queueId, mode);
+            _queueRepository.ChangeRepeat(queueId);
 
 			return (true, "更新成功");
 		}

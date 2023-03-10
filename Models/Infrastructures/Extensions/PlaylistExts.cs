@@ -30,7 +30,9 @@ public static class PlaylistExts
 			Id= source.Id,
 			ListName= source.ListName,
 			MemberId= source.MemberId,
-			PlaylistCoverPath = webUrl + source.PlaylistCoverPath,
+			PlaylistCoverPath = source.PlaylistCoverPath != null
+				? webUrl + source.PlaylistCoverPath
+				: "",
 			TotalLikes = source.TotalLikes,
 		};
 

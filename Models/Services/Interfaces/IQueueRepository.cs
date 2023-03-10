@@ -27,10 +27,10 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         (int? TakeOrder, int NextSongId) NextSong(int memberId);
 
-        SongInfoDTO? PreviousSong(int memberId);
+        void PreviousSong(int memberId);
 
 		void ChangeShuffle(int memberId);
 
-		void ChangeRepeat(int queueId, string mode);
+		void ChangeRepeat(int queueId);
 	}
 }

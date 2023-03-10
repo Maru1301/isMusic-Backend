@@ -145,8 +145,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					Released = album.Released,
 					MainArtistId = album.MainArtistId,
 					MainArtistName = album.MainArtist != null ? album.MainArtist.ArtistName : string.Empty,
+					MainArtistPicPath = album.MainArtist!= null?
+					album.MainArtist.ArtistPicPath : string.Empty,
 					MainCreatorId = album.MainCreatorId,
 					MainCreatorName = album.MainCreator != null ? album.MainCreator.CreatorName : string.Empty,
+					MainCreatorPicPath = album.MainCreator != null?
+					album.MainCreator.CreatorPicPath : string.Empty,
 					Description = album.Description,
 					AlbumProducer = album.AlbumProducer,
 					AlbumCompany = album.AlbumCompany,
@@ -157,7 +161,16 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		public IEnumerable<AlbumIndexDTO> GetLikedAlbums(int memberId, MembersController.LikedQuery query)
 		{
-			var likeds = _db.LikedAlbums.Where(liked => liked.MemberId == memberId);
+			var likeds = _db.LikedAlbums
+				.Include(la => la.Album)
+					.ThenInclude(album => album.AlbumGenre)
+                .Include(la => la.Album)
+                    .ThenInclude(album => album.AlbumType)
+                .Include(la => la.Album)
+                    .ThenInclude(album => album.MainArtist)
+                .Include(la => la.Album)
+                    .ThenInclude(album => album.MainCreator)
+                .Where(liked => liked.MemberId == memberId);
 
 			if(string.IsNullOrEmpty(query.Input) == false)
 			{
@@ -257,5 +270,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			});
 		}
 
-	}
+        public LikedAlbum CheckIsLiked(int albumId, int memberId)
+		{
+			return _db.LikedAlbums.Single(la => la.AlbumId == albumId && la.MemberId == memberId);
+		}
+    }
 }

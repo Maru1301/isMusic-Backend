@@ -19,8 +19,10 @@ public static class AlbumExts
 			Released = source.Released,
 			MainArtistId= source.MainArtistId,
 			MainArtistName= source.MainArtistName,
+            MainArtistPicPath = source.MainArtistPicPath,
 			MainCreatorId= source.MainCreatorId,
 			MainCreatorName= source.MainCreatorName,
+            MainCreatorPicPath = source.MainCreatorPicPath,
 			TotalLikes= source.TotalLikes,
 		};
 
@@ -39,9 +41,15 @@ public static class AlbumExts
             MainArtistName = source.MainArtist != null ?
                         source.MainArtist.ArtistName :
                         string.Empty,
+            MainArtistPicPath = source.MainArtist != null ?
+                        source.MainArtist.ArtistPicPath :
+                        string.Empty, 
             MainCreatorId = source.MainCreatorId,
             MainCreatorName = source.MainCreator != null ? source.MainCreator.CreatorName :
                         string.Empty,
+            MainCreatorPicPath = source.MainCreator != null?
+                source.MainCreator.CreatorPicPath : 
+            string.Empty,
             TotalLikes = source.LikedAlbums.Count,
         };
 
@@ -55,13 +63,16 @@ public static class AlbumExts
 			MainArtistId= source.MainArtistId,
 			AlbumTypeId= source.AlbumTypeId,
 			AlbumTypeName= source.AlbumTypeName,
+            IsLiked = source.IsLiked,
 			AlbumGenreId= source.AlbumGenreId,
 			AlbumGenreName= source.AlbumGenreName,
 			AlbumCompany = source.AlbumCompany,
 			AlbumProducer = source.AlbumProducer,
 			MainArtistName= source.MainArtistName,
+            MainArtistPicPath= string.IsNullOrEmpty(source.MainArtistPicPath)? "": webPicUrl + source.MainArtistPicPath,
 			MainCreatorId= source.MainCreatorId,
 			MainCreatorName= source.MainCreatorName,
+            MainCreatorPicPath= string.IsNullOrEmpty(source.MainCreatorPicPath) ? "" : webPicUrl + source.MainCreatorPicPath,
 			Description= source.Description,
 			Songs = source.Songs.Select(song => song.ToInfoVM()).OrderBy(dto => dto.DisplayOrderInAlbum).ToList(),
 		};

@@ -9,9 +9,12 @@ namespace api.iSMusic.Models.Services
 	{
 		private readonly IAlbumRepository _repository;
 
-		public AlbumService(IAlbumRepository repo)
+		private readonly ISongRepository _songRepository;
+
+		public AlbumService(IAlbumRepository repo, ISongRepository songRepository)
 		{
 			_repository= repo;
+			_songRepository= songRepository;
 		}
 
 		public IEnumerable<AlbumIndexDTO> GetRecommended()
@@ -50,9 +53,32 @@ namespace api.iSMusic.Models.Services
 			return (true, string.Empty, dtos);
 		}
 
-		public AlbumDetailDTO? GetAlbumById(int albumId)
+		public AlbumDetailDTO? GetAlbumById(int albumId, int memberId)
 		{
-			return _repository.GetAlbumById(albumId);
+			var album = _repository.GetAlbumById(albumId);
+
+			if(CheckIsLiked(albumId, memberId))
+			{
+				album.IsLiked = true;
+			}
+
+            var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
+            foreach (var song in album.Songs)
+            {
+                if (likedSongIds.Contains(song.Id))
+                {
+                    song.IsLiked = true;
+                }
+            }
+
+            return album;
+		}
+
+		private bool CheckIsLiked(int albumId, int memberId)
+		{
+			var metadata = _repository.CheckIsLiked(albumId, memberId);
+
+			return metadata != null;
 		}
 	}
 }

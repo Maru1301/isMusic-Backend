@@ -18,7 +18,9 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
 		public string? AlbumGenreName { get; set; }
 
-		public DateTime Released { get; set; }
+        public bool IsLiked { get; set; }
+
+        public DateTime Released { get; set; }
 
 		public string Description { get; set; } = null!;
 
@@ -26,11 +28,15 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
 		public string? MainArtistName { get; set; }
 
-		public int? MainCreatorId { get; set; }
+        public string? MainArtistPicPath { get; set; }
+
+        public int? MainCreatorId { get; set; }
 
 		public string? MainCreatorName { get; set; }
 
-		public string? AlbumProducer { get; set; }
+        public string? MainCreatorPicPath { get; set; }
+
+        public string? AlbumProducer { get; set; }
 
 		public string? AlbumCompany { get; set; }
 

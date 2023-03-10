@@ -16,7 +16,7 @@ public partial class Queue
     public int MemberId { get; set; }
 
     [Column("currentSongOrder")]
-    public int? CurrentSongOrder { get; set; }
+    public int CurrentSongOrder { get; set; }
 
     [Column("currentSongTime")]
     public int? CurrentSongTime { get; set; }
