@@ -428,7 +428,15 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<SubscriptionRecordDetail>(entity =>
         {
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.HasKey(e => e.Id).HasName("PK_SubscriptionRecordDetail");
+
+            entity.HasOne(d => d.Member).WithMany(p => p.SubscriptionRecordDetails)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SubscriptionRecordDetail_Members");
+
+            entity.HasOne(d => d.SubscriptionRecord).WithMany(p => p.SubscriptionRecordDetails)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SubscriptionRecordDetail_SubscriptionRecords");
         });
 
         OnModelCreatingPartial(modelBuilder);

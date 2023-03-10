@@ -31,4 +31,7 @@ public partial class SubscriptionRecord
     [ForeignKey("SubscriptionPlanId")]
     [InverseProperty("SubscriptionRecords")]
     public virtual SubscriptionPlan SubscriptionPlan { get; set; } = null!;
+
+    [InverseProperty("SubscriptionRecord")]
+    public virtual ICollection<SubscriptionRecordDetail> SubscriptionRecordDetails { get; } = new List<SubscriptionRecordDetail>();
 }

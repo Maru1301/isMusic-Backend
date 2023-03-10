@@ -34,19 +34,20 @@ namespace api.iSMusic.Controllers
 
 		private readonly IQueueRepository _queueRepository;
 
-		private readonly MemberService _memberService;        
-
+		private readonly MemberService _memberService;		
+        
         public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository, IQueueRepository queueRepository, IActivityRepository activityRepository)
 		{
 			_memberRepository = memberRepo;
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository, queueRepository);
-		}
+			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository, queueRepository);			
+        }
 
         [HttpPost]
         [Route("Register")]
+		[AllowAnonymous]
         public IActionResult MemberRegister([FromForm] MemberRegisterVM member)
         {
             // email驗證網址
@@ -100,10 +101,10 @@ namespace api.iSMusic.Controllers
         [HttpPatch]        
         [Route("ResetPassword")]
 		[AllowAnonymous]
-		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromForm]string password)
+		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromForm] MemberResetPasswordVM source)
         {
 
-            var result = _memberService.ResetPassword(memberId, confirmCode, password);
+            var result = _memberService.ResetPassword(memberId, confirmCode, source.Password);
             return Ok(result.Message);
         }
 
@@ -178,13 +179,13 @@ namespace api.iSMusic.Controllers
 
 		[HttpPost]
 		[Route("SubscribePlan")]
-		public IActionResult SubscribedPlan([FromForm] int SubscriptionPlanId,[FromForm] IEnumerable<string>emails)
+		public IActionResult SubscribedPlan([FromForm] SubscribedPlanVM source)
 		{
 			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
-			var SubscriptionPlan = _memberRepository.SubscriptionPlanLoad(SubscriptionPlanId);
-
-			var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, emails);
-			return Ok(result);         
+			var SubscriptionPlan = _memberRepository.SubscriptionPlanLoad(source.SubscriptionPlanId);
+      
+			var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, source.Emails);
+			return Ok(result.Message);
         }
 
 		[HttpPatch]

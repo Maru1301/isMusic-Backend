@@ -41,7 +41,7 @@ public partial class Member
     public DateTime? MemberDateOfBirth { get; set; }
 
     [Column("avatarId")]
-    public int AvatarId { get; set; }
+    public int? AvatarId { get; set; }
 
     [Column("memberReceivedMessage")]
     public bool MemberReceivedMessage { get; set; }
@@ -114,6 +114,9 @@ public partial class Member
 
     [InverseProperty("Member")]
     public virtual ICollection<SongPlayedRecord> SongPlayedRecords { get; } = new List<SongPlayedRecord>();
+
+    [InverseProperty("Member")]
+    public virtual ICollection<SubscriptionRecordDetail> SubscriptionRecordDetails { get; } = new List<SubscriptionRecordDetail>();
 
     [InverseProperty("Member")]
     public virtual ICollection<SubscriptionRecord> SubscriptionRecords { get; } = new List<SubscriptionRecord>();

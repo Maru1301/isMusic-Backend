@@ -57,18 +57,6 @@ namespace api.isMusic
 
 			builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext")));
 
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAnyOrigin",
-                    builder =>
-                    {
-                        builder.WithOrigins("http://localhost:8080")
-								.AllowCredentials()
-                               .AllowAnyHeader()
-                               .AllowAnyMethod();
-                    });
-            });
-
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
