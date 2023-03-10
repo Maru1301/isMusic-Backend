@@ -8,17 +8,17 @@ namespace api.iSMusic.Models.DTOs.MemberDTOs
 
         public int Id { get; set; }
 
-        public string? MemberAccount { get; set; }
+        public string MemberAccount { get; set; } = null!;
 
         /// <summary>
         /// 密碼,明碼
         /// </summary>
-        public string? MemberPassword { get; set; }
+        public string MemberPassword { get; set; } = null!;
 
         /// <summary>
         /// 加密之後的密碼
         /// </summary>
-        public string? MemberEncryptedPassword
+        public string MemberEncryptedPassword
         {
             get
             {

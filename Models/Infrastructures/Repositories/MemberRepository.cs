@@ -87,7 +87,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
         public MemberDTO GetByAccount(string Account)
         {
             var data = _db.Members
-                .SingleOrDefault(x => x.MemberAccount == Account);
+                .Single(x => x.MemberAccount == Account);
 
             return data.ToDTO();
         }

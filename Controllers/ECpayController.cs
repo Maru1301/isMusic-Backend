@@ -99,7 +99,7 @@ namespace api.iSMusic.Controllers
 
                 if (hash != null)
                 {
-                    result = BitConverter.ToString(hash)?.Replace("-", string.Empty)?.ToUpper();
+                    result = BitConverter.ToString(hash)?.Replace("-", string.Empty)?.ToUpper()!;
                 }
 
             }

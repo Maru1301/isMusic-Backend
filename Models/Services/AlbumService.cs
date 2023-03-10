@@ -57,6 +57,8 @@ namespace api.iSMusic.Models.Services
 		{
 			var album = _repository.GetAlbumById(albumId);
 
+			if (album == null) return album;
+
 			if(CheckIsLiked(albumId, memberId))
 			{
 				album.IsLiked = true;

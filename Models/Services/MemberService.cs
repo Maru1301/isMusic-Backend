@@ -424,30 +424,33 @@ namespace api.iSMusic.Models.Services
             return _memberRepository.GetMemberSubscriptionPlan(memberId)!;
         }
 
-        public (bool Success, string Message) SubscribedPlan(int memberId, SubscriptionPlanDTO dto, IEnumerable<string> emails)
+        public (bool Success, string Message) SubscribedPlan(int memberId, SubscribedPlanVM model)
         {
+            var SubscriptionPlan = _memberRepository.SubscriptionPlanLoad(model.SubscriptionPlanId);
             // TODO 如果有並過期 傳回訂閱已到期訊息
             //if (dto.SubscribedExpireTime < DateTime.Now) return (false, "訂閱已到期")            
             var date = DateTime.Now;
             var member = _memberRepository.Load(memberId);
             if (member.CreditCardId == null) return (false, "請先輸入信用卡資訊");
             if (memberId == 0) return (false, "找不到對應的會員記錄");
-            if (dto.Id == 0) return (false, "找不到對應的訂閱記錄");
+            if (SubscriptionPlan.Id == 0) return (false, "找不到對應的訂閱記錄");
 
-            if (emails == null) emails = Enumerable.Empty<string>();
-            if (dto.NumberOfUsers != emails.Count()+1)
+            if (model.Emails == null) model.Emails = Enumerable.Empty<string>();
+            if (SubscriptionPlan.NumberOfUsers != model.Emails.Count()+1)
             {
-                return (false, $"email數量不能超過{dto.NumberOfUsers}個");
+                return (false, $"email數量不符");
             }
             if (_memberRepository.SubscriptionRecordExist(memberId)) return (false, "已經訂閱過了");
 
-            _memberRepository.CreateSubscribedPlanRecord(memberId, dto, date);
+            _memberRepository.CreateSubscribedPlanRecord(memberId, SubscriptionPlan, date);
             var subscriptionRecord = _memberRepository.GetSubscriptionRecords(memberId);
             _memberRepository.CreateSubscriptionRecordDetail(subscriptionRecord.Id, memberId);
 
-            foreach (var email in emails)
+            foreach (var email in model.Emails)
             {
                 var memberForSubscrptionPlan = _memberRepository.GetByEmail(email);
+
+                if (memberForSubscrptionPlan == null) return (false, "輸入信箱中存在非會員信箱");
                 _memberRepository.CreateSubscriptionRecordDetail(subscriptionRecord.Id, memberForSubscrptionPlan.Id);
             }
             return (true, "訂閱成功");

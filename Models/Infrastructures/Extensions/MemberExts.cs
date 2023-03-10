@@ -37,9 +37,7 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
 
         public static MemberDTO ToDTO(this Member entity)
         {
-            return entity == null
-                ? null
-                : new MemberDTO
+            return new MemberDTO
                 {
                 Id = entity.Id,
                 MemberAccount = entity.MemberAccount,

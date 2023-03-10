@@ -179,12 +179,11 @@ namespace api.iSMusic.Controllers
 
 		[HttpPost]
 		[Route("SubscribePlan")]
-		public IActionResult SubscribedPlan([FromForm] SubscribedPlanVM source)
+		public IActionResult SubscribedPlan([FromForm] SubscribedPlanVM model)
 		{
-			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
-			var SubscriptionPlan = _memberRepository.SubscriptionPlanLoad(source.SubscriptionPlanId);
+			var memberId = this.GetMemberId();
       
-			var result = _memberService.SubscribedPlan(memberId, SubscriptionPlan, source.Emails);
+			var result = _memberService.SubscribedPlan(memberId, model);
 			return Ok(result.Message);
         }
 
