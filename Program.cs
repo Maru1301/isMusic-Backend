@@ -70,7 +70,7 @@ namespace api.isMusic
 				app.UseSwaggerUI();
 			}
 
-            app.UseCors("AllowAnyOrigin");
+            app.UseCors(MyAllowOrigins);
 
             app.UseHttpsRedirection();
             

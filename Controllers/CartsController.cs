@@ -7,6 +7,7 @@ using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace api.iSMusic.Controllers
 {
@@ -23,9 +24,9 @@ namespace api.iSMusic.Controllers
 
         [HttpGet]
         [Route("CartItem")]
-        public List<CartItemDTO> GetCartInfo(int memberId)
+        public List<CartItemDTO> GetCartInfo()
         {
-           
+            int memberId = int.Parse(HttpContext.User.Claims.First(claim=>claim.Type=="MemberId").Value);
             var data = _db.CartItems
                 .Include(x=>x.Cart)
                 .Include(x=>x.Product)
@@ -33,9 +34,11 @@ namespace api.iSMusic.Controllers
                 .Select(x=> new CartItemDTO
                 {
                     Id= x.Id,
+                    cartId=x.CartId,
                     ProductName=x.Product.ProductName,
                     ProductPrice=x.Product.ProductPrice,
-                    qty= x.Qty
+                    ProductId=x.ProductId,
+                    qty = x.Qty
                 }).ToList(); 
                 
 
@@ -55,11 +58,11 @@ namespace api.iSMusic.Controllers
         }
 
         [HttpDelete]
-        [Route("{cartMemberId}/Cart/{productId}")]
-        public IActionResult DeleteCarItem(int cartMemberId, int productId)
+        [Route("DeleteCart/{CartItemtId}")]
+        public IActionResult DeleteCarItem(int CartItemtId)
         {
-  
-            var data = _db.CartItems.FirstOrDefault(x => x.Cart.MemberId == cartMemberId && x.ProductId == productId);
+            int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
+            var data = _db.CartItems.FirstOrDefault(x => x.Cart.MemberId == memberId && x.Id == CartItemtId);
 
             if (data != null)
             {
@@ -67,7 +70,7 @@ namespace api.iSMusic.Controllers
                 _db.SaveChanges();
             };
 
-            var newdata = GetCartInfo(cartMemberId);
+            var newdata = GetCartInfo();
             return Ok(newdata);
 
         }
@@ -131,47 +134,81 @@ namespace api.iSMusic.Controllers
            
         }
 
-        [HttpPost]
-        [Route("{cartId}/Cart/{productId}")]
-        public IActionResult AddProductIntoCart(int numberqty ,int cartId, int productId)
+        //[HttpPost]
+        //[Route("Cart/{productId}")]
+        //public IActionResult AddProductIntoCart(int productId)
+        //{
+        //    int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
+        //    try
+        //    {
+        //        var cartItem = _db.CartItems
+        //            .Include(x => x.Cart)
+        //            .Include(x => x.Cart.Member)
+        //            .Where(x => x.Cart.MemberId == memberId && x.ProductId == productId)
+        //            .SingleOrDefault();
+
+        //        if (cartItem != null)
+        //        {
+        //            //cartItem.Qty++;
+        //            cartItem.Qty = cartItem.Qty + numberqty;
+        //            _db.SaveChanges();
+        //        }
+        //        else
+        //        {
+        //            var newCartItem = new CartItem
+        //            {
+                       
+
+        //            };
+        //            _db.CartItems.Add(newCartItem);
+        //            _db.SaveChanges();
+        //        }
+
+             
+
+        //        var newcart = GetCartInfo();
+
+        //        return Ok("已加入購物車");
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+
+
+        //}
+
+        [HttpPatch]
+        [Route("increaseCart/{productId}")]
+        public IActionResult increaseItemQuantity(int productId)
         {
+            int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
             try
             {
                 var cartItem = _db.CartItems
                     .Include(x => x.Cart)
                     .Include(x => x.Cart.Member)
-                    .Where(x => x.Cart.Id == cartId && x.ProductId == productId)
+                    .Where(x => x.Cart.MemberId == memberId && x.ProductId == productId)
                     .SingleOrDefault();
 
                 if (cartItem != null)
                 {
                     //cartItem.Qty++;
-                    cartItem.Qty = cartItem.Qty + numberqty;
+                    cartItem.Qty = cartItem.Qty + 1;
                     _db.SaveChanges();
                 }
                 else
                 {
-                    var newCartItem = new CartItem
-                    {
-                        CartId = cartId,
-                        ProductId = productId,
-                        Qty = numberqty,
 
-                    };
-                    _db.CartItems.Add(newCartItem);
+
                     _db.SaveChanges();
                 }
 
-                var memberId = _db.CartItems
-                    .Include(x => x.Cart)
-                    .Where(x => x.CartId == cartId)
-                    .Select(x => x.Cart.MemberId).First();
 
-                var newcart = GetCartInfo(memberId);
 
                 return Ok("已加入購物車");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -179,6 +216,43 @@ namespace api.iSMusic.Controllers
 
         }
 
+        [HttpPatch]
+        [Route("decreaseCart/{productId}")]
+        public IActionResult decreaseItemQuantity(int productId)
+        {
+            int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
+            try
+            {
+                var cartItem = _db.CartItems
+                    .Include(x => x.Cart)
+                    .Include(x => x.Cart.Member)
+                    .Where(x => x.Cart.MemberId == memberId && x.ProductId == productId)
+                    .SingleOrDefault();
+
+                if (cartItem != null)
+                {
+                    //cartItem.Qty++;
+                    cartItem.Qty = cartItem.Qty - 1;
+                    _db.SaveChanges();
+                }
+                else
+                {
+
+
+                    _db.SaveChanges();
+                }
+
+
+
+                return Ok("購物車數量減1");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+
+        }
 
     }
 }
