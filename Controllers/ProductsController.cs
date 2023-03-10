@@ -163,11 +163,11 @@ namespace api.iSMusic.Controllers
 
         [HttpGet]
         [Route("{productId}/Detail")]
-        public IEnumerable<ProductDetailDTO> GetProductsDetail(int productId)
+        public IActionResult GetProductsDetail(int productId)
         {
 
             var data = _db.Products
-                .Include(product => product.Album)//.ThenInclude(album => album.AlbumType)
+                .Include(product => product.Album)
                 .Include(product => product.Album.AlbumType)
                 .Include(product => product.Album.AlbumGenre)
                 .Include(product => product.Album.MainArtist)
@@ -183,8 +183,8 @@ namespace api.iSMusic.Controllers
                     Stock = product.Stock,
                     AlbumDetail = product.Album.ToDetailVM(), 
 
-                }).ToList();
-            return data;
+                }).Single();
+            return Ok(data);
         }
     }
 }

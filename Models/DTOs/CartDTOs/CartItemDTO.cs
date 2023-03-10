@@ -10,8 +10,11 @@ namespace api.iSMusic.Models.DTOs.CartDTOs
         public int Id { get; set; }
 
         public string ProductName { get; set; } = null!;
+        public int cartId { get; set; }
 
         public decimal ProductPrice { get; set; }
+
+        public int ProductId { get; set; }
 
         public int qty { get; set; }
 
