@@ -77,9 +77,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		public IEnumerable<SongInfoDTO> GetSongsByPlaylistId(int playlistId)
 		{
-			return _db.Songs
-				.Include(s => s.Album)
-				.Where(s => s.PlaylistSongMetadata.Select(m => playlistId).Contains(playlistId))
+			return _db.PlaylistSongMetadata
+				.Include(metadata => metadata.Song)
+					.ThenInclude(song => song.Album)
+				.Where(metadata => metadata.PlayListId == playlistId)
+				.OrderBy(metadata=> metadata.DisplayOrder)
+				.Select(metadata => metadata.Song)
 				.Select(song => new SongInfoDTO
 				{
 					Id = song.Id,

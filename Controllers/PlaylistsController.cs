@@ -93,12 +93,17 @@ namespace api.iSMusic.Controllers
             //Return a 201 Created status code along with the newly created playlist's information
             return Ok(playlistId);
         }
+		
+		public class ForceMode
+		{
+            public bool Value { get; set; }
+        }
 
         [HttpPost]
 		[Route("{playlistId}/Songs/{songId}")]
-		public IActionResult AddSongToPlaylist(int playlistId, int songId, [FromBody]bool Force)
+		public IActionResult AddSongToPlaylist(int playlistId, int songId, [FromBody]ForceMode Mode)
 		{
-			var result = _service.AddSongToPlaylist(playlistId, songId, Force);
+			var result = _service.AddSongToPlaylist(playlistId, songId, Mode.Value);
 
 			if (!result.Success)
 			{

@@ -270,9 +270,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			});
 		}
 
-        public LikedAlbum CheckIsLiked(int albumId, int memberId)
+        public LikedAlbum? CheckIsLiked(int albumId, int memberId)
 		{
-			return _db.LikedAlbums.Single(la => la.AlbumId == albumId && la.MemberId == memberId);
+			return _db.LikedAlbums.SingleOrDefault(la => la.AlbumId == albumId && la.MemberId == memberId);
 		}
     }
 }

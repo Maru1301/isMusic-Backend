@@ -97,12 +97,17 @@ namespace api.iSMusic.Controllers
 			return Ok(updatedQueue.ToIndexVM());
 		}
 
+		public class Condition
+		{
+			public string Value { get; set; } = null!;
+        }
+
 		[HttpPut]
 		[Route("{contentId}")]
-		public async Task<IActionResult> ChangeQueueContent(int contentId, [FromBody]string condition)
+		public async Task<IActionResult> ChangeQueueContent(int contentId, [FromBody] Condition condition)
 		{
 			int memberId = this.GetMemberId();
-			var result = _service.ChangeQueueContent(memberId, contentId, condition);
+			var result = _service.ChangeQueueContent(memberId, contentId, condition.Value);
 
 			if (!result.Success)
 			{
