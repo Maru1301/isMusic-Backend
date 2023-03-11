@@ -228,7 +228,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             member.MemberAddress = memberDTO.MemberAddress;
             member.MemberCellphone = memberDTO.MemberCellphone;
             member.MemberDateOfBirth = memberDTO.MemberDateOfBirth;
-            member.AvatarId = memberDTO.AvatarId;
+            //member.AvatarId = memberDTO.AvatarId;
             member.MemberReceivedMessage = memberDTO.MemberReceivedMessage;
             member.MemberSharedData = memberDTO.MemberSharedData;
             member.LibraryPrivacy = memberDTO.LibraryPrivacy;

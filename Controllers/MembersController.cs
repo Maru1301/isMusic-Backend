@@ -48,7 +48,7 @@ namespace api.iSMusic.Controllers
         [HttpPost]
         [Route("Register")]
 		[AllowAnonymous]
-        public IActionResult MemberRegister([FromForm] MemberRegisterVM member)
+        public IActionResult MemberRegister([FromBody] MemberRegisterVM member)
         {
             // email驗證網址
             string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActivateRegister?memberid={0}&confirmCode={1}";
@@ -160,6 +160,27 @@ namespace api.iSMusic.Controllers
                 return BadRequest(result.Message);
             }
 
+            return Ok(result.Message);
+        }
+
+		public class UpdateEmail
+		{
+			public string Email { get; set; } = null;
+        }
+        [HttpPatch]
+		[Route("UpdateEmail")]
+		public IActionResult UdateMemberEmail([FromForm] UpdateEmail email)
+		{
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = _memberService.UpdateEmail(memberId, email.Email);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
             return Ok(result.Message);
         }
 
