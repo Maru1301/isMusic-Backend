@@ -34,6 +34,19 @@ namespace BookStore.Site.Models.Infrastructures
             SendFromGmail(from, to, subject, body);
         }
 
+        public void ReSendConfirmEmail(string url, string NickName, string email)
+        {
+            string subject = "[驗證碼確認信]";
+            string body = $@"Hi {NickName},
+						<br />
+						請點擊此連結 [<a href='{url}' target='_blank'>的確是我</a>], 如果您沒有提出申請, 請忽略本信, 謝謝";
+
+            string from = senderEmail;
+            string to = email;
+
+            SendFromGmail(from, to, subject, body);
+        }
+
         public virtual void SendFromGmail(string from, string to, string subject, string body)
         {
             // todo 

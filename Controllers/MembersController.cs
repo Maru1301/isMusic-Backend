@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http.HttpResults;
 using BookStore.Site.Models.Infrastructures;
+using System.ComponentModel.DataAnnotations;
 
 namespace api.iSMusic.Controllers
 {
@@ -165,7 +166,9 @@ namespace api.iSMusic.Controllers
 
 		public class UpdateEmail
 		{
-			public string Email { get; set; } = null;
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; } = null;
         }
         [HttpPatch]
 		[Route("UpdateEmail")]
@@ -211,12 +214,12 @@ namespace api.iSMusic.Controllers
 
 		[HttpPatch]
 		[Route("ResendConfirmCode")]
-		public IActionResult ResendConfirmCode([FromForm] string newEmail)
+		public IActionResult ResendConfirmCode([FromForm] string email)
 		{
             var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
 
             string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActivateRegister?memberid={0}&confirmCode={1}";
-            var result = _memberService.ResendConfirmCode(memberId, newEmail, urlTemplate);
+            var result = _memberService.ResendConfirmCode(memberId, email, urlTemplate);
             return Ok(result.Message);
         }
 
