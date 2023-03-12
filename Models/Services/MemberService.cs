@@ -281,8 +281,17 @@ namespace api.iSMusic.Models.Services
             var dto = _memberRepository.GetMemberById(memberId).ToDTO();
             if (dto == null) return (false, "此帳號不存在");
             // TODO 驗證修改的資料(暱稱是否存在...)
-            member.Id= dto.Id;
+            member.Id = dto.Id;
             _memberRepository.UpdateMember(member);
+            return (true, "更新成功");
+        }
+        public (bool Success, string Message) UpdateEmail(int memberId, string email)
+        {
+            var emailExist = _memberRepository.EmailExist(email);
+            var dto = _memberRepository.GetMemberById(memberId).ToDTO();
+            if (dto == null) return (false, "此帳號不存在");
+            if (emailExist) return (false, "此信箱已存在");
+            _memberRepository.UpdateEmail(dto, email);
             return (true, "更新成功");
         }
 
