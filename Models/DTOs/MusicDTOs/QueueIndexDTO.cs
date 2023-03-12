@@ -18,6 +18,8 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
         public bool? IsRepeat { get; set; }
 
+        public bool InList { get; set; }
+
         public int? AlbumId { get; set; }
 
         public int? ArtistId { get; set; }

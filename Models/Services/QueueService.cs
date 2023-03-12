@@ -139,7 +139,6 @@ namespace api.iSMusic.Models.Services
                 (takeOrder, nextSongId) = _queueRepository.NextSong(memberId);
 
                 _songRepository.CreatePlayRecord(memberId, nextSongId);
-
             }
             catch (Exception ex)
             {

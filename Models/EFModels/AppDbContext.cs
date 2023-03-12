@@ -199,8 +199,6 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Creator>(entity =>
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
             entity.HasOne(d => d.Member).WithMany(p => p.Creators)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Creators_Members");
@@ -330,8 +328,6 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_Queues_Artists");
 
-            entity.HasOne(d => d.CurrentSongOrderNavigation).WithMany(p => p.Queues).HasConstraintName("FK_Queues_Songs");
-
             entity.HasOne(d => d.Member).WithMany(p => p.Queues)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Queues_Members");
@@ -428,15 +424,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<SubscriptionRecordDetail>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_SubscriptionRecordDetail");
-
-            entity.HasOne(d => d.Member).WithMany(p => p.SubscriptionRecordDetails)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SubscriptionRecordDetail_Members");
-
-            entity.HasOne(d => d.SubscriptionRecord).WithMany(p => p.SubscriptionRecordDetails)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SubscriptionRecordDetail_SubscriptionRecords");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
 
         OnModelCreatingPartial(modelBuilder);

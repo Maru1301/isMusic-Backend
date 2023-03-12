@@ -36,6 +36,9 @@ public partial class Queue
     [Column("artistId")]
     public int? ArtistId { get; set; }
 
+    [Column("inList")]
+    public bool InList { get; set; }
+
     [ForeignKey("AlbumId")]
     [InverseProperty("Queues")]
     public virtual Album? Album { get; set; }
@@ -43,10 +46,6 @@ public partial class Queue
     [ForeignKey("ArtistId")]
     [InverseProperty("Queues")]
     public virtual Artist? Artist { get; set; }
-
-    [ForeignKey("CurrentSongOrder")]
-    [InverseProperty("Queues")]
-    public virtual Song? CurrentSongOrderNavigation { get; set; }
 
     [ForeignKey("MemberId")]
     [InverseProperty("Queues")]
