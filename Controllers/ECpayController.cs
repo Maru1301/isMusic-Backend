@@ -33,13 +33,13 @@ namespace api.iSMusic.Controllers
                 { "MerchantTradeDate",  DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")},
 
                 //完成後發通知
-                { "ReturnURL",  "http://localhost:8080"},
+                { "ReturnURL",  "https://localhost:8080/shop.html#/"},
 
                 //付款完成後導頁
-                { "OrderResultURL", "http://localhost:8080" },
+                { "OrderResultURL", "https://localhost:8080/shop.html#/" },
 
                 //特店編號， 2000132 測試綠界編號
-                { "MerchantID",  "3002599"},
+                { "MerchantID",  "3002607"},
 
                 //交易類型 固定填入 aio
                 { "PaymentType",  "aio"},
@@ -75,10 +75,10 @@ namespace api.iSMusic.Controllers
             var checkValue = string.Join("&", param);
 
             //測試用的 HashKey
-            var hashKey = "spPjZn66i0OhqJsQ";
+            var hashKey = "pwFHCqoQZGmho4w6";
 
             //測試用的 HashIV
-            var HashIV = "hT5OJckN45isQTTs";
+            var HashIV = "EkRm7iFT261dpevs";
 
             checkValue = $"HashKey={hashKey}" + "&" + checkValue + $"&HashIV={HashIV}";
 
@@ -88,6 +88,8 @@ namespace api.iSMusic.Controllers
 
             return checkValue.ToUpper();
         }
+
+
 
         public string EncryptSHA256(string source)
         {
@@ -105,6 +107,115 @@ namespace api.iSMusic.Controllers
             }
             return result;
         }
+        public string DecryptAESHex(string source, string cryptoKey, string cryptoIV)
+        {
+            string result = string.Empty;
+
+            if (!string.IsNullOrEmpty(source))
+            {
+                // 將 16 進制字串 轉為 byte[] 後
+                byte[] sourceBytes = ToByteArray(source);
+
+                if (sourceBytes != null)
+                {
+                    // 使用金鑰解密後，轉回 加密前 value
+                    result = Encoding.UTF8.GetString(DecryptAES(sourceBytes, cryptoKey, cryptoIV)).Trim();
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 將16進位字串轉換為byteArray
+        /// </summary>
+        /// <param name="source">欲轉換之字串</param>
+        /// <returns></returns>
+        public byte[] ToByteArray(string source)
+        {
+            byte[] result = null;
+
+            if (!string.IsNullOrWhiteSpace(source))
+            {
+                var outputLength = source.Length / 2;
+                var output = new byte[outputLength];
+
+                for (var i = 0; i < outputLength; i++)
+                {
+                    output[i] = Convert.ToByte(source.Substring(i * 2, 2), 16);
+                }
+                result = output;
+            }
+
+            return result;
+        }
+        public byte[] DecryptAES(byte[] source, string cryptoKey, string cryptoIV)
+        {
+            byte[] dataKey = Encoding.UTF8.GetBytes(cryptoKey);
+            byte[] dataIV = Encoding.UTF8.GetBytes(cryptoIV);
+
+            using (var aes = System.Security.Cryptography.Aes.Create())
+            {
+                aes.Mode = System.Security.Cryptography.CipherMode.CBC;
+                // 智付通無法直接用PaddingMode.PKCS7，會跳"填補無效，而且無法移除。"
+                // 所以改為PaddingMode.None並搭配RemovePKCS7Padding
+                aes.Padding = System.Security.Cryptography.PaddingMode.None;
+                aes.Key = dataKey;
+                aes.IV = dataIV;
+
+                using (var decryptor = aes.CreateDecryptor())
+                {
+                    byte[] data = decryptor.TransformFinalBlock(source, 0, source.Length);
+                    int iLength = data[data.Length - 1];
+                    var output = new byte[data.Length - iLength];
+                    Buffer.BlockCopy(data, 0, output, 0, output.Length);
+                    return output;
+                }
+            }
+        }
+        public string EncryptAESHex(string source, string cryptoKey, string cryptoIV)
+        {
+            string result = string.Empty;
+
+            if (!string.IsNullOrEmpty(source))
+            {
+                var encryptValue = EncryptAES(Encoding.UTF8.GetBytes(source), cryptoKey, cryptoIV);
+
+                if (encryptValue != null)
+                {
+                    result = BitConverter.ToString(encryptValue)?.Replace("-", string.Empty)?.ToLower();
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 字串加密AES
+        /// </summary>
+        /// <param name="source">加密前字串</param>
+        /// <param name="cryptoKey">加密金鑰</param>
+        /// <param name="cryptoIV">cryptoIV</param>
+        /// <returns>加密後字串</returns>
+        public byte[] EncryptAES(byte[] source, string cryptoKey, string cryptoIV)
+        {
+            byte[] dataKey = Encoding.UTF8.GetBytes(cryptoKey);
+            byte[] dataIV = Encoding.UTF8.GetBytes(cryptoIV);
+
+            using (var aes = System.Security.Cryptography.Aes.Create())
+            {
+                aes.Mode = System.Security.Cryptography.CipherMode.CBC;
+                aes.Padding = System.Security.Cryptography.PaddingMode.PKCS7;
+                aes.Key = dataKey;
+                aes.IV = dataIV;
+
+                using (var encryptor = aes.CreateEncryptor())
+                {
+                    return encryptor.TransformFinalBlock(source, 0, source.Length);
+                }
+            }
+        }
+
     }
-    
+
 }

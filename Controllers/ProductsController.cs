@@ -85,7 +85,7 @@ namespace api.iSMusic.Controllers
 
         [HttpGet]
         [Route("SongGenre/{genreName}")]
-        public IEnumerable<ProductIndexDTO> GetSongsGenre([FromRoute] string genreName)
+        public IEnumerable<ProductIndexDTO> GetSongsGenre(string genreName)
         {
 
             var data = _db.Products
@@ -113,7 +113,7 @@ namespace api.iSMusic.Controllers
         [Route("ProductSearch/{words}")]
         public IEnumerable<ProductIndexDTO> GetProductSearch([FromRoute] string words , [FromQuery] string Sort)
         {
-            if (Sort == "artist")
+            if (Sort == "歌手")
             {
 
                 var data = _db.Products

@@ -1,5 +1,6 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.ViewModels.SongVMs;
+using System.ComponentModel.DataAnnotations;
 
 namespace api.iSMusic.Models.ViewModels.AlbumVMs
 {
@@ -19,6 +20,7 @@ namespace api.iSMusic.Models.ViewModels.AlbumVMs
 
 		public string? AlbumGenreName { get; set; }
 
+		[DisplayFormat(DataFormatString ="{0:yyyy-MM-dd}",ApplyFormatInEditMode =true)]
 		public DateTime Released { get; set; }
 
 		public string Description { get; set; } = null!;

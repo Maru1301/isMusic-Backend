@@ -75,6 +75,30 @@ namespace api.iSMusic.Controllers
 
         }
 
+
+        [HttpDelete]
+        [Route("DeleteAllCart")]
+        public IActionResult DeleteAllCarItem()
+        {
+            int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
+            var data = _db.CartItems.FirstOrDefault(x => x.Cart.MemberId == memberId);
+
+            if (data != null)
+            {
+                _db.CartItems.Remove(data);
+                _db.SaveChanges();
+            };
+
+            var newdata = GetCartInfo();
+            return Ok(newdata);
+
+        }
+
+
+
+
+
+
         [HttpGet]
         [Route("Checkout")]
         public IActionResult GetCheckoutInfo(int memberId , int couponId)
@@ -252,6 +276,59 @@ namespace api.iSMusic.Controllers
             }
 
 
+        }
+
+        [HttpPost]
+        [Route("AddItem/{productId}/{quantity}")]
+        public IActionResult AddItemQuantity(int productId, int quantity)
+        {
+            int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
+            try
+            {
+                var cartItem = _db.CartItems
+                    .Include(x => x.Cart)
+                    .Include(x => x.Cart.Member)
+                    .Where(x => x.Cart.MemberId == memberId && x.ProductId == productId)
+                    .SingleOrDefault();
+
+                if (cartItem != null)
+                {
+                    cartItem.Qty += quantity;
+                }
+                else
+                {
+                    var cart = _db.Carts.FirstOrDefault(x => x.MemberId == memberId);
+
+                    if (cart == null)
+                    {
+                        return BadRequest("購物車不存在");
+                    }
+
+                    var product = _db.Products.FirstOrDefault(x => x.Id == productId);
+
+                    if (product == null)
+                    {
+                        return BadRequest("產品不存在");
+                    }
+
+                    cartItem = new CartItem
+                    {
+                        Cart = cart,
+                        Product = product,
+                        Qty = quantity
+                    };
+
+                    _db.Add(cartItem);
+                }
+
+                _db.SaveChanges();
+
+                return Ok("加入購物車");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
     }
