@@ -11,7 +11,13 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
 		public string ArtistPicPath { get; set; } = null!;
 
-		public List<SongIndexDTO> PopularSongs { get; set; } = null!;
+        public string About { get; set; } = null!;
+
+        public bool IsLiked { get; set; }
+
+        public int TotalFollowed { get; set; }
+
+        public List<SongIndexDTO> PopularSongs { get; set; } = null!;
 
 		public List<AlbumIndexDTO> PopularAlbums { get; set; } = null!;
 

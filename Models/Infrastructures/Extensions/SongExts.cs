@@ -56,6 +56,7 @@ public static class SongExts
             Id = source.Id,
             SongName = source.SongName,
             GenreName = source.GenreName,
+            Duration = source.Duration,
             IsExplicit = source.IsExplicit,
             SongCoverPath = webPicUrl + source.SongCoverPath,
             SongPath = webSongUrl + source.SongPath,
@@ -63,6 +64,7 @@ public static class SongExts
             PlayedTimes = source.PlayedTimes,
             Artistlist = source.Artistlist,
             Creatorlist = source.Creatorlist,
+            IsLiked = source.IsLiked,
         };
 
     public static SongInfoVM ToProductIndexInfoVM(this Song source)

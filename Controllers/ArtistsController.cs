@@ -44,7 +44,8 @@ namespace api.iSMusic.Controllers
 		[Route("{artistId}/Detail")]
 		public ActionResult<ArtistDetailVM> GetArtistDetail(int artistId)
 		{
-			var result = _service.GetArtistDetail(artistId);
+			int memberId = this.GetMemberId();
+			var result = _service.GetArtistDetail(artistId, memberId);
 			if (!result.Success)
 			{
 				return NotFound(result.Message);

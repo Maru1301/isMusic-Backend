@@ -50,6 +50,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					Id = s.Id,
 					SongName = s.SongName,
 					GenreName = s.Genre.GenreName,
+					Duration = s.Duration,
 					IsExplicit = s.IsExplicit,
 					SongCoverPath = s.SongCoverPath,
 					SongPath = s.SongPath,

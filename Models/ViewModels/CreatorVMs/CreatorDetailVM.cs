@@ -13,7 +13,13 @@ namespace api.iSMusic.Models.ViewModels.CreatorVMs
 
 		public string CreatorPicPath { get; set; } = null!;
 
-		public List<SongIndexVM> PopularSongs { get; set; } = null!;
+		public string About { get; set; } = null!;
+
+        public bool IsLiked { get; set; }
+
+        public int TotalFollows { get; set; }
+
+        public List<SongIndexVM> PopularSongs { get; set; } = null!;
 
 		public List<AlbumIndexVM> PopularAlbums { get; set; } = null!;
 

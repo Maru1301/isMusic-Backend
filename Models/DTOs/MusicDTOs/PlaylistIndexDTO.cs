@@ -14,6 +14,10 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
         public int TotalLikes { get; set; }
 
+        public bool IsLiked { get; set; }
+
+        public bool IsPublic { get; set; }
+
         public IEnumerable<PlaylistSongMetadatum> PlaylistSongMetadata { get; set; } = null!;
 	}
 }

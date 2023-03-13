@@ -132,7 +132,7 @@ namespace api.iSMusic.Controllers
 
 		[HttpPut]
 		[Route("{playlistId}/Detail")]
-		public IActionResult UpdatePlaylistDetail(int playlistId, [FromForm] PlaylistEditVM model)
+		public IActionResult UpdatePlaylistDetail(int playlistId, [FromForm]PlaylistEditVM model)
 		{
 			if (!ModelState.IsValid)
 			{

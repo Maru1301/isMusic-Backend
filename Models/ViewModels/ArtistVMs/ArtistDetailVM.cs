@@ -14,7 +14,13 @@ namespace api.iSMusic.Models.ViewModels.ArtistVMs
 
 		public string ArtistPicPath { get; set; } = null!;
 
-		public List<SongIndexVM> PopularSongs { get; set; } = new();
+        public string About { get; set; } = null!;
+
+        public bool IsLiked { get; set; }
+
+        public int TotalFollows { get; set; }
+
+        public List<SongIndexVM> PopularSongs { get; set; } = new();
 
 		public List<AlbumIndexVM> PopularAlbums { get; set; } = new();
 

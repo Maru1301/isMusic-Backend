@@ -43,11 +43,14 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
         public CreatorIndexDTO? GetCreatorById(int creatorId)
 		{
 			return _db.Creators
+				.Include(creator => creator.CreatorFollows)
 				.Select(creator => new CreatorIndexDTO
 				{
 					Id = creator.Id,
 					CreatorName = creator.CreatorName,
 					CreatorPicPath = creator.CreatorPicPath,
+					CreatorAbout = creator.CreatorAbout,
+					TotalFollows = creator.CreatorFollows.Count,
 				})
 				.SingleOrDefault(dto => dto.Id == creatorId);
 		}

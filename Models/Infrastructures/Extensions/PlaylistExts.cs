@@ -34,6 +34,7 @@ public static class PlaylistExts
 				? webUrl + source.PlaylistCoverPath
 				: "",
 			TotalLikes = source.TotalLikes,
+			IsLiked= source.IsLiked,
 		};
 
 	public static Playlist ToEntity(this PlaylistCreateVM source)

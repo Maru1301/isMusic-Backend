@@ -31,5 +31,7 @@
         public string? MainCreatorPicPath { get; set; }
 
         public int TotalLikes { get; set; }
+
+        public bool IsLiked { get; set; }
     }
 }

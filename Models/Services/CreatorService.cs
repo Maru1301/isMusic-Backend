@@ -38,22 +38,62 @@ namespace api.iSMusic.Models.Services
             return (true, dtos);
         }
 
-        public (bool Success, string Message, CreatorDetailDTO dto) GetCreatorDetail(int creatorId)
+        public (bool Success, string Message, CreatorDetailDTO dto) GetCreatorDetail(int creatorId, int memberId)
 		{
 			var creator = _creatorRepository.GetCreatorById(creatorId);
 			if (creator == null) return (false, "創作者不存在", new CreatorDetailDTO());
 
-			var popularSongs = _songRepository.GetPopularSongs(creatorId, CreatorMode);
+            var likedCreators = _creatorRepository.GetLikedCreators(memberId, new Controllers.MembersController.LikedQuery()).Select(lc => lc.Id);
 
-			var popularAlbums = _albumRepository.GetPopularAlbums(creatorId, CreatorMode);
+            if (likedCreators.Contains(creatorId))
+            {
+                creator.IsLiked = true;
+            }
 
-			var includedPlaylists = _playlistRepository.GetIncludedPlaylists(creatorId, CreatorMode);
+            var popularSongs = _songRepository.GetPopularSongs(creatorId, CreatorMode);
 
-			var dto = new CreatorDetailDTO
+            var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
+
+            foreach (var song in popularSongs)
+            {
+                if (likedSongIds.Contains(song.Id))
+                {
+                    song.IsLiked = true;
+                }
+            }
+
+            var popularAlbums = _albumRepository.GetPopularAlbums(creatorId, CreatorMode);
+
+            var likedAlbumIds = _albumRepository.GetLikedAlbums(memberId, new Controllers.MembersController.LikedQuery()).Select(la => la.Id);
+
+            foreach (var album in popularAlbums)
+            {
+                if (likedAlbumIds.Contains(album.Id))
+                {
+                    album.IsLiked = true;
+                }
+            }
+
+            var includedPlaylists = _playlistRepository.GetIncludedPlaylists(creatorId, CreatorMode);
+
+            var likedPlaylistIds = _playlistRepository.GetLikedPlaylists(memberId).Select(lp => lp.Id);
+
+            foreach (var playlist in includedPlaylists)
+            {
+                if (likedPlaylistIds.Contains(playlist.Id))
+                {
+                    playlist.IsLiked = true;
+                }
+            }
+
+            var dto = new CreatorDetailDTO
 			{
 				Id = creatorId,
 				CreatorName = creator.CreatorName,
 				CreatorPicPath = creator.CreatorPicPath!,
+                About = creator.CreatorAbout!,
+                IsLiked = creator.IsLiked,
+                TotalFollowed = creator.TotalFollows,
 				PopularSongs = popularSongs.ToList(),
 				PopularAlbums = popularAlbums.ToList(),
 				IncludedPlaylists = includedPlaylists.ToList(),

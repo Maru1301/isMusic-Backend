@@ -51,9 +51,10 @@ namespace api.iSMusic.Controllers
 
 		[HttpGet]
 		[Route("{creatorId}/Detail")]
-		public ActionResult<ArtistDetailVM> GetCreatorDetail(int creatorId)
+		public ActionResult<CreatorDetailVM> GetCreatorDetail(int creatorId)
 		{
-			var result = _service.GetCreatorDetail(creatorId);
+            int memberId = this.GetMemberId();
+			var result = _service.GetCreatorDetail(creatorId, memberId);
 			if (!result.Success)
 			{
 				return NotFound(result.Message);

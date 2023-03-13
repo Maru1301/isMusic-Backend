@@ -8,6 +8,10 @@
 
         public string ArtistPicPath { get; set; } = null!;
 
+        public string About { get;set; } = null!;
+
         public int TotalFollows { get; set; }
+
+        public bool IsLiked { get; set; }
     }
 }

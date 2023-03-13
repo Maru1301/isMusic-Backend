@@ -1,5 +1,6 @@
 ﻿using api.iSMusic.Models.ViewModels.ArtistVMs;
 using api.iSMusic.Models.ViewModels.CreatorVMs;
+using System.Reflection.Metadata.Ecma335;
 
 namespace api.iSMusic.Models.DTOs.MusicDTOs
 {
@@ -11,7 +12,11 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
 		public string GenreName { get; set; } = string.Empty;
 
-		public bool? IsExplicit { get; set; }
+        public int Duration { get; set; }
+
+        public bool? IsExplicit { get; set; }
+
+        public bool IsLiked { get; set; }
 
         public string SongCoverPath { get; set; } = string.Empty;
 

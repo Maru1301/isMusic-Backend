@@ -36,22 +36,62 @@ namespace api.iSMusic.Models.Services
 			return (true, dtos);
         }
 
-        public (bool Success, string Message, ArtistDetailDTO dto) GetArtistDetail(int artistId)
+        public (bool Success, string Message, ArtistDetailDTO dto) GetArtistDetail(int artistId, int memberId)
 		{
 			var artist = _artistRepository.GetArtistById(artistId);
 			if (artist == null) return (false, "表演者不存在", new ArtistDetailDTO());
 
+			var likedArtistIds = _artistRepository.GetLikedArtists(memberId, new Controllers.MembersController.LikedQuery()).Select(lar =>lar.Id);
+
+			if (likedArtistIds.Contains(artistId))
+			{
+				artist.IsLiked = true;
+			}
+
 			var popularSongs = _songRepository.GetPopularSongs(artistId, ArtistMode);
+
+			var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
+
+			foreach(var song in popularSongs)
+			{
+				if (likedSongIds.Contains(song.Id))
+				{
+					song.IsLiked = true;
+				}
+			}
 
 			var popularAlbums = _albumRepository.GetPopularAlbums(artistId, ArtistMode);
 
-			var includedPlaylists = _playlistRepository.GetIncludedPlaylists(artistId, ArtistMode);
+			var likedAlbumIds = _albumRepository.GetLikedAlbums(memberId, new Controllers.MembersController.LikedQuery()).Select(la => la.Id);
+
+			foreach(var album in popularAlbums)
+			{
+				if (likedAlbumIds.Contains(album.Id))
+				{
+					album.IsLiked = true;
+				}
+			}
+
+			var includedPlaylists = _playlistRepository.GetIncludedPlaylists(artistId, ArtistMode).Where(ip => ip.IsPublic);
+
+			var likedPlaylistIds = _playlistRepository.GetLikedPlaylists(memberId).Select(lp => lp.Id);
+
+			foreach(var playlist in includedPlaylists)
+			{
+				if (likedPlaylistIds.Contains(playlist.Id))
+				{
+					playlist.IsLiked = true;
+				}
+			}
 
 			var dto = new ArtistDetailDTO
 			{
 				Id= artistId,
 				ArtistName = artist.ArtistName,
 				ArtistPicPath = artist.ArtistPicPath,
+				About = artist.About,
+				IsLiked = artist.IsLiked,
+				TotalFollowed = artist.TotalFollows,
 				PopularSongs = popularSongs.ToList(),
 				PopularAlbums = popularAlbums.ToList(),
 				IncludedPlaylists = includedPlaylists.ToList(),

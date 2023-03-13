@@ -47,11 +47,14 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		public ArtistIndexDTO? GetArtistById(int artistId)
 		{
 			return _db.Artists
+				.Include(artist => artist.ArtistFollows)
 				.Select(artist => new ArtistIndexDTO
 				{
 					Id = artist.Id,
 					ArtistName= artist.ArtistName,
 					ArtistPicPath= artist.ArtistPicPath,
+					About = artist.ArtistAbout,
+					TotalFollows = artist.ArtistFollows.Count(),
 				})
 				.SingleOrDefault(dto => dto.Id == artistId);
 		}

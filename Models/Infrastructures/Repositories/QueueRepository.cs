@@ -348,10 +348,18 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 			if (queue.IsShuffle)
 			{
-				var queueSongs = _db.QueueSongs.Where(qs => qs.QueueId == queue.Id).ToList();
+				var queueSongs = _db.QueueSongs.Where(qs => qs.QueueId == queue.Id && qs.FromPlaylist).ToList();
 				int numOfSongs = queueSongs.Count;
 				var rand = new Random();
 				var orders = new HashSet<int>();
+
+				if (queue.InList)
+				{
+					var currentSong = queueSongs.Single(qs => qs.DisplayOrder == queue.CurrentSongOrder);
+					currentSong.ShuffleOrder = 1;
+					orders.Add(1);
+					queueSongs.Remove(currentSong);
+				}
 
 				foreach (var queueSong in queueSongs)
 				{

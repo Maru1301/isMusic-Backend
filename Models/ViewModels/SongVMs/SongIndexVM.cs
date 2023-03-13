@@ -13,9 +13,13 @@ namespace api.iSMusic.Models.ViewModels.SongVMs
 
 		public string GenreName { get; set; } = null!;
 
-		public bool? IsExplicit { get; set; }
+        public int Duration { get; set; }
 
-		public string SongCoverPath { get; set; } = null!;
+        public bool? IsExplicit { get; set; }
+
+        public bool IsLiked { get; set; }
+
+        public string SongCoverPath { get; set; } = null!;
 
 		public string SongPath { get; set; } = null!;
 

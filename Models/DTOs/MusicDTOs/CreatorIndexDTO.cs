@@ -10,6 +10,8 @@
         public string? CreatorAbout { get; set; }
         public string? CreatorCoverPath { get; set; }
 
+        public bool IsLiked { get; set; }
+
         public int TotalFollows { get; set; }
     }
 }

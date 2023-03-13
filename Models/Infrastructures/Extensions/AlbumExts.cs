@@ -24,6 +24,7 @@ public static class AlbumExts
 			MainCreatorName= source.MainCreatorName,
             MainCreatorPicPath = source.MainCreatorPicPath,
 			TotalLikes= source.TotalLikes,
+            IsLiked= source.IsLiked,
 		};
 
 	public static AlbumIndexDTO ToIndexDTO(this Album source)

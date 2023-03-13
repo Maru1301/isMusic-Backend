@@ -5,6 +5,7 @@ using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using static api.iSMusic.Controllers.MembersController;
 
 namespace api.iSMusic.Models.Infrastructures.Repositories
@@ -266,30 +267,46 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		public IEnumerable<PlaylistIndexDTO> GetIncludedPlaylists(int contentId, string mode, int rowNumber = 1)
 		{
-			var playlists = mode == "Artist" ? from playlist in _db.Playlists
-							join metadata in _db.PlaylistSongMetadata on playlist.Id equals metadata.PlayListId
-							join songArtistMetadata in _db.SongArtistMetadata on metadata.SongId equals songArtistMetadata.SongId
-							where songArtistMetadata.ArtistId == contentId
-							select new PlaylistIndexDTO
-							{
-								Id = playlist.Id,
-								ListName = playlist.ListName,
-								PlaylistCoverPath = playlist.PlaylistCoverPath,
-								MemberId = playlist.MemberId,
-								PlaylistSongMetadata = playlist.PlaylistSongMetadata,
-							} :
-							from playlist in _db.Playlists
-							join metadata in _db.PlaylistSongMetadata on playlist.Id equals metadata.PlayListId
-							join songCreatorMetadata in _db.SongCreatorMetadata on metadata.SongId equals songCreatorMetadata.SongId
-							where songCreatorMetadata.CreatorId == contentId
-							select new PlaylistIndexDTO
-							{
-								Id = playlist.Id,
-								ListName = playlist.ListName,
-								PlaylistCoverPath = playlist.PlaylistCoverPath,
-								MemberId = playlist.MemberId,
-								PlaylistSongMetadata = playlist.PlaylistSongMetadata,
-							};
+			IEnumerable<PlaylistIndexDTO> playlists;
+
+            if (mode == "Artist")
+			{
+				playlists = _db.Playlists
+					.Include(playlist => playlist.PlaylistSongMetadata)
+						.ThenInclude(metadata => metadata.Song)
+						.ThenInclude(song => song.SongArtistMetadata)
+						.ThenInclude(metadata => metadata.Artist)
+					.Select(playlist => new PlaylistIndexDTO()
+					{
+						Id = playlist.Id,
+						ListName = playlist.ListName,
+						PlaylistCoverPath = playlist.PlaylistCoverPath,
+						MemberId = playlist.MemberId,
+						PlaylistSongMetadata = playlist.PlaylistSongMetadata,
+						IsPublic = playlist.IsPublic,
+					})
+					.Where(dto => dto.PlaylistSongMetadata
+					.Select(metadata => metadata.Song).Select(song => song.SongArtistMetadata.Any(metadata => metadata.ArtistId == contentId)).Any(included => included == true));
+			}
+			else
+			{
+                playlists = _db.Playlists
+                    .Include(playlist => playlist.PlaylistSongMetadata)
+                        .ThenInclude(metadata => metadata.Song)
+                        .ThenInclude(song => song.SongArtistMetadata)
+                        .ThenInclude(metadata => metadata.Artist)
+                    .Select(playlist => new PlaylistIndexDTO()
+                    {
+                        Id = playlist.Id,
+                        ListName = playlist.ListName,
+                        PlaylistCoverPath = playlist.PlaylistCoverPath,
+                        MemberId = playlist.MemberId,
+                        PlaylistSongMetadata = playlist.PlaylistSongMetadata,
+                        IsPublic = playlist.IsPublic,
+                    })
+                    .Where(dto => dto.PlaylistSongMetadata
+                    .Select(metadata => metadata.Song).Select(song => song.SongCreatorMetadata.Any(metadata => metadata.CreatorId == contentId)).Any(included => included == true));
+            }
 
 			return playlists;
 		}
