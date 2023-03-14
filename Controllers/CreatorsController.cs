@@ -128,25 +128,17 @@ namespace api.iSMusic.Controllers
                 return NotFound("Creator not found");
             }
 
-            var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath)!.FullName;
-            var uploadpicpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Pics/";
-            var uploadcoverpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Covers/";
+            //var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath)!.FullName;
+            var uploadpicpath =  "https://localhost:44373/Uploads/Covers/";
+            var uploadcoverpath = "https://localhost:44373/Uploads/Covers/";
             if(!string.IsNullOrEmpty(creator.CreatorPicPath))
             {
-
-                if (System.IO.File.Exists(uploadpicpath + creator.CreatorPicPath))
-                {
-                    creator.CreatorPic = Convert.ToBase64String(System.IO.File.ReadAllBytes(uploadpicpath + creator.CreatorPicPath));
-                }
+                    creator.CreatorPic = uploadpicpath + creator.CreatorPicPath;
             }
 
             if (!string.IsNullOrEmpty(creator.CreatorCoverPath))
             {
-
-                if (System.IO.File.Exists(uploadcoverpath + creator.CreatorCoverPath))
-                {
-                    creator.CreatorCover = Convert.ToBase64String(System.IO.File.ReadAllBytes(uploadcoverpath + creator.CreatorCoverPath));
-                }
+                    creator.CreatorCover = uploadcoverpath + creator.CreatorCoverPath;
             }
            
 
@@ -471,32 +463,48 @@ namespace api.iSMusic.Controllers
         }
 
         [HttpPut]
-        [Route("{creatorId}/CreatorPage")]//創作者編輯個人資料	
-        public IActionResult CreatorUpdateProfile(int creatorId, [FromForm] CreatorUpdateProfileDTO dto)
+        [Route("CreatorPage")]//創作者編輯個人資料	
+        public IActionResult CreatorUpdateProfile( [FromForm] CreatorUpdateProfileDTO dto)
         {
-            //todo 上傳圖片功能
-            var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath)!.FullName;
-            var uploadpicpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Pics/";
-            var uploadcoverpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Covers/";
-            var picfileName = GetNewFileName(uploadpicpath, dto.Pic.FileName);
-            var coverfileName = GetNewFileName(uploadcoverpath, dto.Cover.FileName);
-            using (var stream = System.IO.File.Create(uploadpicpath + picfileName))
+            string? picfileName, coverfileName;
+            picfileName = coverfileName = null;
+
+
+			int memberId = this.GetMemberId();
+            var creator = _appDbContext.Creators.SingleOrDefault(x => x.MemberId == memberId);
+            if (creator == null)
             {
-                dto.Pic.CopyTo(stream);
+                return NotFound();
             }
-            using (var stream = System.IO.File.Create(uploadcoverpath + coverfileName))
+            int creatorId = creator.Id;
+			var parentroot = Directory.GetParent(_webHostEnvironment.ContentRootPath)!.FullName;
+			if (dto.Pic !=null)
             {
-                dto.Cover.CopyTo(stream);
-            }
-            var creator = _appDbContext.Creators
-                .Where(c => c.Id == creatorId)
-                .Select(c => new CreatorUpdateProfileDTO
-                {
-                    CreatorName = dto.CreatorName,
-                    CreatorAbout = dto.CreatorAbout,
-                    CreatorCoverPath = coverfileName,
-                    CreatorPicPath = picfileName,
-                }).ToList();
+				var uploadpicpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Covers/";
+				 picfileName = GetNewFileName(uploadpicpath, dto.Pic.FileName);
+				using (var stream = System.IO.File.Create(uploadpicpath + picfileName))
+				{
+					dto.Pic.CopyTo(stream);
+				}
+
+			}
+            if(dto.Cover != null)
+            {
+				var uploadcoverpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Covers/";
+				 coverfileName = GetNewFileName(uploadcoverpath, dto.Cover.FileName);
+				using (var stream = System.IO.File.Create(uploadcoverpath + coverfileName))
+				{
+					dto.Cover.CopyTo(stream);
+				}
+			}
+
+
+
+            creator.CreatorName = dto.CreatorName;
+            creator.CreatorAbout = dto.CreatorAbout;
+            creator.CreatorCoverPath = coverfileName;
+			creator.CreatorPicPath = picfileName;
+           
 
             _appDbContext.SaveChanges();
             return NoContent();
