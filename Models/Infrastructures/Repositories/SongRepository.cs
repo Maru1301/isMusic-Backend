@@ -77,9 +77,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		public IEnumerable<SongInfoDTO> GetSongsByPlaylistId(int playlistId)
 		{
-			return _db.Songs
-				.Include(s => s.Album)
-				.Where(s => s.PlaylistSongMetadata.Select(m => playlistId).Contains(playlistId))
+			return _db.PlaylistSongMetadata
+				.Include(metadata => metadata.Song)
+					.ThenInclude(song => song.Album)
+				.Where(metadata => metadata.PlayListId == playlistId)
+				.OrderBy(metadata=> metadata.DisplayOrder)
+				.Select(metadata => metadata.Song)
 				.Select(song => new SongInfoDTO
 				{
 					Id = song.Id,
@@ -145,10 +148,23 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.SingleOrDefault(song => song.Id == id);
 		}
 
-		public IEnumerable<SongInfoDTO> GetSongsByAlbumId(int albumId)
+        public SongIndexDTO? GetSongByQueueOrder(int memberId, int takeOrder)
+        {
+			var queue = _db.Queues
+				.Single(queue => queue.MemberId == memberId);
+
+			var songId = _db.QueueSongs
+				.Where(qs => qs.QueueId == queue.Id && ((queue.IsShuffle) ? qs.ShuffleOrder == takeOrder : qs.DisplayOrder == takeOrder))
+				.Single().SongId;
+
+			return GetSongById(songId);
+		}
+
+        public IEnumerable<SongInfoDTO> GetSongsByAlbumId(int albumId)
 		{
 			return _db.Songs
 				.Where(song => song.AlbumId == albumId)
+				.OrderBy(song => song.DisplayOrderInAlbum)
 				.Select(song => new SongInfoDTO
 				{
 					Id = song.Id,
@@ -187,7 +203,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.ToList();
 		}
 
-        public void CreatePlayRecord(int songId, int memberId)
+        public void CreatePlayRecord(int memberId, int songId)
         {
 			var newRecord = new SongPlayedRecord
 			{

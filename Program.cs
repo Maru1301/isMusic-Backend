@@ -2,59 +2,89 @@ using api.iSMusic.Models;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Repositories;
 using api.iSMusic.Models.Services.Interfaces;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace api.isMusic
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			var builder = WebApplication.CreateBuilder(args);
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
 
-			// Add services to the container.
+            string MyAllowOrigins = "AllowAny";
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(
+                        name: MyAllowOrigins,
+                        policy => policy.WithOrigins("http://localhost:8080")
+                           .AllowCredentials()
+                           .AllowAnyHeader()
+                           .AllowAnyMethod()
+                        );
+            });
 
-			builder.Services.AddControllers();
+            // Add Authentication services to the container.
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
+            {
+                option.Cookie.SameSite = SameSiteMode.None;
+                option.LoginPath = null;
+            });
 
-			// Get all repository types
-			var assembly = Assembly.GetExecutingAssembly();
-			var repositoryTypes = assembly.GetTypes()
-				.Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces().Any(i => i.Name == "IRepository"));
+            builder.Services.AddMvc(options =>
+            {
+                options.Filters.Add(new AuthorizeFilter());
+            });
 
-			// Register each type as a scoped service
-			foreach (var repositoryType in repositoryTypes)
-			{
-				var interfaceType = repositoryType.GetInterfaces().First(i => i.Name != "IRepository");
-				builder.Services.AddScoped(interfaceType, repositoryType);
-			}
+            builder.Services.AddControllers();
 
-			builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext")));
+            // Get all repository types
+            var assembly = Assembly.GetExecutingAssembly();
+            var repositoryTypes = assembly.GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces().Any(i => i.Name == "IRepository"));
 
-			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-			builder.Services.AddEndpointsApiExplorer();
-			builder.Services.AddSwaggerGen();
+            // Register each type as a scoped service
+            foreach (var repositoryType in repositoryTypes)
+            {
+                var interfaceType = repositoryType.GetInterfaces().First(i => i.Name != "IRepository");
+                builder.Services.AddScoped(interfaceType, repositoryType);
+            }
 
-			var app = builder.Build();
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext")));
 
-			// Configure the HTTP request pipeline.
-			if (app.Environment.IsDevelopment())
-			{
-				app.UseSwagger();
-				app.UseSwaggerUI();
-			}
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.Limits.MaxRequestBodySize = 100000000; // or whatever limit you want to set
+            });
+            var app = builder.Build();
 
-			app.UseHttpsRedirection();
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
 
-			//app.UseCookiePolicy();
-			
-			//app.UseAuthentication();
+            app.UseCors(MyAllowOrigins);
 
-			app.UseAuthorization();
+            app.UseHttpsRedirection();
 
-			app.MapControllers();
+            app.UseCookiePolicy();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
-			app.Run();
-		}
-	}
+            app.MapControllers();
+
+            app.Run();
+        }
+    }
 }

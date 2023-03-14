@@ -57,6 +57,9 @@ public partial class Song
     [Column("albumId")]
     public int? AlbumId { get; set; }
 
+    [Column("displayOrderInAlbum")]
+    public int? DisplayOrderInAlbum { get; set; }
+
     [ForeignKey("AlbumId")]
     [InverseProperty("Songs")]
     public virtual Album? Album { get; set; }

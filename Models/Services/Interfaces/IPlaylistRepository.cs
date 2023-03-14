@@ -21,7 +21,6 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		Task CreatePlaylistAsync(PlaylistCreateVM newPlaylist);
 
-		//check
 		Task<int> GetPlaylistIdByMemberIdAsync(int memberId);
 
 		PlaylistDetailDTO GetPlaylistById(int playlistId);

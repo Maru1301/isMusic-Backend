@@ -1,13 +1,24 @@
 ﻿using api.iSMusic.Models;
+using api.iSMusic.Models.DTOs.MemberDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services;
 using api.iSMusic.Models.Services.Interfaces;
+using api.iSMusic.Models.ViewModels.MemberVMs;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using api.iSMusic.Models.ViewModels.QueueVMs;
+using iSMusic.Models.Infrastructures;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http.HttpResults;
+using BookStore.Site.Models.Infrastructures;
 
 namespace api.iSMusic.Controllers
 {
@@ -23,25 +34,197 @@ namespace api.iSMusic.Controllers
 
 		private readonly IQueueRepository _queueRepository;
 
-		private readonly IAlbumRepository _albumRepository;
-
-		private readonly MemberService _memberService;
-
-		public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository , IQueueRepository queueRepository)
+		private readonly MemberService _memberService;		
+        
+        public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository, IQueueRepository queueRepository, IActivityRepository activityRepository)
 		{
 			_memberRepository = memberRepo;
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_albumRepository= albumRepository;
-			_memberService = new (_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository);
-		}
+			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository, queueRepository);			
+        }
+
+        [HttpPost]
+        [Route("Register")]
+		[AllowAnonymous]
+        public IActionResult MemberRegister([FromBody] MemberRegisterVM member)
+        {
+            // email驗證網址
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActivateRegister?memberid={0}&confirmCode={1}";
+
+
+            var result = _memberService.MemberRegister(member.ToMemberDTO(), urlTemplate);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
+        }
+
+        [HttpPost]
+        [Route("MemberLogin")]
+		[AllowAnonymous]
+		public IActionResult MemberLogin([FromBody]MemberLoginVM member)
+        {
+            var result = _memberService.MemberLogin(member.ToLoginDTO());
+
+			if (!result.Success)
+			{
+				return NotFound(result.Message);
+			}
+
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.claimsIdentity));
+            return Ok(result.Message);
+        }
+
+        [HttpPost("MemberLogOut")]
+        public IActionResult MemberLogOut()
+        {
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+			return Ok("登出成功");
+        }
+
+        [HttpGet]
+        [Route("ForgetPassword")]
+		[AllowAnonymous]
+		public IActionResult ForgetPassword(string email)
+        {
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ResetPassword?memberid={0}&confirmCode={1}";
+
+            var result = _memberService.RequestResetPassword(email, urlTemplate);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPatch]        
+        [Route("ResetPassword")]
+		[AllowAnonymous]
+		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromForm] MemberResetPasswordVM source)
+        {
+
+            var result = _memberService.ResetPassword(memberId, confirmCode, source.Password);
+            return Ok(result.Message);
+        }
 
 		[HttpGet]
-		[Route("{memberId}/Playlists")]
-		public ActionResult<IEnumerable<PlaylistIndexVM>> GetMemberPlaylists([FromRoute] int memberId, [FromQuery]InputQuery query)
+		[Route("SubscriptionPlan")]
+		public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan()
+		{			
+			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            var result = _memberService.GetMemberSubscriptionPlan(memberId);
+
+            return result;
+
+        }
+
+		[HttpGet]
+		[Route("Orders")]
+		public IEnumerable<OrderDTO> GetMemberOrder()
 		{
-			var dtos = _memberService.GetMemberPlaylists(memberId, query);
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            var result = _memberService.GetMemberOrder(memberId);
+
+			return result;
+		}
+
+        [HttpGet]
+        //[Route("{memberId}")]
+        public IActionResult GetMemberInfo()
+        {
+            // 取得 memberId
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            var member = _memberService.GetMemberInfo(memberId);
+            if (member == null)
+            {
+                return NotFound("Member not found");
+            }
+
+            return Ok(member);
+        }
+
+        [HttpPut]
+        //[Route("{memberId}")]
+        public IActionResult UpdateMember([FromForm] MemberEditVM member)
+        {
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = _memberService.UpdateMember(memberId, member.ToMemberDTO());
+
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
+        }
+
+		public class UpdateEmail
+		{
+			public string Email { get; set; } = null;
+        }
+        [HttpPatch]
+		[Route("UpdateEmail")]
+		public IActionResult UdateMemberEmail([FromForm] UpdateEmail email)
+		{
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = _memberService.UpdateEmail(memberId, email.Email);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Message);
+        }
+
+        [HttpGet]
+        [Route("ActivateRegister")]
+        [AllowAnonymous]
+        public IActionResult ActivateRegister(int memberId, string confirmCode)
+        {            
+            var result = _memberService.ActivateRegister(memberId, confirmCode);
+			if (!result.Success)
+			{
+				return Forbid(result.Message);
+			}
+
+            return Ok(result.Message);
+        }
+
+		[HttpPost]
+		[Route("SubscribePlan")]
+		public IActionResult SubscribedPlan([FromForm] SubscribedPlanVM model)
+		{
+			var memberId = this.GetMemberId();
+      
+			var result = _memberService.SubscribedPlan(memberId, model);
+			return Ok(result.Message);
+        }
+
+		[HttpPatch]
+		[Route("ResendConfirmCode")]
+		public IActionResult ResendConfirmCode([FromForm] string newEmail)
+		{
+            var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+
+            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActivateRegister?memberid={0}&confirmCode={1}";
+            var result = _memberService.ResendConfirmCode(memberId, newEmail, urlTemplate);
+            return Ok(result.Message);
+        }
+
+		[HttpGet]
+		[Route("Playlists")]
+		public IActionResult GetMemberPlaylists([FromQuery] InputQuery query)
+		{
+            int memberId = this.GetMemberId();
+            var dtos = _memberService.GetMemberPlaylists(memberId, query);
 
 			if (dtos == null)
 			{
@@ -50,7 +233,7 @@ namespace api.iSMusic.Controllers
 
 			return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
-
+		
 		public class InputQuery
 		{
 			public InputQuery()
@@ -70,41 +253,47 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/Playlists/{playlistName}")]
-		public IActionResult GetMemberPlaylistsByName(int memberId, string name, [FromQuery] int rowNumber = 2)
+		[Route("Playlists/{playlistName}")]
+		public IActionResult GetMemberPlaylistsByName(string name, [FromQuery] int rowNumber = 2)
 		{
-			var dto = _memberService.GetMemberPlaylistsByName(memberId, name, rowNumber);
+            int memberId = this.GetMemberId();
+            var dto = _memberService.GetMemberPlaylistsByName(memberId, name, rowNumber);
 
 			return Ok(dto);
 		}
 
 		[HttpGet]
-		[Route("{memberId}/Queue")]
-		public async Task<IActionResult> GetMemberQueue([FromRoute] int memberId)
+		[Route("Queue")]
+		public async Task<IActionResult> GetMemberQueue()
 		{
+			var memberId = Int32.Parse(HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == "MemberId")!.Value);
 			try
 			{
 				var member = await _memberRepository.GetMemberAsync(memberId);
 				if (member == null)
 				{
-					return NotFound(new { message = "Member not found" });
+					return NotFound("會員不存在");
 				}
 
 				var queue = await _queueRepository.GetQueueByMemberIdAsync(memberId);
 				if (queue == null)
 				{
-					return NotFound(new { message = "Queue not found for the given member" });
+					return NotFound("佇列不存在");
 				}
 
 				var queueSongIds = queue.SongInfos.Select(info => info.Id);
 
 				var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
 
-				foreach(int songId in queueSongIds)
+				foreach (int songId in queueSongIds)
 				{
-					if (likedSongIds.Contains(songId)){
-						queue.SongInfos.Single(info => info.Id == songId).IsLiked = true;
-					}
+					if (likedSongIds.Contains(songId))
+					{
+                        queue.SongInfos
+							.Where(info => info.Id == songId)
+							.ToList()
+							.ForEach(info => info.IsLiked = true);
+                    }
 				}
 
 				return Ok(queue.ToIndexVM());
@@ -116,11 +305,12 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/RecentlyPlayed")]
-		public IActionResult GetRecentlyPlayed(int memberId)
+		[Route("RecentlyPlayed")]
+		public IActionResult GetRecentlyPlayed()
 		{
-			//Check if the provided memberAccount is valid
-			if (memberId <= 0)
+            int memberId = this.GetMemberId();
+            //Check if the provided memberAccount is valid
+            if (memberId <= 0)
 			{
 				return BadRequest("Invalid member account");
 			}
@@ -138,24 +328,26 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/LikedArtists")]
-		public IActionResult GetLikedArtists(int memberId, [FromQuery] LikedQuery query)
+		[Route("LikedArtists")]
+		public IActionResult GetLikedArtists([FromQuery] LikedQuery query)
 		{
-			var result = _memberService.GetLikedArtists(memberId, query);
+            int memberId = this.GetMemberId();
+            var result = _memberService.GetLikedArtists(memberId, query);
 
 			if (!result.Success)
 			{
 				return BadRequest(result.Message);
 			}
 
-			return Ok(result.ArtistDtos.Select(dto=> dto.ToIndexVM()));
+			return Ok(result.ArtistDtos.Select(dto => dto.ToIndexVM()));
 		}
 
 		[HttpGet]
-		[Route("{memberId}/LikedCreators")]
-		public IActionResult GetLikedCreators(int memberId, [FromQuery] LikedQuery query)
+		[Route("LikedCreators")]
+		public IActionResult GetLikedCreators([FromQuery] LikedQuery query)
 		{
-			var result = _memberService.GetLikedCreators(memberId, query);
+            int memberId = this.GetMemberId();
+            var result = _memberService.GetLikedCreators(memberId, query);
 
 			if (!result.Success)
 			{
@@ -166,10 +358,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{memberId}/LikedAlbums")]
-		public IActionResult GetLikedAlbums(int memberId, [FromQuery] LikedQuery query)
+		[Route("LikedAlbums")]
+		public IActionResult GetLikedAlbums([FromQuery] LikedQuery query)
 		{
-			var result = _memberService.GetLikedAlbums(memberId, query);
+            int memberId = this.GetMemberId();
+            var result = _memberService.GetLikedAlbums(memberId, query);
 
 			if (!result.Success)
 			{
@@ -194,29 +387,27 @@ namespace api.iSMusic.Controllers
 			public string Input { get; set; }
 		}
 
-		[HttpPost]
-		[Route("{memberId}/Playlist")]
-		public async Task<IActionResult> CreatePlaylist([FromRoute] int memberId)
+		[HttpGet]
+		[Route("Activities")]
+		public IActionResult GetMemberFollowedActivities()
 		{
-			//Check if the provided memberAccount is valid
-			if (memberId <= 0)
+            int memberId = this.GetMemberId();
+            var result = _memberService.GetMemberFollowedActivities(memberId);
+			if (!result.Success)
 			{
-				return BadRequest("Invalid member account");
+				return BadRequest(result.Message);
 			}
 
-			var _playlistService = new PlaylistService(_playlistRepository, _songRepository, _albumRepository);
+			return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
 
-			var playlistId = await _playlistService.CreatePlaylistAsync(memberId);
-
-			//Return a 201 Created status code along with the newly created playlist's information
-			return Ok(playlistId);
-		}
+        }
 
 		[HttpPost]
-		[Route("{memberId}/LikedSongs/{songId}")]
-		public IActionResult AddLikedSong(int memberId, int songId)
+		[Route("LikedSongs/{songId}")]
+		public IActionResult AddLikedSong(int songId)
 		{
-			var result = _memberService.AddLikedSong(memberId, songId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.AddLikedSong(memberId, songId);
 
 			if (!result.Success)
 			{
@@ -227,10 +418,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{memberId}/LikedPlaylists/{playlistId}")]
-		public IActionResult AddLikedPlaylist(int memberId, int playlistId)
+		[Route("LikedPlaylists/{playlistId}")]
+		public IActionResult AddLikedPlaylist(int playlistId)
 		{
-			var result = _memberService.AddLikedPlaylist(memberId, playlistId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.AddLikedPlaylist(memberId, playlistId);
 
 			if (!result.Success)
 			{
@@ -241,10 +433,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{memberId}/LikedAlbums/{albumId}")]
-		public IActionResult AddLikedAlbum(int memberId, int albumId)
+		[Route("LikedAlbums/{albumId}")]
+		public IActionResult AddLikedAlbum(int albumId)
 		{
-			var result = _memberService.AddLikedAlbum(memberId, albumId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.AddLikedAlbum(memberId, albumId);
 
 			if (!result.Success)
 			{
@@ -255,10 +448,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpPost]
-		[Route("{memberId}/FollowedArtists/{artistId}")]
-		public IActionResult FollowArtist(int memberId, int artistId)
+		[Route("FollowedArtists/{artistId}")]
+		public IActionResult FollowArtist(int artistId)
 		{
-			var result = _memberService.FollowArtist(memberId, artistId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.FollowArtist(memberId, artistId);
 
 			if (!result.Success)
 			{
@@ -268,25 +462,27 @@ namespace api.iSMusic.Controllers
 			return Ok(result.Message);
 		}
 
-        [HttpPost]
-        [Route("{memberId}/FollowedCreators/{creatorId}")]
-        public IActionResult FollowCreator(int memberId, int creatorId)
-        {
+		[HttpPost]
+		[Route("FollowedCreators/{creatorId}")]
+		public IActionResult FollowCreator(int creatorId)
+		{
+            int memberId = this.GetMemberId();
             var result = _memberService.FollowCreator(memberId, creatorId);
 
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
 
-            return Ok(result.Message);
-        }
+			return Ok(result.Message);
+		}
 
-        [HttpDelete]
-		[Route("{memberId}/LikedSongs/{songId}")]
-		public IActionResult DeleteLikedSong(int memberId, int songId)
+		[HttpPost]
+		[Route("Activities/{activityId}/{attendDate}")]
+		public IActionResult FollowActivity(int activityId, DateTime attendDate)
 		{
-			var result = _memberService.DeleteLikedSong(memberId, songId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.FollowActivity(memberId, activityId, attendDate);
 
 			if (!result.Success)
 			{
@@ -297,10 +493,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpDelete]
-		[Route("{memberId}/LikedPlaylists/{playlistId}")]
-		public IActionResult DeleteLikedPlaylist(int memberId, int playlistId)
+		[Route("LikedSongs/{songId}")]
+		public IActionResult DeleteLikedSong(int songId)
 		{
-			var result = _memberService.DeleteLikedPlaylist(memberId, playlistId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.DeleteLikedSong(memberId, songId);
 
 			if (!result.Success)
 			{
@@ -311,10 +508,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpDelete]
-		[Route("{memberId}/LikedAlbums/{albumId}")]
-		public IActionResult DeleteLikedAlbum(int memberId, int albumId)
+		[Route("LikedPlaylists/{playlistId}")]
+		public IActionResult DeleteLikedPlaylist(int playlistId)
 		{
-			var result = _memberService.DeleteLikedAlbum(memberId, albumId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.DeleteLikedPlaylist(memberId, playlistId);
 
 			if (!result.Success)
 			{
@@ -325,10 +523,11 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpDelete]
-		[Route("{memberId}/FollowedArtists/{artistId}")]
-		public IActionResult UnfollowArtist(int memberId, int artistId)
+		[Route("LikedAlbums/{albumId}")]
+		public IActionResult DeleteLikedAlbum(int albumId)
 		{
-			var result = _memberService.UnfollowArtist(memberId, artistId);
+            int memberId = this.GetMemberId();
+            var result = _memberService.DeleteLikedAlbum(memberId, albumId);
 
 			if (!result.Success)
 			{
@@ -338,18 +537,49 @@ namespace api.iSMusic.Controllers
 			return Ok(result.Message);
 		}
 
-        [HttpDelete]
-        [Route("{memberId}/FollowedCreators/{creatorId}")]
-        public IActionResult UnfollowCreator(int memberId, int creatorId)
-        {
+		[HttpDelete]
+		[Route("FollowedArtists/{artistId}")]
+		public IActionResult UnfollowArtist(int artistId)
+		{
+            int memberId = this.GetMemberId();
+            var result = _memberService.UnfollowArtist(memberId, artistId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+
+		[HttpDelete]
+		[Route("FollowedCreators/{creatorId}")]
+		public IActionResult UnfollowCreator(int creatorId)
+		{
+            int memberId = this.GetMemberId();
             var result = _memberService.UnfollowCreator(memberId, creatorId);
 
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
 
-            return Ok(result.Message);
-        }
-    }
+			return Ok(result.Message);
+		}
+
+		[HttpDelete]
+		[Route("Activities/{activityId}")]
+		public IActionResult UnfollowActivity(int activityId)
+		{
+			int memberId = this.GetMemberId();
+			var result = _memberService.UnfollowActivity(memberId, activityId);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Message);
+			}
+
+			return Ok(result.Message);
+		}
+	}
 }

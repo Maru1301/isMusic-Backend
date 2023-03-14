@@ -113,17 +113,33 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		public PlaylistDetailDTO GetPlaylistById(int playlistId)
 		{
 			return _db.Playlists
-				.Include(p => p.PlaylistSongMetadata)
+				.Include(playlist => playlist.PlaylistSongMetadata)
+					.ThenInclude(metadata => metadata.Song)
+					.ThenInclude(song => song.Album)
+				.Include(playlist => playlist.PlaylistSongMetadata)
+					.ThenInclude(metadata => metadata.Song)
+					.ThenInclude(song => song.SongArtistMetadata)
+					.ThenInclude(sametadata => sametadata.Artist)
+                .Include(playlist => playlist.PlaylistSongMetadata)
+                    .ThenInclude(metadata => metadata.Song)
+                    .ThenInclude(song => song.SongCreatorMetadata)
+                    .ThenInclude(scmetadata => scmetadata.Creator)
+                .Include(playlist => playlist.Member)
+					.ThenInclude(member => member.Avatar)
+				.Include(playlist => playlist.LikedPlaylists)
 				.Select(playlist => new PlaylistDetailDTO
 				{
 					Id = playlist.Id,
 					ListName = playlist.ListName,
 					IsPublic = playlist.IsPublic,
 					MemberId = playlist.MemberId,
+					MemberName = playlist.Member.MemberNickName,
+					MemberPicPath = playlist.Member.Avatar!.Path,
 					PlaylistCoverPath = playlist.PlaylistCoverPath,
-					PlayListSongMetadata = playlist.PlaylistSongMetadata
+					TotalLikes = playlist.LikedPlaylists.Count,
+					Metadata = playlist.PlaylistSongMetadata
 						.OrderBy(metadata => metadata.DisplayOrder)
-						.Select(m => m.ToVM())
+						.Select(metadata => metadata.ToDTO())
 						.ToList()
 				})
 				.Single(p => p.Id == playlistId);

@@ -11,8 +11,6 @@ namespace API_practice.Models.ViewModels.PlaylistVMs
 
 		public IFormFile? PlaylistCover { get; set; }
 
-		public string? PlaylistCoverPath { get; set; }
-
 		public string? Description { get; set; }
 
 	}

@@ -12,8 +12,18 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
         public int MemberId { get; set; }
 
+        public string MemberName { get; set; } = null!;
+
+        public string MemberPicPath { get; set; } = null!;
+
         public bool IsPublic { get; set; }
 
-        public virtual List<PlaylistSongMetadataVM> PlayListSongMetadata { get; set; } = null!;
+        public bool IsLiked { get; set; }
+
+        public bool IsOwner { get; set; }
+
+        public int TotalLikes { get; set; }
+
+        public List<PlaylistSongMetadataDTO> Metadata { get; set; } = null!;
     }
 }

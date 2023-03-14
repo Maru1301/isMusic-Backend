@@ -6,7 +6,7 @@
 
         public string CreatorName { get; set; } = null!;
 
-        public string CreatorPicPath { get; set; } = null!;
+        public string? CreatorPicPath { get; set; }
         public string? CreatorAbout { get; set; }
         public string? CreatorCoverPath { get; set; }
 

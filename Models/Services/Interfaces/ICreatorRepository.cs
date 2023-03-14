@@ -6,7 +6,9 @@ namespace api.iSMusic.Models.Services.Interfaces
 {
     public interface ICreatorRepository
 	{
-		IEnumerable<CreatorIndexDTO> GetLikedCreators(int memberId, LikedQuery body);
+        IEnumerable<CreatorIndexDTO> GetRecommended();
+
+        IEnumerable<CreatorIndexDTO> GetLikedCreators(int memberId, LikedQuery body);
 
 		CreatorIndexDTO? GetCreatorById(int creatorId);
 

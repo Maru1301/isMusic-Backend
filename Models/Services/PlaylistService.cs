@@ -16,11 +16,15 @@ namespace api.iSMusic.Models.Services
 
 		private readonly IAlbumRepository _albumRepository;
 
-		public PlaylistService(IPlaylistRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository)
+
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        public PlaylistService(IPlaylistRepository repository, ISongRepository songRepository, IAlbumRepository albumRepository, IWebHostEnvironment webHostEnvironment)
 		{
 			_repository = repository;
 			_songRepository = songRepository;
 			_albumRepository = albumRepository;
+			_webHostEnvironment = webHostEnvironment;
 		}
 
 		public IEnumerable<PlaylistIndexDTO> GetRecommended()
@@ -44,29 +48,40 @@ namespace api.iSMusic.Models.Services
 			return await _repository.GetPlaylistIdByMemberIdAsync(memberId);
 		}
 
-		public (bool Success, string Message, PlaylistDetailVM PlaylistDetail) GetPlaylistDetail(int playlistId)
+		public (bool Success, string Message, PlaylistDetailDTO Dto) GetPlaylistDetail(int playlistId, int memberId)
 		{
-			if (playlistId <= 0) return (false, "非法的清單編號", new PlaylistDetailVM());
+			if (playlistId <= 0) return (false, "非法的清單編號", new PlaylistDetailDTO());
 
 			var playlist = _repository.GetPlaylistById(playlistId);
 			if (playlist == null)
 			{
-				return (false, "清單不存在", new PlaylistDetailVM());
+				return (false, "清單不存在", new PlaylistDetailDTO());
 			}
-			var memberId = playlist.MemberId;
-			var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
-			var songs = _songRepository.GetSongsByPlaylistId(playlistId);
-			var playlistDetailVM = playlist.ToDetailVM();
-			foreach (var metadata in playlistDetailVM.PlayListSongMetadata)
+			if(playlist.MemberId == memberId)
 			{
-				var song = songs.Single(s => s.Id == metadata.SongId).ToInfoVM();
+				playlist.IsOwner = true;
+			}
+			else
+			{
+				playlist.IsOwner = false;
+			}
+
+			var likedPlaylists = _repository.GetLikedPlaylists(memberId);
+			if(likedPlaylists.Select(playlist => playlist.Id).Contains(playlistId))
+			{
+				playlist.IsLiked = true;
+			}
+
+            var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
+            foreach (var song in playlist.Metadata.Select(metadata => metadata.Song))
+			{
 				if (likedSongIds.Contains(song.Id))
 				{
 					song.IsLiked = true;
 				}
-				metadata.Song = song;
 			}
-			return (true, string.Empty, playlistDetailVM);
+
+			return (true, string.Empty, playlist);
 		}
 
 		public IEnumerable<PlaylistIndexDTO> GetPlaylistsByName(string name, int rowNumber)
@@ -87,14 +102,16 @@ namespace api.iSMusic.Models.Services
 			var playlist = _repository.GetPlaylistById(playlistId);
 			if(playlist == null) return (false, "清單不存在");
 
-			var metadata = playlist.PlayListSongMetadata;
+			if (CheckSongExistence(songId) == false) return (false, "歌曲不存在");
 
-			if(!Force && metadata.Select(metadatum => metadatum.SongId).Contains(songId))
+			var metadata = playlist.Metadata;
+
+			if(Force == false && metadata.Select(metadatum => metadatum.Song.Id).Contains(songId))
 			{
-				return (false, string.Empty);
+				return (false, "歌曲已存在清單內");
 			}
 
-			var lastOrder = metadata != null ? metadata.Max(metadatum => metadatum.DisplayOrder) : 0;
+			var lastOrder = metadata.Count() != 0 ? metadata.Max(metadatum => metadatum.DisplayOrder) : 0;
 
 			_repository.AddSongToPlaylist(playlistId, songId, lastOrder);
 
@@ -109,7 +126,7 @@ namespace api.iSMusic.Models.Services
 			var album = _albumRepository.GetAlbumById(albumId);
 			if (album == null) return (false, "專輯不存在");
 
-			var songIdsInPlaylist = playlist.PlayListSongMetadata.Select(metadata => metadata.SongId).ToHashSet();
+			var songIdsInPlaylist = playlist.Metadata.Select(metadata => metadata.Song.Id).ToHashSet();
 
 			var selectedSongs = album.Songs.Select(song => song.Id).ToList();
 
@@ -130,7 +147,7 @@ namespace api.iSMusic.Models.Services
 				selectedSongs = selectedSongs.Where(songId => songIdsInPlaylist.Contains(songId) == false).ToList();
 			}
 
-			var metadata = playlist.PlayListSongMetadata;
+			var metadata = playlist.Metadata;
 
 			var newOrder = metadata != null ? metadata.Max(metadatum => metadatum.DisplayOrder)+1 : 0;
 
@@ -140,15 +157,16 @@ namespace api.iSMusic.Models.Services
 
 		public (bool Success, string Messgae) UpdatePlaylistDetail(int playlistId, PlaylistEditDTO dto)
 		{
-			if (CheckPlaylistExistence(playlistId)) return (false, "清單不存在");
+			if (CheckPlaylistExistence(playlistId) == false) return (false, "清單不存在");
 
 			if (dto.PlaylistCover != null)
 			{
-				var coverPath = "https://localhost:44373/Uploads/Covers";
+				var parentPath = Directory.GetParent(_webHostEnvironment.ContentRootPath)!.FullName;
+				var coverPath = Path.Combine(parentPath, "iSMusic.ServerSide/iSMusic/Uploads/Covers");
 
                 var fileName = Path.GetFileName(dto.PlaylistCover.FileName);
                 string newFileName = GetNewFileName(coverPath, fileName);
-                var fullPath = Path.Combine(coverPath, fileName);
+                var fullPath = Path.Combine(coverPath, newFileName);
 
                 using (var stream = new FileStream(fullPath, FileMode.Create))
 				{
@@ -162,7 +180,7 @@ namespace api.iSMusic.Models.Services
 			return (true, "更新成功");
 		}
 
-        private string GetNewFileName(string path, string fileName)
+        private static string GetNewFileName(string path, string fileName)
         {
             string ext = System.IO.Path.GetExtension(fileName); // 取得副檔名,例如".jpg"
             string newFileName;

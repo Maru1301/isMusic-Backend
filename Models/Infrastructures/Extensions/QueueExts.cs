@@ -14,11 +14,10 @@ namespace api.iSMusic.Models.Infrastructures.Extensions
 				IsShuffle= source.IsShuffle,
 				IsRepeat= source.IsRepeat,
 				MemberId= source.MemberId,
-				SongInfos = source.SongInfos,
+				SongInfos = source.SongInfos.Select(dto => dto.ToInfoVM()),
 				AlbumId= source.AlbumId,
 				ArtistId= source.ArtistId,
 				PlaylistId= source.PlaylistId,
 			};
-
 	}
 }

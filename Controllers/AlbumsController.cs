@@ -19,10 +19,10 @@ namespace api.iSMusic.Controllers
 
 		private readonly AlbumService _service;
 
-		public AlbumsController(IAlbumRepository repo)
+		public AlbumsController(IAlbumRepository repo, ISongRepository songRepository)
 		{
 			_repository = repo;
-			_service = new AlbumService(_repository);
+			_service = new AlbumService(_repository, songRepository);
 		}
 
 		[HttpGet]
@@ -57,7 +57,7 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
-		[Route("{albumName}")]
+		[Route("Search/{albumName}")]
 		public IActionResult GetAlbumByName(string albumName, [FromQuery]int rowNumber = 2)
 		{
             var result = _service.GetAlbumsByName(albumName, rowNumber);
@@ -77,14 +77,16 @@ namespace api.iSMusic.Controllers
 		[Route("{albumId}")]
 		public IActionResult GetAlbumById(int albumId)
 		{
-			var dto = _service.GetAlbumById(albumId);
+            int memberId = this.GetMemberId();
+
+            var dto = _service.GetAlbumById(albumId, memberId);
 
 			if(dto == null) return NotFound("專輯不存在");
 
 			return Ok(dto.ToDetailVM());
 		}
 		[HttpGet]
-		[Route("{AlbumTypes}")]
+		[Route("AlbumTypes")]
 		public IActionResult GetAlbumTypes()
 		{
 			var albumtypes = _repository.GetAlbumTypes();

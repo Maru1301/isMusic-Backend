@@ -1,6 +1,7 @@
 ﻿using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.QueueVMs;
+using api.iSMusic.Models.ViewModels.SongVMs;
 
 namespace api.iSMusic.Models.ViewModels.QueueVMs
 {
@@ -24,6 +25,6 @@ namespace api.iSMusic.Models.ViewModels.QueueVMs
 
 		public int? PlaylistId { get; set; }
 
-		public IEnumerable<SongInfoDTO> SongInfos { get; set; } = null!;
+		public IEnumerable<SongInfoVM> SongInfos { get; set; } = null!;
 	}
 }

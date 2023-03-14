@@ -26,5 +26,8 @@
 		public string? AlbumProducer { get; set; }
 
 		public string? AlbumCompany { get; set; }
-	}
+		public string? Cover { get; set; }
+		public int[]? SongList { get; set; }
+
+    }
 }

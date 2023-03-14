@@ -24,7 +24,19 @@ namespace api.iSMusic.Models.Services
 			_playlistRepository = playlistRepository;
 		}
 
-		public (bool Success, string Message, ArtistDetailDTO dto) GetArtistDetail(int artistId)
+        public (bool Success, IEnumerable<ArtistIndexDTO> Dtos) GetRecommended()
+		{
+			var dtos = _artistRepository.GetRecommended();
+
+			if(!dtos.Any())
+			{
+				return (false, dtos);
+			}
+
+			return (true, dtos);
+        }
+
+        public (bool Success, string Message, ArtistDetailDTO dto) GetArtistDetail(int artistId)
 		{
 			var artist = _artistRepository.GetArtistById(artistId);
 			if (artist == null) return (false, "表演者不存在", new ArtistDetailDTO());

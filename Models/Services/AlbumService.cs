@@ -9,14 +9,19 @@ namespace api.iSMusic.Models.Services
 	{
 		private readonly IAlbumRepository _repository;
 
-		public AlbumService(IAlbumRepository repo)
+		private readonly ISongRepository _songRepository;
+
+		public AlbumService(IAlbumRepository repo, ISongRepository songRepository)
 		{
 			_repository= repo;
+			_songRepository= songRepository;
 		}
 
 		public IEnumerable<AlbumIndexDTO> GetRecommended()
 		{
-			return _repository.GetRecommended();
+			var dtos = _repository.GetRecommended();
+			
+			return dtos;
 		}
 
 		public (bool Success, string Message, IEnumerable<AlbumIndexDTO> Dtos)GetAlbumsByGenreId(int genreId, int rowNumber)
@@ -27,6 +32,11 @@ namespace api.iSMusic.Models.Services
             }
 
             var dtos = _repository.GetAlbumsByGenreId(genreId, rowNumber);
+
+			foreach (var dto in dtos)
+			{
+                dto.AlbumCoverPath = "https://localhost:44373/Uploads/Covers/" + dto.AlbumCoverPath;
+            }
 
             return (true, string.Empty, dtos);
         }
@@ -43,9 +53,34 @@ namespace api.iSMusic.Models.Services
 			return (true, string.Empty, dtos);
 		}
 
-		public AlbumDetailDTO? GetAlbumById(int albumId)
+		public AlbumDetailDTO? GetAlbumById(int albumId, int memberId)
 		{
-			return _repository.GetAlbumById(albumId);
+			var album = _repository.GetAlbumById(albumId);
+
+			if (album == null) return album;
+
+			if(CheckIsLiked(albumId, memberId))
+			{
+				album.IsLiked = true;
+			}
+
+            var likedSongIds = _songRepository.GetLikedSongIdsByMemberId(memberId);
+            foreach (var song in album.Songs)
+            {
+                if (likedSongIds.Contains(song.Id))
+                {
+                    song.IsLiked = true;
+                }
+            }
+
+            return album;
+		}
+
+		private bool CheckIsLiked(int albumId, int memberId)
+		{
+			var metadata = _repository.CheckIsLiked(albumId, memberId);
+
+			return metadata != null;
 		}
 	}
 }

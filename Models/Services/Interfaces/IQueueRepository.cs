@@ -9,28 +9,28 @@ namespace api.iSMusic.Models.Services.Interfaces
 
 		QueueIndexDTO? GetQueueById(int queueId);
 
-		Queue? GetQueueByIdForCheck(int queueId);
+        Queue? GetQueueByMemberIdForCheck(int queueId);
 		
 		Task<QueueIndexDTO?> GetQueueByMemberIdAsync(int memberId);
 
-		void AddSongIntoQueue(int queueId, int songId);
+		void AddSongIntoQueue(int memberId, int songId);
 
-		void AddPlaylistIntoQueue(int queueId, int playlistId);
+		void AddPlaylistIntoQueue(int memberId, int playlistId);
 
-		void AddAlbumIntoQueue(int queueId, int albumId);
+		void AddAlbumIntoQueue(int memberId, int albumId);
 
-		void UpdateQueueBySong(int queueId, int Id);
+		void UpdateQueueBySong(int memberId, int Id);
 
-		void UpdateQueueBySongs(int queueId, List<int> SongIds, string fromWhere, int contentId);
+		void UpdateQueueBySongs(int memberId, List<int> SongIds, string fromWhere, int contentId);
 
 		void UpdateByDisplayOredr(int queueId, int displayOrder);
 
-        SongInfoDTO? NextSong(int queueId);
+        (int? TakeOrder, int NextSongId) NextSong(int memberId);
 
-        SongInfoDTO? PreviousSong(int queueId);
+        void PreviousSong(int memberId);
 
-		void ChangeShuffle(int queueId);
+		void ChangeShuffle(int memberId);
 
-		void ChangeRepeat(int queueId, string mode);
+		void ChangeRepeat(int queueId);
 	}
 }

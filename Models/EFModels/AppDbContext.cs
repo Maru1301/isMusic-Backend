@@ -49,8 +49,6 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Department> Departments { get; set; }
 
-    public virtual DbSet<LikedActivity> LikedActivities { get; set; }
-
     public virtual DbSet<LikedAlbum> LikedAlbums { get; set; }
 
     public virtual DbSet<LikedPlaylist> LikedPlaylists { get; set; }
@@ -91,6 +89,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<SubscriptionRecord> SubscriptionRecords { get; set; }
 
+    public virtual DbSet<SubscriptionRecordDetail> SubscriptionRecordDetails { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Activity>(entity =>
@@ -103,9 +103,7 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Activities_ActivityTypes");
 
-            entity.HasOne(d => d.CheckedBy).WithMany(p => p.Activities)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Activities_Admins");
+            entity.HasOne(d => d.CheckedBy).WithMany(p => p.Activities).HasConstraintName("FK_Activities_Admins");
         });
 
         modelBuilder.Entity<ActivityFollow>(entity =>
@@ -201,8 +199,6 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Creator>(entity =>
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
             entity.HasOne(d => d.Member).WithMany(p => p.Creators)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Creators_Members");
@@ -217,17 +213,6 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Member).WithMany(p => p.CreatorFollows)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CreatorFollows_Members");
-        });
-
-        modelBuilder.Entity<LikedActivity>(entity =>
-        {
-            entity.HasOne(d => d.Activity).WithMany(p => p.LikedActivities)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_LikedActivities_Activities");
-
-            entity.HasOne(d => d.Member).WithMany(p => p.LikedActivities)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_LikedActivities_Members");
         });
 
         modelBuilder.Entity<LikedAlbum>(entity =>
@@ -421,6 +406,11 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK_SongPlayedRecords_Songs");
         });
 
+        modelBuilder.Entity<SubscriptionPlan>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_SubscriptionPlan");
+        });
+
         modelBuilder.Entity<SubscriptionRecord>(entity =>
         {
             entity.HasOne(d => d.Member).WithMany(p => p.SubscriptionRecords)
@@ -430,6 +420,11 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.SubscriptionPlan).WithMany(p => p.SubscriptionRecords)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SubscriptionRecords_SubscriptionPlan");
+        });
+
+        modelBuilder.Entity<SubscriptionRecordDetail>(entity =>
+        {
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
 
         OnModelCreatingPartial(modelBuilder);

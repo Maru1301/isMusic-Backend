@@ -1,4 +1,7 @@
-﻿namespace api.iSMusic.Models.ViewModels.PlaylistVMs
+﻿using api.iSMusic.Models.DTOs.MusicDTOs;
+using api.iSMusic.Models.ViewModels.SongVMs;
+
+namespace api.iSMusic.Models.ViewModels.PlaylistVMs
 {
 	public class PlaylistDetailVM
 	{
@@ -8,10 +11,18 @@
 
 		public string? PlaylistCoverPath { get; set; }
 
-		public int MemberId { get; set; }
+		public string MemberName { get; set; } = null!;
 
-		public bool IsPublic { get; set; }
+		public string MemberPicPath { get; set; } = null!;
 
-		public virtual List<PlaylistSongMetadataVM> PlayListSongMetadata { get; set; } = null!;
+        public bool IsPublic { get; set; }
+
+        public bool IsLiked { get; set; }
+
+        public bool IsOwner { get; set; }
+
+        public int TotalLikes { get; set; }
+
+        public List<PlaylistSongMetadataVM> Metadata { get; set; } = null!;
 	}
 }

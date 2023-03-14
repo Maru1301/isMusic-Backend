@@ -18,5 +18,7 @@
         public bool Status { get; set; }
         public int? AlbumId { get; set; }
         public string? AlbumName { get; set; }
+        public string? Cover { get; set; }
+    
     }
 }

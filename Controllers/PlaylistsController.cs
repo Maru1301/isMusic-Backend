@@ -21,13 +21,13 @@ namespace api.iSMusic.Controllers
 
 		private readonly ISongRepository _songRepository;
 
-		private readonly PlaylistService _service;
+        private readonly PlaylistService _service;
 
-		public PlaylistsController(IPlaylistRepository repo, ISongRepository songRepository,IAlbumRepository albumRepository)
+		public PlaylistsController(IPlaylistRepository repo, ISongRepository songRepository,IAlbumRepository albumRepository, IWebHostEnvironment webHostEnvironment)
 		{
 			_repository = repo;
 			_songRepository = songRepository;
-			_service = new(_repository, _songRepository, albumRepository);
+			_service = new(_repository, _songRepository, albumRepository, webHostEnvironment);
 		}
 
 		[HttpGet]
@@ -41,19 +41,20 @@ namespace api.iSMusic.Controllers
 				return NoContent();
 			}
 
-			return Ok(recommendedPlaylists);
+			return Ok(recommendedPlaylists.Select(dto => dto.ToIndexVM()));
 		}
 
 		[HttpGet]
 		[Route("{playlistId}")]
-		public ActionResult<PlaylistDetailVM> GetPlaylistDetail(int playlistId)
+		public IActionResult GetPlaylistDetail(int playlistId)
 		{
-			var result = _service.GetPlaylistDetail(playlistId);
+			int memberId = this.GetMemberId();
+			var result = _service.GetPlaylistDetail(playlistId, memberId);
 			if (!result.Success)
 			{
 				return BadRequest(result.Message);
 			}
-			return result.PlaylistDetail;
+			return Ok(result.Dto.ToDetailVM());
 		}
 
 		/// <summary>
@@ -63,7 +64,7 @@ namespace api.iSMusic.Controllers
 		/// <param name="rowNumber">the default number is 1</param>
 		/// <returns>a list of playlists</returns>
 		[HttpGet]
-		[Route("{playlistName}")]
+		[Route("Search/{playlistName}")]
 		public ActionResult<IEnumerable<PlaylistIndexVM>> GetPlaylistsByName([FromRoute] string playlistName, [FromQuery]int rowNumber = 2)
 		{
 			var data = _service.GetPlaylistsByName(playlistName, rowNumber);
@@ -71,11 +72,38 @@ namespace api.iSMusic.Controllers
 			return Ok(data.Select(p => p.ToIndexVM()));
 		}
 
-		[HttpPost]
-		[Route("{playlistId}/Songs/{songId}")]
-		public IActionResult AddSongToPlaylist(int playlistId, int songId, [FromBody]bool Force)
+		private int GetMemberId()
 		{
-			var result = _service.AddSongToPlaylist(playlistId, songId, Force);
+            return Int32.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
+        }
+
+        [HttpPost]
+        [Route("NewList")]
+        public async Task<IActionResult> CreatePlaylist()
+        {
+			int memberId = GetMemberId();
+            //Check if the provided memberAccount is valid
+            if (memberId <= 0)
+            {
+                return BadRequest("Invalid member account");
+            }
+
+            var playlistId = await _service.CreatePlaylistAsync(memberId);
+
+            //Return a 201 Created status code along with the newly created playlist's information
+            return Ok(playlistId);
+        }
+		
+		public class ForceMode
+		{
+            public bool Value { get; set; }
+        }
+
+        [HttpPost]
+		[Route("{playlistId}/Songs/{songId}")]
+		public IActionResult AddSongToPlaylist(int playlistId, int songId, [FromBody]ForceMode Mode)
+		{
+			var result = _service.AddSongToPlaylist(playlistId, songId, Mode.Value);
 
 			if (!result.Success)
 			{

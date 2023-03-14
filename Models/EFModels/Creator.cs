@@ -18,18 +18,18 @@ public partial class Creator
     public string CreatorName { get; set; } = null!;
 
     [Column("creatorGender")]
-    public byte CreatorGender { get; set; }
+    public byte? CreatorGender { get; set; }
 
     [Column("creatorAbout")]
     [StringLength(500)]
-    public string CreatorAbout { get; set; } = null!;
+    public string? CreatorAbout { get; set; }
 
     [Column("memberId")]
     public int MemberId { get; set; }
 
     [Column("creatorPicPath")]
     [StringLength(100)]
-    public string CreatorPicPath { get; set; } = null!;
+    public string? CreatorPicPath { get; set; }
 
     [Column("creatorCoverPath")]
     [StringLength(100)]

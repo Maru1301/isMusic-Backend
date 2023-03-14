@@ -6,6 +6,7 @@ using api.iSMusic.Models.Services;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.PlaylistVMs;
 using api.iSMusic.Models.ViewModels.SongVMs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,12 +28,13 @@ namespace api.iSMusic.Controllers
 		}
 
 		[HttpGet]
+		[AllowAnonymous]
 		[Route("Popular")]
-		public ActionResult<IEnumerable<SongIndexVM>> GetPopularSongs()
+		public ActionResult<IEnumerable<SongIndexVM>> GetPopularSongs([FromQuery]int rowNumber)
 		{
-			var data = _repository.GetPopularSongs();
+			var dtos = _repository.GetPopularSongs(0, "", rowNumber);
 
-			return Ok(data.Select(dto => dto.ToIndexVM()));
+            return Ok(dtos.Select(dto => dto.ToIndexVM()));
 		}
 
 		[HttpGet]

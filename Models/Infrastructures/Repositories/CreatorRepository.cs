@@ -1,8 +1,10 @@
 ﻿using api.iSMusic.Controllers;
 using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Extensions;
 using api.iSMusic.Models.Services.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace api.iSMusic.Models.Infrastructures.Repositories
@@ -20,7 +22,25 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			_db = db;
 		}
 
-		public CreatorIndexDTO? GetCreatorById(int creatorId)
+        public IEnumerable<CreatorIndexDTO> GetRecommended()
+        {
+            var dtos = _db.Creators
+                .Include(creator => creator.CreatorFollows)
+                .Select(creator => new CreatorIndexDTO
+				{
+                    Id = creator.Id,
+                    CreatorName = creator.CreatorName,
+                    CreatorPicPath = creator.CreatorPicPath,
+                    TotalFollows = creator.CreatorFollows.Count,
+                })
+                .OrderByDescending(dto => dto.TotalFollows)
+                .Take(takeNumber)
+                .ToList();
+
+            return dtos;
+        }
+
+        public CreatorIndexDTO? GetCreatorById(int creatorId)
 		{
 			return _db.Creators
 				.Select(creator => new CreatorIndexDTO

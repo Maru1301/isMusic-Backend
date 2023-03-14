@@ -1,4 +1,6 @@
 ﻿using api.iSMusic.Models.DTOs;
+using api.iSMusic.Models.DTOs.MemberDTOs;
+using api.iSMusic.Models.DTOs.MusicDTOs;
 using api.iSMusic.Models.EFModels;
 
 namespace api.iSMusic.Models.Services.Interfaces
@@ -7,7 +9,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 	{
 		Member? GetMemberById(int memberId);
 
-		Task<Member?> GetMemberAsync(int memberId);
+        Task<Member?> GetMemberAsync(int memberId);
 
 		void AddLikedSong(int memberId, int songId);
 
@@ -28,6 +30,44 @@ namespace api.iSMusic.Models.Services.Interfaces
 		void UnfollowArtist(int memberId, int artistId);
 
 		void UnfollowCreator(int memberId, int creatorId);
+
+        MemberDTO? GetByEmail(string email);
+
+        MemberDTO GetByAccount(string Account);
+
+        void UpdateMember(MemberDTO memberDTO);
+
+        MemberDTO? GetMemberInfo(int memberId);
+
+        MemberDTO Load(int memberId);
+
+        SubscriptionPlanDTO SubscriptionPlanLoad(int SubscriptionPlanId);
+
+        void MemberRegister(MemberRegisterDTO source);
+
+        bool IsExist(string account);
+
+        bool NickNameExist(string nickName);
+
+        bool EmailExist(string email);
+
+        bool SubscriptionRecordExist(int memberId);
+
+        void ActivateRegister(int memberId);
+
+        void UpdatePassword(int memberId, string newEncryptedPassword);
+
+        IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId);
+
+        void CreateSubscribedPlanRecord(int memberId, SubscriptionPlanDTO subscriptionPlan, DateTime addDate);
+
+        void CreateSubscriptionRecordDetail(int subscriptionRecordId, int memberForSubscrptionPlanId);
+
+        IEnumerable<OrderDTO> GetMemberOrder(int memberId);
+
+        void UpdateEmail(MemberDTO dto, string email);
+
+        SubscriptionRecordsDTO GetSubscriptionRecords(int memberId);
 
     }
 }

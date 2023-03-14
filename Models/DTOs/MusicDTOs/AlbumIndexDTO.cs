@@ -22,9 +22,13 @@
 
         public string? MainArtistName { get; set; }
 
+        public string? MainArtistPicPath { get; set; }
+
         public int? MainCreatorId { get; set; }
 
         public string? MainCreatorName { get; set; }
+
+        public string? MainCreatorPicPath { get; set; }
 
         public int TotalLikes { get; set; }
     }

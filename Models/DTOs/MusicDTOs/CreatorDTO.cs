@@ -8,6 +8,7 @@
         public string? CreatorPicPath { get; set; }
         public string? CreatorCoverPath { get; set; }
         public int TotalFollows { get; set; }
-
+        public string? CreatorPic { get; set; }
+        public string? CreatorCover { get; set; }
     }
 }
