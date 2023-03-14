@@ -179,8 +179,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 			IEnumerable<Album> albums = query.Condition switch
 			{
-				"RecentlyAdded" => likeds.OrderByDescending(liked => liked.Created).Select(liked => liked.Album),
-				"Alphatically" => likeds.Select(liked => liked.Album)
+                "RecentlyAdded" => likeds.OrderByDescending(liked => liked.Created).Select(liked => liked.Album),
+				"Alphabetically" => likeds.Select(liked => liked.Album)
 										.OrderBy(album => album.AlbumName),
 				_ => new List<Album>(),
 			};

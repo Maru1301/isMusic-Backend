@@ -345,10 +345,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			var queue = _db.Queues.Single(queue => queue.MemberId == memberId);
 
 			queue.IsShuffle = !queue.IsShuffle;
+            var queueSongs = _db.QueueSongs.Where(qs => qs.QueueId == queue.Id && qs.FromPlaylist).ToList();
 
-			if (queue.IsShuffle)
+            if (queue.IsShuffle)
 			{
-				var queueSongs = _db.QueueSongs.Where(qs => qs.QueueId == queue.Id && qs.FromPlaylist).ToList();
+				
 				int numOfSongs = queueSongs.Count;
 				var rand = new Random();
 				var orders = new HashSet<int>();
@@ -356,8 +357,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				if (queue.InList)
 				{
 					var currentSong = queueSongs.Single(qs => qs.DisplayOrder == queue.CurrentSongOrder);
-					currentSong.ShuffleOrder = 1;
-					orders.Add(1);
+					currentSong.ShuffleOrder = queue.CurrentSongOrder;
+					orders.Add(queue.CurrentSongOrder);
 					queueSongs.Remove(currentSong);
 				}
 
@@ -372,6 +373,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 					queueSong.ShuffleOrder = order;
 				}
 			}
+			else
+			{
+                var currentSong = queueSongs.Single(qs => qs.ShuffleOrder == queue.CurrentSongOrder);
+				queue.CurrentSongOrder = currentSong.DisplayOrder;
+            }
 
 			_db.SaveChanges();
 		}
@@ -383,6 +389,15 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			queue.IsRepeat = !queue.IsRepeat;
 
             _db.SaveChanges();
+		}
+
+        public void SavePlayTime(int memberId, int time)
+		{
+			var queue = _db.Queues.Single(queue => queue.MemberId == memberId);
+
+			queue.CurrentSongTime = time;
+
+			_db.SaveChanges();
 		}
 
         public (int? TakeOrder, int NextSongId) NextSong(int memberId)

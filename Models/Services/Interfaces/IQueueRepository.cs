@@ -32,5 +32,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 		void ChangeShuffle(int memberId);
 
 		void ChangeRepeat(int queueId);
-	}
+
+        void SavePlayTime(int memberId, int time);
+    }
 }

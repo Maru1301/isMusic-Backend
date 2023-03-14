@@ -33,11 +33,6 @@ namespace api.iSMusic.Models.Services
 
             var dtos = _repository.GetAlbumsByGenreId(genreId, rowNumber);
 
-			foreach (var dto in dtos)
-			{
-                dto.AlbumCoverPath = "https://localhost:44373/Uploads/Covers/" + dto.AlbumCoverPath;
-            }
-
             return (true, string.Empty, dtos);
         }
 

@@ -85,7 +85,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				"RecentlyAdded" => follows
 										.OrderByDescending(follow => follow.Created)
 										.Select(follow => follow.Artist),
-				"Alphatically" => follows
+				"Alphabetically" => follows
 										.Select(follows => follows.Artist)
 										.OrderBy(artist => artist.ArtistName),
 				_ => new List<Artist>(),

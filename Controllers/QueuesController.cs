@@ -214,6 +214,18 @@ namespace api.iSMusic.Controllers
             return Ok(queue.ToIndexVM());
         }
 
+		[HttpPatch]
+		[Route("SavePlayTime/{time}")]
+		public IActionResult SavePlayTime(int time)
+		{
+			int memberId = this.GetMemberId();
+
+			_repository.SavePlayTime(memberId, time);
+
+
+			return Ok();
+		}
+
         private QueueIndexDTO ProcessLikedSongs(QueueIndexDTO updatedQueue)
         {
             var queueSongIds = updatedQueue.SongInfos.Select(info => info.Id);
