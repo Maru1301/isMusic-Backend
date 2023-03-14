@@ -2,7 +2,7 @@
 {
     public class CreateAlbumbyCreatorDTO
     {
-		//public int Id { get; set; }
+		public int? Id { get; set; }
 
 		public string AlbumName { get; set; } = null!;
 
@@ -33,6 +33,7 @@
 		public string? AlbumCompany { get; set; }
 
 		public IFormFile? Cover { get; set; }
+		public int[]? SongList { get; set; }
 
 	}
 }

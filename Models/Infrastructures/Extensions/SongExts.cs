@@ -74,4 +74,12 @@ public static class SongExts
             SongName = source.SongName,
             DisplayOrderInAlbum=source.DisplayOrderInAlbum,
         };
+
+    public static SongInfoVM ToProductIndexInfoVM(this Song source)
+        => new()
+        {
+            Id = source.Id,
+            SongName = source.SongName,
+            DisplayOrderInAlbum=source.DisplayOrderInAlbum,
+        };
 }
