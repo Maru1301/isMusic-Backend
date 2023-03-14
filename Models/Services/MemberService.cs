@@ -470,19 +470,19 @@ namespace api.iSMusic.Models.Services
             return _memberRepository.GetMemberOrder(memberId)!;
         }
 
-        public(bool Success, string Message) ResendConfirmCode(int memberId, string newEmail, string urlTemplate)
+        public(bool Success, string Message) ResendConfirmCode(int memberId, string email, string urlTemplate)
         {
             var dto = _memberRepository.GetMemberById(memberId)!.ToDTO();
             string confirmCode = Guid.NewGuid().ToString("N");
             dto!.ConfirmCode = confirmCode;
             
-            if (_memberRepository.EmailExist(newEmail))
-            {
-                return (false, "信箱已存在");
-            }
-            _memberRepository.UpdateEmail(dto, newEmail);
+            //if (_memberRepository.EmailExist(newEmail))
+            //{
+            //    return (false, "信箱已存在");
+            //}
+            _memberRepository.UpdateEmail(dto, email);
             string url = string.Format(urlTemplate, memberId, confirmCode);
-            new EmailHelper().SendForgetPasswordEmail(url, dto.MemberAccount, newEmail);
+            new EmailHelper().ReSendConfirmEmail(url, dto.MemberAccount, email);
             return (true, "已重新發送信件");
 
         }
