@@ -22,9 +22,8 @@ namespace api.iSMusic.Models.ViewModels.AlbumVMs
 
 		[DisplayFormat(DataFormatString ="{0:yyyy-MM-dd}",ApplyFormatInEditMode =true)]
 		public DateTime Released { get; set; }
-        public bool IsLiked { get; set; }
 
-        public DateTime Released { get; set; }
+        public bool IsLiked { get; set; }
 
 		public string Description { get; set; } = null!;
 
