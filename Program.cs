@@ -22,7 +22,7 @@ namespace api.isMusic
 			{
 				options.AddPolicy(
 						name: MyAllowOrigins,
-						policy => policy.WithOrigins("https://localhost:8080")
+						policy => policy.WithOrigins("http://localhost:8080")
 						   .AllowCredentials()
 						   .AllowAnyHeader()
 						   .AllowAnyMethod()
