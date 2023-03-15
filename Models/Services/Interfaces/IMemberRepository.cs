@@ -69,7 +69,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         SubscriptionRecordsDTO GetSubscriptionRecords(int memberId);
 
-        //IEnumerable<SubscribeDetailDTO> GetSubscriptionDetail(int memberId);
+        IEnumerable<SubscribeDetailDTO> GetSubscriptionDetail(int memberId);
 
         IEnumerable<SubscriptionPlanDTO> GetSubscriptionPlan();
 

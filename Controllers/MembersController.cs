@@ -77,11 +77,11 @@ namespace api.iSMusic.Controllers
 
 			if (!result.Success)
 			{
-				return NotFound(result.Message);
+				return NotFound(result.MemberNickName);
 			}
 
             HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.claimsIdentity));
-            return Ok(result.Message);
+            return Ok(result.MemberNickName);
         }
 
         [HttpPost("MemberLogOut")]
@@ -238,18 +238,18 @@ namespace api.iSMusic.Controllers
             return Ok(result.Message);
         }
 
-        //[HttpGet]
-        //[Route("SubscribeDetails")]
-        //public IEnumerable<SubscribeDetailDTO> GetSubscribeDetail()
-        //{
-        //    var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+		[HttpGet]
+		[Route("SubscribeDetails")]
+		public IEnumerable<SubscribeDetailDTO> GetSubscribeDetail()
+		{
+			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
 
-        //    var result = _memberService.GetSubscriptionDetail(memberId);
+			var result = _memberService.GetSubscriptionDetail(memberId);
 
-        //    return result;
-        //}
+			return result;
+		}
 
-        [HttpGet]
+		[HttpGet]
 		[Route("Playlists")]
 		public IActionResult GetMemberPlaylists([FromQuery] InputQuery query)
 		{

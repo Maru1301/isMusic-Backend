@@ -404,23 +404,23 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
         }
 
 
-        //public IEnumerable<SubscribeDetailDTO> GetSubscriptionDetail(int memberId)
-        //{
-        //    var result = _db.SubscriptionRecordDetails
-        //        .Include(s => s.Member)
-        //        .Include(s => s.SubscriptionRecord)
-        //        .ThenInclude(s => s.SubscriptionPlan)
-        //        .Where(s => s.MemberId == memberId)
-        //        .Select(s => new SubscribeDetailDTO
-        //        {
-        //            MemberNickName = s.Member.MemberNickName,
-        //            //MemberEmail = s.Member.MemberEmail,
-        //            NumberOfUsers = s.SubscriptionRecord.SubscriptionPlan.NumberOfUsers,
-        //            PlanName = s.SubscriptionRecord.SubscriptionPlan.PlanName,
-        //            Description = s.SubscriptionRecord.SubscriptionPlan.Description
-        //        });
-        //    return result;
-        //}
+        public IEnumerable<SubscribeDetailDTO> GetSubscriptionDetail(int memberId)
+        {
+            var result = _db.SubscriptionRecordDetails
+                .Include(s => s.Member)
+                .Include(s => s.SubscriptionRecord)
+                .ThenInclude(s => s.SubscriptionPlan)
+                .Where(s => s.MemberId == memberId)
+                .Select(s => new SubscribeDetailDTO
+                {
+                    MemberNickName = s.Member.MemberNickName,
+                    //MemberEmail = s.Member.MemberEmail,
+                    NumberOfUsers = s.SubscriptionRecord.SubscriptionPlan.NumberOfUsers,
+                    PlanName = s.SubscriptionRecord.SubscriptionPlan.PlanName,
+                    Description = s.SubscriptionRecord.SubscriptionPlan.Description
+                });
+            return result;
+        }
 
     }
 }
