@@ -27,7 +27,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         (int? TakeOrder, int NextSongId) NextSong(int memberId);
 
-        void PreviousSong(int memberId);
+        int PreviousSong(int memberId);
 
 		void ChangeShuffle(int memberId);
 

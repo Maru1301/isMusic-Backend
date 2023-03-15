@@ -535,7 +535,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             return nextSongId;
         }
 
-        public void PreviousSong(int memberId)
+        public int PreviousSong(int memberId)
         {
             var queue = _db.Queues
                 .Include(q => q.QueueSongs)
@@ -546,7 +546,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                 throw new InvalidOperationException("佇列為空");
             }
 
-            var queueSongs = queue.QueueSongs;
+            var queueSongs = queue.QueueSongs.Where(qs => qs.FromPlaylist);
             int firstOrder = queueSongs.Min(qs => (queue.IsShuffle)
                                                 ? qs.ShuffleOrder
                                                 : qs.DisplayOrder);
@@ -562,12 +562,14 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 						firstOrder : 
 						currentOrder - 1,
                 true => (currentOrder == firstOrder) ? 
-						queueSongs.Count : 
+						queueSongs.Count() : 
 						currentOrder - 1
             };
             queue.CurrentSongTime = 0;
 
             _db.SaveChanges();
+
+			return queueSongs.Where(qs => queue.IsShuffle ? qs.ShuffleOrder == queue.CurrentSongOrder : qs.DisplayOrder == queue.CurrentSongOrder).Single().SongId;
         }
     }
 }

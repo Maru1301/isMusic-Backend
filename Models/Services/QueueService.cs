@@ -165,7 +165,9 @@ namespace api.iSMusic.Models.Services
 			{
                 if (CheckQueueExistence(memberId) == false) throw new Exception ("佇列不存在");
 
-                _queueRepository.PreviousSong(memberId);
+                int previoutSongId = _queueRepository.PreviousSong(memberId);
+
+                _songRepository.CreatePlayRecord(memberId, previoutSongId);
 
             }
             catch(Exception ex)
