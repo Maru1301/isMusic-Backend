@@ -113,17 +113,20 @@ namespace api.iSMusic.Controllers
         [Route("ProductSearch/{words}")]
         public IEnumerable<ProductIndexDTO> GetProductSearch([FromRoute] string words , [FromQuery] string Sort)
         {
-            if (Sort == "歌手")
-            {
+            var data = _db.Products
+                    .Include(product => product.Album)//.ThenInclude(album => album.AlbumType)
+                    .Include(product => product.Album.AlbumType)
+                    .Include(product => product.Album.AlbumGenre)
+                    .Include(product => product.Album.MainArtist)
+                    .Where(product => product.Status == true);
 
-                var data = _db.Products
-                    .Include(product => product.Album)//.ThenInclude(album => album.AlbumType)
-                    .Include(product => product.Album.AlbumType)
-                    .Include(product => product.Album.AlbumGenre)
-                    .Include(product => product.Album.MainArtist)
-                    .Where(product => product.Status == true)
-                    .Where(product => product.Album.MainArtist!.ArtistName.Contains(words))
-                    .OrderByDescending(product => product.Album.Released)
+            data = (Sort == "歌手"
+                    ? data.Where(product => product.Album.MainArtist!.ArtistName.Contains(words))
+                    : (Sort=="專輯"
+                        ? data.Where(product => product.Album.AlbumName.Contains(words))
+                        : data));
+
+            var res= data.OrderByDescending(product => product.Album.Released)
                     .Select(product => new ProductIndexDTO
                     {
                         Id = product.Id,
@@ -134,30 +137,8 @@ namespace api.iSMusic.Controllers
                         stock = product.Stock,
                         status = product.Status,
                     }).ToList();
-                return data;
-            }
-            else
-            {
-                var data = _db.Products
-                    .Include(product => product.Album)//.ThenInclude(album => album.AlbumType)
-                    .Include(product => product.Album.AlbumType)
-                    .Include(product => product.Album.AlbumGenre)
-                    .Include(product => product.Album.MainArtist)
-                    .Where(product => product.Status == true)
-                    .Where(product => product.Album.AlbumName.Contains(words))
-                    .OrderByDescending(product => product.Album.Released)
-                    .Select(product => new ProductIndexDTO
-                    {
-                        Id = product.Id,
-                        CategoryName = product.ProductCategory.CategoryName,
-                        ProductPrice = product.ProductPrice,
-                        AlbumInfo = product.Album.ToInfoVM(),
-                        productName = product.ProductName,
-                        stock = product.Stock,
-                        status = product.Status,
-                    }).ToList();
-                return data;
-            }
+            
+            return res;
         }
 
 
