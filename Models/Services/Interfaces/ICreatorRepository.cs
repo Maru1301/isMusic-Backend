@@ -15,5 +15,8 @@ namespace api.iSMusic.Models.Services.Interfaces
         Creator? GetCreatorByIdForCheck(int creatorId);
 
         IEnumerable<CreatorIndexDTO> GetCreatorsByName(string name, int rowNumber);
-	}
+
+        void CreateCreator(int memberId);
+
+    }
 }
