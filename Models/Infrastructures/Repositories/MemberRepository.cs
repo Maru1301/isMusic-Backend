@@ -37,12 +37,12 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             return dto;
         }
 
-        public SubscriptionPlanDTO SubscriptionPlanLoad(int SubscriptionPlanId)
+        public MemberSubscriptionPlanDTO SubscriptionPlanLoad(int SubscriptionPlanId)
         {
             SubscriptionPlan entity = _db.SubscriptionPlans.SingleOrDefault(s => s.Id == SubscriptionPlanId)!;
             if (entity == null) return null!;
 
-            SubscriptionPlanDTO dto = new SubscriptionPlanDTO
+            MemberSubscriptionPlanDTO dto = new MemberSubscriptionPlanDTO
             {
                 Id = entity.Id,
                 PlanName = entity.PlanName,
@@ -305,7 +305,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             _db.SaveChanges();
         }
 
-        public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId)
+        public IEnumerable<MemberSubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId)
         {
             // 得到的 memberId 跟資料庫做比較，如果符合取出那筆資料的值
             var result = _db.SubscriptionRecords
@@ -313,7 +313,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                 .Include(s => s.SubscriptionPlan)
                 .Include(s => s.Member.Avatar)
                 .Where(s => s.MemberId == memberId)
-                .Select(s => new SubscriptionPlanDTO  // 將取到的值轉成DTO
+                .Select(s => new MemberSubscriptionPlanDTO  // 將取到的值轉成DTO
                 {
                     MemberId = memberId,
                     MemberNickName = s.Member.MemberNickName,                    
@@ -328,7 +328,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             return result;
         }
 
-        public void CreateSubscribedPlanRecord(int memberId, SubscriptionPlanDTO dto, DateTime date)
+        public void CreateSubscribedPlanRecord(int memberId, MemberSubscriptionPlanDTO dto, DateTime date)
         {
             var SubscriptionRecords = new SubscriptionRecord
             {
@@ -390,6 +390,37 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
             return data.ToSubscriptionRecordsDTO();
         }
 
+        public IEnumerable<SubscriptionPlanDTO> GetSubscriptionPlan()
+        {
+            var result = _db.SubscriptionPlans.Select(s => new SubscriptionPlanDTO
+            {
+                Id = s.Id,
+                PlanName = s.PlanName,
+                Price = s.Price,
+                NumberOfUsers = s.NumberOfUsers,
+                Description = s.Description
+            });
+            return result;
+        }
+
+
+        //public IEnumerable<SubscribeDetailDTO> GetSubscriptionDetail(int memberId)
+        //{
+        //    var result = _db.SubscriptionRecordDetails
+        //        .Include(s => s.Member)
+        //        .Include(s => s.SubscriptionRecord)
+        //        .ThenInclude(s => s.SubscriptionPlan)
+        //        .Where(s => s.MemberId == memberId)
+        //        .Select(s => new SubscribeDetailDTO
+        //        {
+        //            MemberNickName = s.Member.MemberNickName,
+        //            //MemberEmail = s.Member.MemberEmail,
+        //            NumberOfUsers = s.SubscriptionRecord.SubscriptionPlan.NumberOfUsers,
+        //            PlanName = s.SubscriptionRecord.SubscriptionPlan.PlanName,
+        //            Description = s.SubscriptionRecord.SubscriptionPlan.Description
+        //        });
+        //    return result;
+        //}
 
     }
 }

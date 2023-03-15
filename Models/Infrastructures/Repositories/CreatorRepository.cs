@@ -108,5 +108,23 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				CreatorPicPath= artist.CreatorPicPath,
 			});
 		}
-	}
+
+        public void CreateCreator(int memberId)
+        {
+            var member = _db.Members.Where(m => m.Id == memberId).FirstOrDefault();
+            if (member.IsConfirmed)
+            {
+                var Creator = new Creator
+                {
+                    CreatorName = member.MemberNickName,
+                    MemberId = memberId,
+                    //CreatorPicPath = member.Avatar.Path
+
+                };
+                _db.Creators.Add(Creator);
+                _db.SaveChanges();
+
+            }
+        }
+    }
 }

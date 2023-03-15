@@ -103,9 +103,10 @@ namespace api.iSMusic.Controllers
         }
 
         [HttpGet]
-        [Route("{memberId}/CreatorPage")]//取得創作者個人資訊
-        public IActionResult GetCreatorById(int memberId)
+        [Route("CreatorPage")]//取得創作者個人資訊
+        public IActionResult GetCreatorById()
         {
+            int memberId = this.GetMemberId();
             var creatortotalfollows = _appDbContext.CreatorFollows.GroupBy(follow => follow.CreatorId)
                    .Select(group => new { CreatorId = group.Key, Count = group.Count() });
 
