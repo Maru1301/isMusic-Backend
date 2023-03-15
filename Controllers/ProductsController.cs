@@ -165,6 +165,11 @@ namespace api.iSMusic.Controllers
         [Route("{productId}/Detail")]
         public IActionResult GetProductsDetail(int productId)
         {
+            var check = _db.Products.Where(x => x.Id == productId).FirstOrDefault();
+            if (check == null)
+            {
+                return NotFound();
+            }
 
             var data = _db.Products
                 .Include(product => product.Album)
@@ -181,9 +186,10 @@ namespace api.iSMusic.Controllers
                     ProductPrice = product.ProductPrice,
                     ProductName = product.ProductName,
                     Stock = product.Stock,
-                    AlbumDetail = product.Album.ToDetailVM(), 
+                    AlbumDetail = product.Album.ToDetailVM(),
 
                 }).Single();
+
             return Ok(data);
         }
     }

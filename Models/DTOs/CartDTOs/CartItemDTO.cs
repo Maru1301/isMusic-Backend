@@ -18,5 +18,7 @@ namespace api.iSMusic.Models.DTOs.CartDTOs
 
         public int qty { get; set; }
 
+        public string AlbumCoverPath { get; set; }
+
     }
 }
