@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http.HttpResults;
 using BookStore.Site.Models.Infrastructures;
 using System.ComponentModel.DataAnnotations;
+using api.iSMusic.Models.Infrastructures.Repositories;
 
 namespace api.iSMusic.Controllers
 {
@@ -35,15 +36,18 @@ namespace api.iSMusic.Controllers
 
 		private readonly IQueueRepository _queueRepository;
 
-		private readonly MemberService _memberService;		
-        
+		private readonly MemberService _memberService;
+
+		private readonly ICreatorRepository _creatorRepository;
+
         public MembersController(IMemberRepository memberRepo, ISongRepository songRepository, IArtistRepository artistRepository, ICreatorRepository creatorRepository, IPlaylistRepository playlistRepository, IAlbumRepository albumRepository, IQueueRepository queueRepository, IActivityRepository activityRepository)
 		{
 			_memberRepository = memberRepo;
 			_songRepository = songRepository;
 			_playlistRepository = playlistRepository;
 			_queueRepository = queueRepository;
-			_memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository, queueRepository);			
+			_creatorRepository = creatorRepository;
+            _memberService = new(_memberRepository, _playlistRepository, _songRepository, artistRepository, creatorRepository, albumRepository, activityRepository, queueRepository);			
         }
 
         [HttpPost]
@@ -73,11 +77,11 @@ namespace api.iSMusic.Controllers
 
 			if (!result.Success)
 			{
-				return NotFound(result.Message);
+				return NotFound(result.MemberNickName);
 			}
 
             HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.claimsIdentity));
-            return Ok(result.Message);
+            return Ok(result.MemberNickName);
         }
 
         [HttpPost("MemberLogOut")]
@@ -110,8 +114,8 @@ namespace api.iSMusic.Controllers
         }
 
 		[HttpGet]
-		[Route("SubscriptionPlan")]
-		public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan()
+		[Route("SubscriptionRecord")]
+		public IEnumerable<MemberSubscriptionPlanDTO> GetMemberSubscriptionPlan()
 		{			
 			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
             var result = _memberService.GetMemberSubscriptionPlan(memberId);
@@ -120,7 +124,18 @@ namespace api.iSMusic.Controllers
 
         }
 
-		[HttpGet]
+        [HttpGet]
+        [Route("SubscriptionPlan")]
+        [AllowAnonymous]
+        public IEnumerable<SubscriptionPlanDTO> GetSubscriptionPlan()
+        {
+            var result = _memberService.GetSubscriptionPlan();
+
+            return result;
+
+        }
+
+        [HttpGet]
 		[Route("Orders")]
 		public IEnumerable<OrderDTO> GetMemberOrder()
 		{
@@ -197,6 +212,7 @@ namespace api.iSMusic.Controllers
 			{
 				return Forbid(result.Message);
 			}
+            _creatorRepository.CreateCreator(memberId);
 
             return Ok(result.Message);
         }
@@ -221,6 +237,17 @@ namespace api.iSMusic.Controllers
             var result = _memberService.ResendConfirmCode(memberId, email, urlTemplate);
             return Ok(result.Message);
         }
+
+		[HttpGet]
+		[Route("SubscribeDetails")]
+		public IEnumerable<SubscribeDetailDTO> GetSubscribeDetail()
+		{
+			var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
+
+			var result = _memberService.GetSubscriptionDetail(memberId);
+
+			return result;
+		}
 
 		[HttpGet]
 		[Route("Playlists")]

@@ -107,6 +107,11 @@ namespace api.iSMusic.Models.Services
 			return (true, string.Empty, dtos);
         }
 
+        public IEnumerable<SubscribeDetailDTO> GetSubscriptionDetail(int memberId)
+        {
+            return _memberRepository.GetSubscriptionDetail(memberId);
+        }
+
         public (bool Success, string Message) AddLikedSong(int memberId, int songId)
 		{
 			if (CheckMemberExistence(memberId) == false) return (false, "會員不存在");
@@ -345,7 +350,7 @@ namespace api.iSMusic.Models.Services
             return (true, "驗證成功");
         }
 
-        public (bool Success, string? Message, ClaimsIdentity claimsIdentity) MemberLogin(MemberDTO dto)
+        public (bool Success, string? MemberNickName, ClaimsIdentity claimsIdentity) MemberLogin(MemberDTO dto)
         {
             MemberDTO member = _memberRepository.GetByAccount(dto.MemberAccount);
 
@@ -366,7 +371,7 @@ namespace api.iSMusic.Models.Services
                 };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            return (true, "登入成功", claimsIdentity);
+            return (true, member.MemberNickName, claimsIdentity);
         }
 
         public (bool Success, string? Message) RequestResetPassword(string email, string urlTemplate)
@@ -424,13 +429,18 @@ namespace api.iSMusic.Models.Services
             return (true, "重設密碼成功");
         }
 
-        public IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId)
+        public IEnumerable<MemberSubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId)
         {
             //if (_memberRepository.SubscriptionRecordExist(memberId) == null)
             //{
             //    return ("找不到訂閱紀錄");
             //}
             return _memberRepository.GetMemberSubscriptionPlan(memberId)!;
+        }
+
+        public IEnumerable<SubscriptionPlanDTO> GetSubscriptionPlan()
+        {
+            return _memberRepository.GetSubscriptionPlan();
         }
 
         public (bool Success, string Message) SubscribedPlan(int memberId, SubscribedPlanVM model)

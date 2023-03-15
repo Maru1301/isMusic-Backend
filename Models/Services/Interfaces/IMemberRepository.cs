@@ -41,7 +41,7 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         MemberDTO Load(int memberId);
 
-        SubscriptionPlanDTO SubscriptionPlanLoad(int SubscriptionPlanId);
+        MemberSubscriptionPlanDTO SubscriptionPlanLoad(int SubscriptionPlanId);
 
         void MemberRegister(MemberRegisterDTO source);
 
@@ -57,9 +57,9 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         void UpdatePassword(int memberId, string newEncryptedPassword);
 
-        IEnumerable<SubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId);
+        IEnumerable<MemberSubscriptionPlanDTO> GetMemberSubscriptionPlan(int memberId);
 
-        void CreateSubscribedPlanRecord(int memberId, SubscriptionPlanDTO subscriptionPlan, DateTime addDate);
+        void CreateSubscribedPlanRecord(int memberId, MemberSubscriptionPlanDTO subscriptionPlan, DateTime addDate);
 
         void CreateSubscriptionRecordDetail(int subscriptionRecordId, int memberForSubscrptionPlanId);
 
@@ -68,6 +68,10 @@ namespace api.iSMusic.Models.Services.Interfaces
         void UpdateEmail(MemberDTO dto, string email);
 
         SubscriptionRecordsDTO GetSubscriptionRecords(int memberId);
+
+        IEnumerable<SubscribeDetailDTO> GetSubscriptionDetail(int memberId);
+
+        IEnumerable<SubscriptionPlanDTO> GetSubscriptionPlan();
 
     }
 }
