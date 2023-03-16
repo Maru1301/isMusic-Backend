@@ -293,8 +293,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                 playlists = _db.Playlists
                     .Include(playlist => playlist.PlaylistSongMetadata)
                         .ThenInclude(metadata => metadata.Song)
-                        .ThenInclude(song => song.SongArtistMetadata)
-                        .ThenInclude(metadata => metadata.Artist)
+                        .ThenInclude(song => song.SongCreatorMetadata)
+                        .ThenInclude(metadata => metadata.Creator)
                     .Select(playlist => new PlaylistIndexDTO()
                     {
                         Id = playlist.Id,
