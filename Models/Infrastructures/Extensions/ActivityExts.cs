@@ -1,6 +1,7 @@
 ﻿using api.iSMusic.Models.DTOs.ActivityDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.ViewModels.ActivityVMs;
+using NAudio.MediaFoundation;
 
 public static class ActivityExts
 {
@@ -20,6 +21,8 @@ public static class ActivityExts
             ActivityOrganizerId= source.ActivityOrganizerId,
             Updated= source.Updated,
             TotalFollows= source.ActivityFollows.Count,
+            ActivityOrganizer = source.ActivityOrganizer.MemberNickName,
+            ActivityType = source.ActivityType.TypeName
         };
 
     public static ActivityIndexVM ToIndexVM(this ActivityIndexDTO source)
@@ -36,6 +39,8 @@ public static class ActivityExts
             ActivityOrganizerId = source.ActivityOrganizerId,
             Updated = source.Updated,
             TotalFollows = source.TotalFollows,
+            ActivityOrganizer = source.ActivityOrganizer,
+            ActivityType = source.ActivityType
         };
 
     public static ActivityCreateDTO ToDTO(this ActivityCreateVM source)

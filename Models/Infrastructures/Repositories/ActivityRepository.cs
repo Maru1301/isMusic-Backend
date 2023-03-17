@@ -1,8 +1,11 @@
 ﻿using api.iSMusic.Models.DTOs.ActivityDTOs;
 using api.iSMusic.Models.EFModels;
 using api.iSMusic.Models.Services.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime;
+using static api.iSMusic.Controllers.ActivitiesController;
 
 namespace api.iSMusic.Models.Infrastructures.Repositories
 {
@@ -29,7 +32,9 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
         {
             IEnumerable<Activity> activities = _db.Activities
                 .Include(activity => activity.ActivityFollows)
-                .Where(activity => activity.ActivityEndTime < DateTime.Now && activity.PublishedStatus != false);
+                .Include(activity => activity.ActivityOrganizer)
+                .Include(activity => activity.ActivityType)
+                .Where(activity => activity.ActivityEndTime > DateTime.Now && activity.PublishedStatus != false);
 
             if(!string.IsNullOrEmpty(value)) 
             { 
@@ -47,11 +52,16 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                     activities = activities.OrderBy(activity => activity.ActivityEndTime).ToList(); 
                     break;
                 case "Popular":
-                    activities = activities.OrderByDescending(activity =>       activity.ActivityFollows.Count()).ToList();
+                    activities = activities.OrderByDescending(activity =>activity.ActivityFollows.Count()).ToList();
                     break;
             }
 
             return activities.Select(activity => activity.ToIndexDTO());
+        }
+
+        public IEnumberable<ActivityIndexDTO> GetAcGetActivitiesBySearch(SearchParam searchParam)
+        {
+            var filteredActivities = _db.Activities.Where(a=> (string.IsNullOrEmpty(searchParam.)))
         }
 
         public void AddNewActivity(ActivityCreateDTO dto)
@@ -108,5 +118,26 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
                 .Select(af => af.Activity)
                 .Select(activity => activity.ToIndexDTO());
         }
+
+        public IEnumerable<ActivityIndexDTO> GetActivities()
+        {
+            return _db.Activities
+                .Include(x =>x.ActivityType)
+                .Include(x=> x.ActivityOrganizer)
+                .Select(x=>x.ToIndexDTO()).ToList();
+        }
+
+        public ActivityIndexDTO GetSingleActivity(int id)
+        {
+            return _db.Activities
+                .Include(activityType => activityType.ActivityType)
+                .Include(activityOrganizerId => activityOrganizerId.ActivityOrganizerId)
+                .Where(x=>x.Id == id).SingleOrDefault()!.ToIndexDTO();
+        }
+        public Activity? CheckActivityByIdForCheck(int activityId)
+        {
+            return _db.Activities.Find(activityId);
+        }
+        
     }
 }

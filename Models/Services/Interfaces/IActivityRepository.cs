@@ -1,6 +1,7 @@
 ﻿using api.iSMusic.Models.DTOs.ActivityDTOs;
 using api.iSMusic.Models.EFModels;
 using System;
+using static api.iSMusic.Controllers.ActivitiesController;
 
 namespace api.iSMusic.Models.Services.Interfaces
 {
@@ -16,10 +17,18 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         IEnumerable<ActivityType> GetActivityTypes();
 
+        IEnumberable<ActivityIndexDTO> GetAcGetActivitiesBySearch(SearchParam searchParam);
+
         void AddNewActivity(ActivityCreateDTO dto);
 
         void FollowActivity(int memberId, int activityId, DateTime attendDate);
 
         void UnfollowActivity(int memberId, int activityId);
+
+        IEnumerable<ActivityIndexDTO> GetActivities();
+
+        ActivityIndexDTO GetSingleActivity(int id);
+
+        Activity? CheckActivityByIdForCheck(int activityId);
     }
 }
