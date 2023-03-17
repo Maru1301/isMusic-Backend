@@ -1,4 +1,5 @@
-﻿using api.iSMusic.Models.Services;
+﻿using api.iSMusic.Models;
+using api.iSMusic.Models.Services;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.ActivityVMs;
 using Microsoft.AspNetCore.Authorization;
@@ -32,6 +33,7 @@ namespace api.iSMusic.Controllers
             return Ok(dtos.Select(dto => dto.ToIndexVM()));
         }
 
+        //有用到
         [HttpGet]
         [AllowAnonymous]
         public IActionResult GetActivities()
@@ -41,6 +43,7 @@ namespace api.iSMusic.Controllers
             return Ok(dtos.Select(dto => dto.ToIndexVM()));
         }
 
+        //有用到
         [HttpGet]
         [Route("single/{id}")]
         [AllowAnonymous]
@@ -88,20 +91,16 @@ namespace api.iSMusic.Controllers
             return Ok(types);
         }
 
+        //要試試看
         [HttpGet]
-        public IActionResult GetActivitiesBySearch([FromQuery]SearchParam searchParam)
+        [Route("search")]
+        public IActionResult GetActivitiesBySearch([FromQuery]ActivityQueryParameters queryParameters)
         {
-            var result = _service.GetActivitiesBySearch(searchParam);
+            var result = _service.GetActivitiesBySearch(queryParameters);
 
             return Ok(result);
         }
-        public class SearchParam
-        {
-            public string? ActivityName { get; set; }
-            public string? StartTime { get; set; }
-            public string? EndTime { get; set; }
-            public string? Location { get; set; }
-        }
+       
 
         [HttpPost]
         [Route("Organizers/{memberId}")]

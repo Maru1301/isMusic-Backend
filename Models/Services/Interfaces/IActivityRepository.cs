@@ -17,8 +17,6 @@ namespace api.iSMusic.Models.Services.Interfaces
 
         IEnumerable<ActivityType> GetActivityTypes();
 
-        IEnumberable<ActivityIndexDTO> GetAcGetActivitiesBySearch(SearchParam searchParam);
-
         void AddNewActivity(ActivityCreateDTO dto);
 
         void FollowActivity(int memberId, int activityId, DateTime attendDate);
@@ -30,5 +28,7 @@ namespace api.iSMusic.Models.Services.Interfaces
         ActivityIndexDTO GetSingleActivity(int id);
 
         Activity? CheckActivityByIdForCheck(int activityId);
-    }
+
+        IEnumerable<ActivityIndexDTO> GetActivitiesBySearch(ActivityQueryParameters queryParameters);
+	}
 }

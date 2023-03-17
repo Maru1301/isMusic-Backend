@@ -137,9 +137,9 @@ namespace api.iSMusic.Models.Services
             return activity != null;
         }
 
-        public IEnumerable<ActivityIndexDTO> GetActivitiesBySearch(SearchParam searchParam)
+        public IEnumerable<ActivityIndexDTO> GetActivitiesBySearch(ActivityQueryParameters queryParameters)
         {
-            return _activityRepository.GetActivitiesBySearch(searchParam);
+            return _activityRepository.GetActivitiesBySearch(queryParameters);
         }
 
     }
