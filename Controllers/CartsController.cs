@@ -63,7 +63,7 @@ namespace api.iSMusic.Controllers
         [Route("DeleteCart/{CartItemtId}")]
         public IActionResult DeleteCarItem(int CartItemtId)
         {
-            var check = _db.CartItems.Where(x => x.CartId == CartItemtId).FirstOrDefault();
+            var check = _db.CartItems.Where(x => x.Id == CartItemtId).FirstOrDefault();
             if (check == null)
             {
                 return NotFound();
@@ -90,11 +90,11 @@ namespace api.iSMusic.Controllers
         public IActionResult DeleteAllCarItem()
         {
             int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
-            var data = _db.CartItems.FirstOrDefault(x => x.Cart.MemberId == memberId);
+            var data = _db.CartItems.Where(x => x.Cart.MemberId == memberId);
 
             if (data != null)
             {
-                _db.CartItems.Remove(data);
+                _db.CartItems.RemoveRange(data);
                 _db.SaveChanges();
             };
 
