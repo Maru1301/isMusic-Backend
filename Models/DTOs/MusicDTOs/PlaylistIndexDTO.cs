@@ -12,6 +12,8 @@ namespace api.iSMusic.Models.DTOs.MusicDTOs
 
         public int MemberId { get; set; }
 
+        public string? OwnerName { get; set; }
+
         public int TotalLikes { get; set; }
 
         public bool IsLiked { get; set; }

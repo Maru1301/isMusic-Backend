@@ -10,7 +10,9 @@
 
 		public int MemberId { get; set; }
 
-		public int TotalLikes { get; set; }
+        public string? OwnerName{ get; set; }
+
+        public int TotalLikes { get; set; }
 
         public bool IsLiked { get; set; }
     }

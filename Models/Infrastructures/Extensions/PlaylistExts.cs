@@ -35,6 +35,7 @@ public static class PlaylistExts
 				: "",
 			TotalLikes = source.TotalLikes,
 			IsLiked= source.IsLiked,
+			OwnerName = source.OwnerName,
 		};
 
 	public static Playlist ToEntity(this PlaylistCreateVM source)

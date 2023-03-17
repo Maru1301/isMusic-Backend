@@ -77,7 +77,10 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				Id= playlist.Id,
 				PlaylistCoverPath = playlist.PlaylistCoverPath,
 				ListName= playlist.ListName,
-				MemberId= memberId,
+				MemberId= playlist.MemberId,
+				OwnerName = (playlist.MemberId != memberId)
+					?playlist.Member.MemberNickName
+					:"",
 			});
 
 			return dtos;
@@ -227,10 +230,13 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			//Update the playlist with the data from the view model
 			playlist.ListName = dto.ListName;
 			playlist.Description = dto.Description;
-			playlist.PlaylistCoverPath= dto.PlaylistCoverPath;
+			if(dto.PlaylistCover != null)
+			{
+                playlist.PlaylistCoverPath = dto.PlaylistCoverPath;
+            }
 
-			//Save the changes to the database
-			_db.SaveChanges();
+            //Save the changes to the database
+            _db.SaveChanges();
 		}
 
 		public void DeletePlaylist(int playlistId)
