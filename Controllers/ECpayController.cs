@@ -33,10 +33,10 @@ namespace api.iSMusic.Controllers
                 { "MerchantTradeDate",  DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")},
 
                 //完成後發通知
-                { "ReturnURL",  "https://localhost:8080/shop.html#/"},
+                { "ReturnURL",  "https://localhost:7205/"},
 
                 //付款完成後導頁
-                { "OrderResultURL", "https://localhost:8080/shop.html#/" },
+                { "OrderResultURL", "https://localhost:7205/" },
 
                 //特店編號， 2000132 測試綠界編號
                 { "MerchantID",  "3002607"},

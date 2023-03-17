@@ -30,6 +30,7 @@ namespace api.iSMusic.Controllers
             var data = _db.CartItems
                 .Include(x=>x.Cart)
                 .Include(x=>x.Product)
+                .Include(x=>x.Product.Album)
                 .Where(x=>x.Cart.MemberId==memberId)
                 .Select(x=> new CartItemDTO
                 {
@@ -38,7 +39,8 @@ namespace api.iSMusic.Controllers
                     ProductName=x.Product.ProductName,
                     ProductPrice=x.Product.ProductPrice,
                     ProductId=x.ProductId,
-                    qty = x.Qty
+                    qty = x.Qty,
+                    AlbumCoverPath = "https://localhost:44373/Uploads/Covers/"+ x.Product.Album.AlbumCoverPath,
                 }).ToList(); 
                 
 
@@ -61,6 +63,13 @@ namespace api.iSMusic.Controllers
         [Route("DeleteCart/{CartItemtId}")]
         public IActionResult DeleteCarItem(int CartItemtId)
         {
+            var check = _db.CartItems.Where(x => x.Id == CartItemtId).FirstOrDefault();
+            if (check == null)
+            {
+                return NotFound();
+            }
+
+
             int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
             var data = _db.CartItems.FirstOrDefault(x => x.Cart.MemberId == memberId && x.Id == CartItemtId);
 
@@ -81,11 +90,11 @@ namespace api.iSMusic.Controllers
         public IActionResult DeleteAllCarItem()
         {
             int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
-            var data = _db.CartItems.FirstOrDefault(x => x.Cart.MemberId == memberId);
+            var data = _db.CartItems.Where(x => x.Cart.MemberId == memberId);
 
             if (data != null)
             {
-                _db.CartItems.Remove(data);
+                _db.CartItems.RemoveRange(data);
                 _db.SaveChanges();
             };
 
@@ -206,6 +215,12 @@ namespace api.iSMusic.Controllers
         [Route("increaseCart/{productId}")]
         public IActionResult increaseItemQuantity(int productId)
         {
+            var check = _db.CartItems.Where(x=>x.ProductId== productId).FirstOrDefault();
+            if (check == null)
+            {
+                return NotFound();
+            }
+
             int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
             try
             {
@@ -244,6 +259,8 @@ namespace api.iSMusic.Controllers
         [Route("decreaseCart/{productId}")]
         public IActionResult decreaseItemQuantity(int productId)
         {
+
+
             int memberId = int.Parse(HttpContext.User.Claims.First(claim => claim.Type == "MemberId").Value);
             try
             {
