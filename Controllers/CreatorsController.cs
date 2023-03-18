@@ -163,7 +163,7 @@ namespace api.iSMusic.Controllers
                     {
                         Id = s.Id,
                         SongName = s.SongName,
-                        //GenreId = s.GenreId,
+                        GenreId = s.GenreId,
                         GenreName = s.Genre.GenreName,
                         Duration = s.Duration,
                         IsInstrumental = s.IsInstrumental,
@@ -527,7 +527,7 @@ namespace api.iSMusic.Controllers
                 return NotFound("歌曲不存在");
             }
 
-            song.SongName = songdata.SongName!;
+            song.SongName = data.SongName!;
             song.GenreId = songdata.GenreId;
             //song.Duration = dto.Duration;
             song.IsInstrumental = songdata.IsInstrumental;
