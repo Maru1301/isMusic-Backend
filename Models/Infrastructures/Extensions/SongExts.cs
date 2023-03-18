@@ -24,6 +24,7 @@ public static class SongExts
             SongPath = webSongUrl + source.SongPath,
             Status = source.Status,
             AlbumId = source.AlbumId,
+            FromList = source.FromList,
             AlbumName = source.AlbumName,
             DisplayOrderInAlbum = source.DisplayOrderInAlbum,
             PlayedTimes = source.PlayedTimes,
@@ -43,6 +44,7 @@ public static class SongExts
 			SongPath = source.SongPath,
 			Status = source.Status,
 			AlbumId = source.AlbumId,
+            FromList = true,
             AlbumName = source.Album != null ? source.Album.AlbumName: string.Empty,
             Artists = source.SongArtistMetadata.Select(metadata => metadata.Artist.ToInfoVM()).ToList(),
             Creators = source.SongCreatorMetadata.Select(metadata => metadata.Creator.ToInfoVM()).ToList(),
@@ -50,7 +52,27 @@ public static class SongExts
             PlayedTimes = source.SongPlayedRecords.Count,
 		};
 
-	public static SongIndexVM ToIndexVM(this SongIndexDTO source)
+    public static SongInfoDTO ToInfoDTONotFromList(this Song source)
+        => new()
+        {
+            Id = source.Id,
+            SongName = source.SongName,
+            Duration = source.Duration,
+            IsExplicit = source.IsExplicit,
+            Released = source.Released,
+            SongCoverPath = source.SongCoverPath,
+            SongPath = source.SongPath,
+            Status = source.Status,
+            AlbumId = source.AlbumId,
+            FromList = false,
+            AlbumName = source.Album != null ? source.Album.AlbumName : string.Empty,
+            Artists = source.SongArtistMetadata.Select(metadata => metadata.Artist.ToInfoVM()).ToList(),
+            Creators = source.SongCreatorMetadata.Select(metadata => metadata.Creator.ToInfoVM()).ToList(),
+            DisplayOrderInAlbum = source.DisplayOrderInAlbum,
+            PlayedTimes = source.SongPlayedRecords.Count,
+        };
+
+    public static SongIndexVM ToIndexVM(this SongIndexDTO source)
         => new()
 		{
             Id = source.Id,

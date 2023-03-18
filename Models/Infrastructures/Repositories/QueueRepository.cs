@@ -120,7 +120,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.Where(qs => !qs.FromPlaylist )
 				.OrderBy(qs => qs.DisplayOrder)
 				.Select(qs => qs.Song)
-				.Select(song => song.ToInfoDTO());
+				.Select(song => song.ToInfoDTONotFromList());
 
 			var takeFromList = fromList
 				.Where(list => (queue.IsShuffle)

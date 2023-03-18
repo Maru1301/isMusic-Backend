@@ -14,7 +14,9 @@ namespace api.iSMusic.Models.ViewModels.SongVMs
 
 		public bool? IsExplicit { get; set; }
 
-		public DateTime Released { get; set; }
+        public bool FromList { get; set; }
+
+        public DateTime Released { get; set; }
 
 		public string SongCoverPath { get; set; } = null!;
 

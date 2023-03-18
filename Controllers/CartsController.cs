@@ -42,7 +42,6 @@ namespace api.iSMusic.Controllers
                     qty = x.Qty,
                     AlbumCoverPath = "https://localhost:44373/Uploads/Covers/"+ x.Product.Album.AlbumCoverPath,
                 }).ToList(); 
-                
 
             return data;
 
