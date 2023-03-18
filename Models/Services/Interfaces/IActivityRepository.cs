@@ -1,7 +1,6 @@
 ﻿using api.iSMusic.Models.DTOs.ActivityDTOs;
 using api.iSMusic.Models.EFModels;
 using System;
-using static api.iSMusic.Controllers.ActivitiesController;
 
 namespace api.iSMusic.Models.Services.Interfaces
 {
@@ -30,5 +29,7 @@ namespace api.iSMusic.Models.Services.Interfaces
         Activity? CheckActivityByIdForCheck(int activityId);
 
         IEnumerable<ActivityIndexDTO> GetActivitiesBySearch(ActivityQueryParameters queryParameters);
+
+
 	}
 }

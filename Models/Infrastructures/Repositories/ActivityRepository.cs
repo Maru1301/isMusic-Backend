@@ -108,8 +108,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
 		public IEnumerable<ActivityIndexDTO> GetMemberFollowedActivities(int memberId)
 		{
+
 			return _db.ActivityFollows
 				.Where(af => af.MemberId == memberId && af.AttendDate.Year == DateTime.Now.Year)
+				.Include(af => af.Activity)
+				.ThenInclude(a=>a.ActivityType)
 				.Select(af => af.Activity)
 				.Select(activity => activity.ToIndexDTO());
 		}
@@ -126,7 +129,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		{
 			return _db.Activities
 				.Include(activityType => activityType.ActivityType)
-				.Include(activityOrganizerId => activityOrganizerId.ActivityOrganizerId)
+				.Include(activity => activity.ActivityOrganizer)
 				.Where(x => x.Id == id).SingleOrDefault()!.ToIndexDTO();
 		}
 		public Activity? CheckActivityByIdForCheck(int activityId)

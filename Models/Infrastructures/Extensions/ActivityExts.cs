@@ -22,7 +22,7 @@ public static class ActivityExts
             Updated= source.Updated,
             TotalFollows= source.ActivityFollows.Count,
             ActivityOrganizer = source.ActivityOrganizer.MemberNickName,
-            ActivityType = source.ActivityType.TypeName
+            ActivityType = source.ActivityType.TypeName,
         };
 
     public static ActivityIndexVM ToIndexVM(this ActivityIndexDTO source)

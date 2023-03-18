@@ -21,6 +21,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using BookStore.Site.Models.Infrastructures;
 using System.ComponentModel.DataAnnotations;
 using api.iSMusic.Models.Infrastructures.Repositories;
+using System.Globalization;
+using System;
 
 namespace api.iSMusic.Controllers
 {
@@ -509,10 +511,12 @@ namespace api.iSMusic.Controllers
 
 		[HttpPost]
 		[Route("Activities/{activityId}/{attendDate}")]
-		public IActionResult FollowActivity(int activityId, DateTime attendDate)
+		public IActionResult FollowActivity([FromRoute] int activityId, [FromRoute] string attendDate)
 		{
-            int memberId = this.GetMemberId();
-            var result = _memberService.FollowActivity(memberId, activityId, attendDate);
+			
+			int memberId = this.GetMemberId();
+			DateTime attendDateTime = DateTime.ParseExact(attendDate, "yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+			var result = _memberService.FollowActivity(memberId, activityId, attendDateTime);
 
 			if (!result.Success)
 			{
