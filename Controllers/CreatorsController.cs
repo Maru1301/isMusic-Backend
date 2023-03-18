@@ -363,7 +363,7 @@ namespace api.iSMusic.Controllers
                 Song song = new()
                 {
 
-                    SongName = creatoruploadsongdto.Song.Name,
+                    SongName = creatoruploadsongdto.SongName,
                     GenreId = creatoruploadsongdto.GenreId,
                     Duration = (int)duration,
                     IsInstrumental = creatoruploadsongdto.IsInstrumental,
@@ -474,6 +474,8 @@ namespace api.iSMusic.Controllers
 
 			int memberId = this.GetMemberId();
             var creator = _appDbContext.Creators.SingleOrDefault(x => x.MemberId == memberId);
+            picfileName = creator.CreatorPicPath;
+            coverfileName = creator.CreatorCoverPath;
             if (creator == null)
             {
                 return NotFound();
@@ -489,7 +491,8 @@ namespace api.iSMusic.Controllers
 					dto.Pic.CopyTo(stream);
 				}
 
-			}
+            }
+            
             if(dto.Cover != null)
             {
 				var uploadcoverpath = parentroot + @"/iSMusic.ServerSide/iSMusic/Uploads/Covers/";
@@ -543,7 +546,7 @@ namespace api.iSMusic.Controllers
 
 
         [HttpPut]
-        [Route("{creatorId}/albums/{albumId}")]//修改創作者的單一歌曲
+        [Route("{creatorId}/albums/{albumId}")]//修改創作者的單一專輯
         public IActionResult EdiAlbumByCreator([FromBody] CreateAlbumbyCreatorDTO data)
         {
 
