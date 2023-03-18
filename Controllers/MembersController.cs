@@ -56,7 +56,7 @@ namespace api.iSMusic.Controllers
         public IActionResult MemberRegister([FromBody] MemberRegisterVM member)
         {
             // email驗證網址
-            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActivateRegister?memberid={0}&confirmCode={1}";
+            string urlTemplate = "http://localhost:8080/member.html#/MemberActivate/{0}/{1}";
 
 
             var result = _memberService.MemberRegister(member.ToMemberDTO(), urlTemplate);
@@ -96,7 +96,7 @@ namespace api.iSMusic.Controllers
 		[AllowAnonymous]
 		public IActionResult ForgetPassword(string email)
         {
-            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ResetPassword?memberid={0}&confirmCode={1}";
+            string urlTemplate = "http://localhost:8080/resetPassword.html#/ResetPassword/{0}/{1}";
 
             var result = _memberService.RequestResetPassword(email, urlTemplate);
 
@@ -106,7 +106,7 @@ namespace api.iSMusic.Controllers
         [HttpPatch]        
         [Route("ResetPassword")]
 		[AllowAnonymous]
-		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromForm] MemberResetPasswordVM source)
+		public IActionResult ResetPassword([FromQuery] int memberId, string confirmCode, [FromBody] MemberResetPasswordVM source)
         {
 
             var result = _memberService.ResetPassword(memberId, confirmCode, source.Password);
