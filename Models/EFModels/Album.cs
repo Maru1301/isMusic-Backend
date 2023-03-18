@@ -34,7 +34,7 @@ public partial class Album
     public string Description { get; set; } = null!;
 
     [Column("mainArtistId")]
-    public int MainArtistId { get; set; }
+    public int? MainArtistId { get; set; }
 
     [Column("mainCreatorId")]
     public int? MainCreatorId { get; set; }
@@ -60,7 +60,11 @@ public partial class Album
 
     [ForeignKey("MainArtistId")]
     [InverseProperty("Albums")]
-    public virtual Artist MainArtist { get; set; } = null!;
+    public virtual Artist? MainArtist { get; set; }
+
+    [ForeignKey("MainCreatorId")]
+    [InverseProperty("Albums")]
+    public virtual Creator? MainCreator { get; set; }
 
     [InverseProperty("Album")]
     public virtual ICollection<Product> Products { get; } = new List<Product>();

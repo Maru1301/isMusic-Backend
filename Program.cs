@@ -1,5 +1,12 @@
 using api.iSMusic.Models;
+using api.iSMusic.Models.EFModels;
+using api.iSMusic.Models.Infrastructures.Repositories;
+using api.iSMusic.Models.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace api.isMusic
@@ -10,7 +17,29 @@ namespace api.isMusic
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
-			// Add services to the container.
+			string MyAllowOrigins = "AllowAny";
+			builder.Services.AddCors(options =>
+			{
+				options.AddPolicy(
+						name: MyAllowOrigins,
+						policy => policy.WithOrigins("http://localhost:8080")
+						   .AllowCredentials()
+						   .AllowAnyHeader()
+						   .AllowAnyMethod()
+						);
+			});
+
+			// Add Authentication services to the container.
+			builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
+            {
+				option.Cookie.SameSite = SameSiteMode.None;
+                option.LoginPath = null;
+            });
+
+			builder.Services.AddMvc(options =>
+			{
+				options.Filters.Add(new AuthorizeFilter());
+			});
 
 			builder.Services.AddControllers();
 
@@ -26,11 +55,10 @@ namespace api.isMusic
 				builder.Services.AddScoped(interfaceType, repositoryType);
 			}
 
-			//builder.Services.AddScoped<ISongRepository, SongRepository>();
-			//builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext")));
+			builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext")));
 
-			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-			builder.Services.AddEndpointsApiExplorer();
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 
 			var app = builder.Build();
@@ -42,10 +70,13 @@ namespace api.isMusic
 				app.UseSwaggerUI();
 			}
 
-			app.UseHttpsRedirection();
+            app.UseCors(MyAllowOrigins);
 
-			app.UseAuthorization();
-
+            app.UseHttpsRedirection();
+            
+            app.UseCookiePolicy();
+            app.UseAuthentication();
+            app.UseAuthorization();            
 
 			app.MapControllers();
 

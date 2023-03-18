@@ -22,7 +22,7 @@ public partial class Member
 
     [Column("memberEncryptedPassword")]
     [StringLength(100)]
-    public string MemberEncryptedPassword { get; set; } = null!;
+    public string? MemberEncryptedPassword { get; set; }
 
     [Column("memberEmail")]
     [StringLength(50)]
@@ -95,9 +95,6 @@ public partial class Member
     public virtual CreditCard? CreditCard { get; set; }
 
     [InverseProperty("Member")]
-    public virtual ICollection<LikedActivity> LikedActivities { get; } = new List<LikedActivity>();
-
-    [InverseProperty("Member")]
     public virtual ICollection<LikedAlbum> LikedAlbums { get; } = new List<LikedAlbum>();
 
     [InverseProperty("Member")]
@@ -117,6 +114,9 @@ public partial class Member
 
     [InverseProperty("Member")]
     public virtual ICollection<SongPlayedRecord> SongPlayedRecords { get; } = new List<SongPlayedRecord>();
+
+    [InverseProperty("Member")]
+    public virtual ICollection<SubscriptionRecordDetail> SubscriptionRecordDetails { get; } = new List<SubscriptionRecordDetail>();
 
     [InverseProperty("Member")]
     public virtual ICollection<SubscriptionRecord> SubscriptionRecords { get; } = new List<SubscriptionRecord>();

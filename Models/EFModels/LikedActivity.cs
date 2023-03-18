@@ -18,6 +18,9 @@ public partial class LikedActivity
     [Column("activityId")]
     public int ActivityId { get; set; }
 
+    [Column("created", TypeName = "datetime")]
+    public DateTime Created { get; set; }
+
     [ForeignKey("ActivityId")]
     [InverseProperty("LikedActivities")]
     public virtual Activity Activity { get; set; } = null!;

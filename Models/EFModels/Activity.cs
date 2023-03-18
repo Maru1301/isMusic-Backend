@@ -45,7 +45,7 @@ public partial class Activity
     public bool PublishedStatus { get; set; }
 
     [Column("checkedById")]
-    public int CheckedById { get; set; }
+    public int? CheckedById { get; set; }
 
     [Column("updated", TypeName = "datetime")]
     public DateTime Updated { get; set; }
@@ -66,8 +66,5 @@ public partial class Activity
 
     [ForeignKey("CheckedById")]
     [InverseProperty("Activities")]
-    public virtual Admin CheckedBy { get; set; } = null!;
-
-    [InverseProperty("Activity")]
-    public virtual ICollection<LikedActivity> LikedActivities { get; } = new List<LikedActivity>();
+    public virtual Admin? CheckedBy { get; set; }
 }

@@ -21,6 +21,9 @@ public partial class SubscriptionRecord
     [Column("subscribedTime", TypeName = "datetime")]
     public DateTime SubscribedTime { get; set; }
 
+    [Column("subscribedExpireTime", TypeName = "datetime")]
+    public DateTime SubscribedExpireTime { get; set; }
+
     [ForeignKey("MemberId")]
     [InverseProperty("SubscriptionRecords")]
     public virtual Member Member { get; set; } = null!;
@@ -28,4 +31,7 @@ public partial class SubscriptionRecord
     [ForeignKey("SubscriptionPlanId")]
     [InverseProperty("SubscriptionRecords")]
     public virtual SubscriptionPlan SubscriptionPlan { get; set; } = null!;
+
+    [InverseProperty("SubscriptionRecord")]
+    public virtual ICollection<SubscriptionRecordDetail> SubscriptionRecordDetails { get; } = new List<SubscriptionRecordDetail>();
 }

@@ -18,6 +18,9 @@ public partial class ActivityFollow
     [Column("memberId")]
     public int MemberId { get; set; }
 
+    [Column("attendDate", TypeName = "datetime")]
+    public DateTime AttendDate { get; set; }
+
     [ForeignKey("ActivityId")]
     [InverseProperty("ActivityFollows")]
     public virtual Activity Activity { get; set; } = null!;
