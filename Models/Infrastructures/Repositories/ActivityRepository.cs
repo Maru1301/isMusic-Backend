@@ -113,6 +113,8 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 				.Where(af => af.MemberId == memberId && af.AttendDate.Year == DateTime.Now.Year)
 				.Include(af => af.Activity)
 				.ThenInclude(a=>a.ActivityType)
+				.Include(af=>af.Activity)
+				.ThenInclude(a=>a.ActivityOrganizer)
 				.Select(af => af.Activity)
 				.Select(activity => activity.ToIndexDTO());
 		}

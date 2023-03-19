@@ -35,7 +35,6 @@ namespace api.iSMusic.Controllers
 
         //有用到
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult GetActivities()
         {
             var dtos = _service.GetActivities();
@@ -60,6 +59,7 @@ namespace api.iSMusic.Controllers
         }
 
 
+        //做成按鈕試試看
         [HttpGet]
         [Route("{value}")]
         public IActionResult GetActivityByName([FromRoute] string value, [FromQuery] string sort = "Latest", [FromQuery] int typeId = 0)
@@ -91,6 +91,7 @@ namespace api.iSMusic.Controllers
             return Ok(types);
         }
 
+        //搜尋用
         [HttpGet]
         [Route("search")]
         public IActionResult GetActivitiesBySearch([FromQuery]ActivityQueryParameters queryParameters)
