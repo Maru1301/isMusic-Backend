@@ -106,12 +106,11 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			var queueSongs = _db.QueueSongs
 				.Include(qs => qs.Song)
 					.ThenInclude(song => song.SongArtistMetadata)
-					.ThenInclude(metadata=> metadata.Artist)
-                .Include(qs => qs.Song)
-                    .ThenInclude(song => song.SongCreatorMetadata)
+					.ThenInclude(metadata => metadata.Artist)
+				.Include(qs => qs.Song)
+					.ThenInclude(song => song.SongCreatorMetadata)
 					.ThenInclude(metadata => metadata.Creator)
-                .Where(qs => qs.QueueId == queue.Id)
-				.Take(this.takeLimit);
+				.Where(qs => qs.QueueId == queue.Id);
 
 			var fromList = queueSongs
 				.Where(qs => qs.FromPlaylist)
