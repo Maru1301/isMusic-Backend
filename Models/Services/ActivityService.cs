@@ -37,16 +37,33 @@ namespace api.iSMusic.Models.Services
             return result;
         }
 
-        public (bool Success, string Message, IEnumerable<ActivityIndexDTO> Dtos) GetActivityByName(string value, SearchQuery query)
+        public IEnumerable<ActivityIndexDTO> GetActivities()
+        {       
+            var result = _activityRepository.GetActivities();
+
+            return result;
+        }
+
+        public ActivityIndexDTO GetSingleActivity(int id)
         {
-            if(query.Sort != "Latest" || query.Sort != "Popular")
+            if (!CheckActivityExistence(id))return null;
+            var result = _activityRepository.GetSingleActivity(id);
+        
+
+            return result;
+        }
+        //public (bool Success, string Message, IEnumerable<ActivityIndexDTO> Dtos) GetActivityByName(string value, SearchQuery query)
+
+        public (bool Success, string Message, IEnumerable<ActivityIndexDTO> Dtos) GetActivityByName(string value, string sort, int typeId)
+        {
+            if(sort != "Latest" && sort != "Popular")
             {
                 return (false, "排序條件錯誤", new List<ActivityIndexDTO>());
             }
 
-            if(CheckTypeExistence(query.TypeId) == false) return (false, "活動類型不存在", new List<ActivityIndexDTO>());
+            if(CheckTypeExistence(typeId) == false) return (false, "活動類型不存在", new List<ActivityIndexDTO>());
 
-            var dtos = _activityRepository.Search(value,query.Sort,query.TypeId);
+            var dtos = _activityRepository.Search(value,sort,typeId);
 
             return (true, string.Empty, dtos);
         }
@@ -111,6 +128,18 @@ namespace api.iSMusic.Models.Services
             var type = _activityRepository.GetTypeByIdForCheck(typeId);
 
             return type != null;
+        }
+
+        private bool CheckActivityExistence(int id)
+        {
+            var activity = _activityRepository.CheckActivityByIdForCheck(id);
+
+            return activity != null;
+        }
+
+        public IEnumerable<ActivityIndexDTO> GetActivitiesBySearch(ActivityQueryParameters queryParameters)
+        {
+            return _activityRepository.GetActivitiesBySearch(queryParameters);
         }
 
     }

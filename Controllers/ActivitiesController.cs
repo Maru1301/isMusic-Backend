@@ -1,6 +1,8 @@
-﻿using api.iSMusic.Models.Services;
+﻿using api.iSMusic.Models;
+using api.iSMusic.Models.Services;
 using api.iSMusic.Models.Services.Interfaces;
 using api.iSMusic.Models.ViewModels.ActivityVMs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -23,6 +25,7 @@ namespace api.iSMusic.Controllers
 
         [HttpGet]
         [Route("Main")]
+        [AllowAnonymous]
         public IActionResult GetMainPageActivities()
         {
             var dtos = _service.GetMainPageActivities();
@@ -30,11 +33,38 @@ namespace api.iSMusic.Controllers
             return Ok(dtos.Select(dto => dto.ToIndexVM()));
         }
 
+        //有用到
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult GetActivities()
+        {
+            var dtos = _service.GetActivities();
+
+            return Ok(dtos.Select(dto => dto.ToIndexVM()));
+        }
+
+        //有用到
+        [HttpGet]
+        [Route("single/{id}")]
+        [AllowAnonymous]
+        public IActionResult GetSingleActivity([FromRoute] int id)
+        {
+
+            var result = _service.GetSingleActivity(id);
+            if (result == null)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+
+        }
+
+
         [HttpGet]
         [Route("{value}")]
-        public IActionResult GetActivityByName(string value, [FromQuery] SearchQuery query)
+        public IActionResult GetActivityByName([FromRoute] string value, [FromQuery] string sort = "Latest", [FromQuery] int typeId = 0)
         {
-            var result = _service.GetActivityByName(value, query);
+            var result = _service.GetActivityByName(value, sort, typeId);
             if (!result.Success)
             {
                 return NotFound(result.Message);
@@ -43,12 +73,14 @@ namespace api.iSMusic.Controllers
             return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
         }
 
+
         public class SearchQuery
         {
             public string Sort = "Latest";
 
             public int TypeId = 0;
         }
+
 
         [HttpGet]
         [Route("Types")]
@@ -58,6 +90,16 @@ namespace api.iSMusic.Controllers
 
             return Ok(types);
         }
+
+        [HttpGet]
+        [Route("search")]
+        public IActionResult GetActivitiesBySearch([FromQuery]ActivityQueryParameters queryParameters)
+        {
+            var result = _service.GetActivitiesBySearch(queryParameters);
+
+            return Ok(result);
+        }
+       
 
         [HttpPost]
         [Route("Organizers/{memberId}")]

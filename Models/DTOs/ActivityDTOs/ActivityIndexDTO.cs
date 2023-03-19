@@ -18,6 +18,10 @@ namespace api.iSMusic.Models.DTOs.ActivityDTOs
 
         public string ActivityLocation { get; set; } = null!;
 
+        public string ActivityType { get; set; } = null!;
+
+        public string ActivityOrganizer { get; set; } = null!;
+
         public int ActivityTypeId { get; set; }
 
         public string ActivityInfo { get; set; } = null!;

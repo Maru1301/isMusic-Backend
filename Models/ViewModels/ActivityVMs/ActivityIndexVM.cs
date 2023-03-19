@@ -23,5 +23,9 @@
         public DateTime Updated { get; set; }
 
         public int TotalFollows { get; set; }
+
+        public string ActivityOrganizer { get; set; }
+
+        public string ActivityType { get; set; }
     }
 }

@@ -21,5 +21,15 @@ namespace api.iSMusic.Models.Services.Interfaces
         void FollowActivity(int memberId, int activityId, DateTime attendDate);
 
         void UnfollowActivity(int memberId, int activityId);
-    }
+
+        IEnumerable<ActivityIndexDTO> GetActivities();
+
+        ActivityIndexDTO GetSingleActivity(int id);
+
+        Activity? CheckActivityByIdForCheck(int activityId);
+
+        IEnumerable<ActivityIndexDTO> GetActivitiesBySearch(ActivityQueryParameters queryParameters);
+
+
+	}
 }
