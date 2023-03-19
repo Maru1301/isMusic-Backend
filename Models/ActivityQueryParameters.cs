@@ -2,10 +2,8 @@
 {
 	public class ActivityQueryParameters
 	{
-		public string? ActivityName { get; set; } = null;
-		public DateTime? ActivityTime { get; set; } = null;
-	
-		public string? ActivityLocation { get; set; } = null;
-		public string? ActivityTypeName { get; set; } = null;
+		public string? ActivityName { get; set; } = null!;	
+		public string? ActivityLocation { get; set; } = null!;
+		public string? ActivityTypeName { get; set; } = null!;
 	}
 }

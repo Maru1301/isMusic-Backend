@@ -140,10 +140,13 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 		public IEnumerable<ActivityIndexDTO> GetActivitiesBySearch(ActivityQueryParameters queryParameters)
 		{
 			var filteredActivities = _db.Activities
-				.Where(a => (string.IsNullOrEmpty(queryParameters.ActivityName) || a.ActivityName.Contains(queryParameters.ActivityName)) &&
-							(!queryParameters.ActivityTime.HasValue || a.ActivityEndTime > DateTime.Now) &&
-							(string.IsNullOrEmpty(queryParameters.ActivityLocation) || a.ActivityLocation.Contains(queryParameters.ActivityLocation)) &&
-							(string.IsNullOrEmpty(queryParameters.ActivityTypeName) || a.ActivityType.TypeName.Contains(queryParameters.ActivityTypeName)));
+										.Where(a => (
+														(string.IsNullOrEmpty(queryParameters.ActivityName) || a.ActivityName.Contains(queryParameters.ActivityName)) ||
+														(string.IsNullOrEmpty(queryParameters.ActivityLocation) || a.ActivityLocation.Contains(queryParameters.ActivityLocation)) ||
+														(string.IsNullOrEmpty(queryParameters.ActivityTypeName) || a.ActivityType.TypeName.Contains(queryParameters.ActivityTypeName))
+													) &&
+														(a.ActivityEndTime > DateTime.Now)
+													);
 
 			var activityIndexDTOs = filteredActivities.Select(a => new ActivityIndexDTO
 			{

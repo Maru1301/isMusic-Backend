@@ -91,7 +91,6 @@ namespace api.iSMusic.Controllers
             return Ok(types);
         }
 
-        //要試試看
         [HttpGet]
         [Route("search")]
         public IActionResult GetActivitiesBySearch([FromQuery]ActivityQueryParameters queryParameters)
