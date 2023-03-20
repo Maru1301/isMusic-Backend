@@ -54,7 +54,7 @@ namespace api.iSMusic.Controllers
             {
                 return BadRequest(result);
             }
-            return Ok(result);
+            return Ok(result.ToIndexVM());
 
         }
 
