@@ -433,7 +433,6 @@ namespace api.iSMusic.Controllers
 			return Ok(result.Dtos.Select(dto => dto.ToIndexVM()));
 
         }
-
 		[HttpPost]
 		[Route("LikedSongs/{songId}")]
 		public IActionResult AddLikedSong(int songId)
@@ -511,12 +510,12 @@ namespace api.iSMusic.Controllers
 
 		[HttpPost]
 		[Route("Activities/{activityId}/{attendDate}")]
-		public IActionResult FollowActivity([FromRoute] int activityId, [FromRoute] string attendDate)
+		public IActionResult FollowActivity([FromRoute] int activityId, [FromRoute] DateTime attendDate)
 		{
 			
 			int memberId = this.GetMemberId();
-			DateTime attendDateTime = DateTime.ParseExact(attendDate, "yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
-			var result = _memberService.FollowActivity(memberId, activityId, attendDateTime);
+			//DateTime attendDateTime = DateTime.ParseExact(attendDate, "yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+			var result = _memberService.FollowActivity(memberId, activityId, attendDate);
 
 			if (!result.Success)
 			{
