@@ -124,6 +124,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 			return _db.Activities
 				.Include(x => x.ActivityType)
 				.Include(x => x.ActivityOrganizer)
+				.OrderBy(x => x.ActivityStartTime)
 				.Select(x => x.ToIndexDTO()).ToList();
 		}
 
