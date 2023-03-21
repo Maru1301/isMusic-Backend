@@ -64,7 +64,7 @@ namespace api.iSMusic.Models.Infrastructures.Repositories
 
             switch (query.Condition)
 			{
-				case "Alphatically":
+				case "Alphabetically":
 					memberPlaylists = memberPlaylists.OrderBy(playlist => playlist.ListName);
 					break;
 				case "RecentlyAdded":
