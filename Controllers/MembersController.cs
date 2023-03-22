@@ -235,7 +235,7 @@ namespace api.iSMusic.Controllers
 		{
             var memberId = int.Parse(HttpContext.User.FindFirst("MemberId")!.Value);
 
-            string urlTemplate = Request.Scheme + "://" + Request.Host + Url.Content("~/") + "Members/ActivateRegister?memberid={0}&confirmCode={1}";
+            string urlTemplate = "http://localhost:8080/member.html#/memberActivate/{0}/{1}";
             var result = _memberService.ResendConfirmCode(memberId, email, urlTemplate);
             return Ok(result.Message);
         }

@@ -98,7 +98,7 @@ namespace api.iSMusic.Controllers
         {
             var result = _service.GetActivitiesBySearch(queryParameters);
 
-            return Ok(result);
+            return Ok(result.Select(dto => dto.ToIndexVM()));
         }
        
 
